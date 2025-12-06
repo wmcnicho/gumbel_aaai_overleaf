@@ -119,13 +119,98 @@ Large Language Models (LLMs) have demonstrated strong capabilities for generatin
 (5) A glimpse at how you solve the problem in (4)
 (6) An overview of your evaluation/experiments results
 
-\section{Related Work}
-We owe it all to sample citation\cite{Ando2005}.
+Counterfactual ideation and framing has a long history of studies across disciplines including philosophy, logic, history, and medicine. In construction a counterfactual scenario, we ask what would have happened if a prior condition was changed. The implications of the question can have a wide variety of consequence: from "Would my stomach have hurt if I didn't eat that last cookie?" to "Would the patient still be with us if I used a different medication?" Many applications of Natural Language Processing can also be seen under the lens of counterfactual conditioning. For example Machine Translation could broadly be seen as, "How would this thought be described if expressed in Mandarin instead of English". And computer science research explorations often ask experiments seek to answer "How would this model perform on the task if algorithm B was used in place of algorithm A?"
+
+In the context of education, counterfactual thinking provides instructors strategies to build off of existing student knowledge or work to ƒacilitate learning. For example, in teaching writing an instructor could comment: "If you had a stronger topic sentence this paragraph, it would have helped the reader understand your thesis." This feedback implies the existance of a alternative, counterfactual student answer which would demonstrate better mastery of a particular skill. Providing a demonstration of a counterfactual example is relatively common practice in teaching, but is often general, taking the form of answer keys or showcasing exemplary peer work for a given assignment. While general feedback is helpful, a counterfactual example which is more similar to the original student would be more helpful, as a student can more directly see how their work can be immediately improved and build off their existing ideas and interests. 
+
+While in theory, an instructor could craft an extension of each individual students' work, in practice this is infeasible as it would require extensive time and effort.  Automating this process, or at least providing a framework for generating counterfactual student answers, could help bridge the gap between rubric-based feedback and actionable guidance tailored to individual student submissions. The generative and instruction-following capabilities of large language models (LLMs) offer a promising avenue for automating feedback and edits to student work (TODO need cites). However, the example work of LLMs often diverge from the reference work, even when explicitly instructed not to, introducing vocabulary or concepts which are often are unfamiliar to students. This can result in feedback that is less actionable or relatable, as students may struggle to connect the generated work to their own work. Ensuring that counterfactual answers remain close in style, vocabulary, and conceptual approach to the original student submission is therefore crucial for maximizing the educational value of these example work.
+
+In our work, we explore an approach towards counterfactual example generation which leverages a computational phenomena to recover random noise information from a dataset of real student answers and reuses this noise as a control signal for counterfactual example generation process. 
+
+Our research questions can be summarized as follows:
+
+RQ1: Under what conditions does recovered Gumbel noise allow for a system that can produce counterfactual student answers that adheres to rubric guidelines while staying lexically similar to the original student answer?
+
+RQ2: How does the recovered noise interact with the autoregressive sampling of an LLM and are there conditions under which the noise is more effective at regulating output?
+
+RQ3: What information is carried by this sampling noise? Are there any inherent patterns of differences between noise values which result in high quality results and those that do not?
+
+Our findings and contributions can be summarized as:
+
+Our empirical investigations find that existing Hindsight recovery and reuse appoaches do not lead to a clear recovery signal, at least in the context of the task of counterfactual example generation.
+
+However, we find that under specific conditions that recovered noise can be used to control output generation, however the signal completely dominates the control process.
+
+Leveraging our findings, we introduce a modified sampling and recovery algorithm Beta-Hindsight sampling, which allows for a tunable tradeoff between reference similarity and task performance.
+
+We investigate the differences of 
+
+% Observed Phenomenon:
+
+% - Recovered noise does not behave as a neutral sampling perturbation.
+% - Without strong training or reference hints, generations are unstable or nonsensical
+% - With strong training/reference hinting the recovered noise overwhelms model behavior producing verbatim replicas and counterfactuality collapses
+% - With noise regularization a tuanble tradeoff emerges between task fidelity and reference proximity
+
+
+
+
+
+% Since LLMs are stochastic systems which output a probability over next word solution, in theory an LLM can generate any student reference solution by some random chance. Under this assumption, we extract the random noise used to create a given solution and seed an LLM with this noise under a counterfactual score scenario. By leveraging the stochastic nature of LLMs and controlling the decoding process, we produce personalized, actionable feedback that is closely aligned with each student's submission.
+
+
+
+% question implies the existance of a alternative, counterfactual version of student work which would have recieved a different (often improved score). However, there are infinitely many alterantive student answers some of which 
+
+
+% building off existing student knowledge and encourage critical thinking based off learned concepts "What would the graph look like if we change $a$ from 1 to 3?" 
+
+
+\section{Background}
+
+\subsection{Gumbel-Max Trick}
+
+Explain the trick and show the math
+
+
+\subsection{Hindsight Gumbel Sampling}
+Existing work has provided an initial outline for how this noise could be reused, via "Gumbel Hindsight Sampling." Work of X and Y suggest that this noise can be utilized as a 
 
 \section{Methodology}
 
 \subsection{Counterfactual Answer Generation Task}
-We define a counterfactual student answer to be an output of a prediction model for a perturbed input sequence. Formally, we assume a pretrained autoregressive LLM $f: \mathbf{I} \rightarrow \mathbf{y}$. Where $I$ is a sequence of tokens forming the instruction (prompt) to the model and $\mathbf{y}={y_1 \dots y_N}$ is the output completion of the model.
+In our framework we view that a student answer to a short answer question as a random sequence of tokens drawn from a Large Language Model (LLM). Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the problem prompt and any relevant context. Formally, we assume a pretrained autoregressive LLM $f: \mathbf{x} \rightarrow \mathbf{y}$. Where $\mathbf{x}$ is a sequence of tokens forming the instruction (prompt) to the model and $\mathbf{y}={y_1 \dots y_N}$ is the output completion of the model.  We also introduce a counterfactual scoring model $g: \mathbf{y} \rightarrow \mathbf{z}$ which predicts the score of a model output.
+
+We further breakdown x which includes 1. task instructions, 2. a rubric defining what each value of criteria is required, and 3. a desired score $z$ the value for the particular criteria. We posit that a student work to a given problem can be expressed as a random sequence of tokens drawn from $f$. Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the input $x$.
+
+In the counterfactual case, we define a counterfactual student answer to be an output of a prediction model for a perturbed input sequence. We consider an counterfactual input $x'$ where $z$ is adjusted to $z'$ the alternative score of a student score under the desired output. Therefore, the student counterfactual answer is $y' = f(x')$.
+
+\subsection{Gumbel Noise Recovery}
+
+To generate a counterfactual answer, we seek to modify the scoring rubric or feedback signal while preserving the latent randomness that produced the original student work. This is achieved by a method we coin ``student Gumbell noise recovery'' which is based on the Gumbell-Max Trick and inspired by prior work which uses this trick to generate counterfactual LLM completions.
+
+Consider the probability distribution of a base model for a generated token of an LLM expressed in terms of its logits.
+
+$$p(v) = \frac{\exp(l_v)}{\sum_{v' \in V} \exp(l_{v'})}$$
+
+
+Where $l_v$ are the logits for each token $v$ in the vocabulary $V$. The Gumbell-Max trick provides an equivalent way to sample from this distribution. The trick by adding i.i.d. Gumbell noise to all the logits and selecting the index which has the resulting maximum value. The sampled token is then found by:
+$$ y_i = \arg\max_{v \in V} (l_v + g_v)$$
+where $g_v \sim G(0,1)$.
+
+To recover the Gumbell noise that corresponds to each token of a student's answer, we must find a noise vector $\mathbf{g} = \{g_v\}_{v \in V}$ that satisfies the condition $l_{a_i} + g_{a_i} \ge l_v + g_v$ for all $v \in V$, where $a_i$ is the index in the vocabulary of the observed student answer token. We can sample such a consistent noise vector by first sampling $g_{a_i}$ from a lower-bounded truncated Gumbell distribution, and then sampling the remaining $g_v$ for $v \neq a_i$ from a upper-bounded truncated Gumbell distribution, ensuring they satisfy $g_v \le l_{a_i} + g_{a_i} - l_v$. 
+
+Specifically, we first find the maximum logit $l_{\max} = \max_{v' \in V} l_{v'}$ and sample the noise for the student's actual token, $g_{a_i}$, from the Gumbel distribution truncated from below:
+$$g_{a_i} \sim G \mid G > l_{\max} - l_{a_i}$$
+
+This sample establishes a upper-bounded threshold $T = l_{a_i} + g_{a_i}$. Subsequently, for all other tokens $v \neq a_i$, we sample their corresponding noise values from the Gumbel distribution truncated from above:
+$$g_v \sim G \mid G \le T - l_v \quad \forall v \neq a_i$$
+
+By repeating this process for each token in the student's answer $A$, we recover the full sequence of noise vectors $\{\mathbf{g}_0, \dots, \mathbf{g}_N\}$. This sequence represents the specific latent randomness that produced the original work. This ``recovered noise'' can then be re-applied during a new generation pass with a modified scoring context $C'$ to produce a counterfactual answer that preserves the original answer's underlying stochastic path.
+
+\section{Related Work}
+We owe it all to sample citation\cite{Ando2005}.
+
 
 \section{Results}
 
