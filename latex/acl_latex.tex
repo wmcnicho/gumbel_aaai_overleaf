@@ -30,6 +30,13 @@
 %Including images in your LaTeX document requires adding
 %additional package(s)
 \usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\newcommand{\ml}[1]{\textcolor{orange}{\bf [lan: #1]}}
+\newcommand{\mh}[1]{\textcolor{teal}{\bf [Hunter: #1]}}
 
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
@@ -170,33 +177,73 @@ We investigate the differences of
 
 \subsection{Gumbel-Max Trick}
 
-Explain the trick and show the math
+Explain the trick and show the math. 
+Our approach to generating counterfactual student answers leverages the Gumbel-Max trick, a procedure that allows for sampling from an arbitrary categorical distribution by first drawing repeated samples from the Gumbel distribution and then applying these samples to logits of a distribution. We formalize this trick in terms of language modeling as follows. 
 
+First, we consider the probability distribution of a token predictions of an LLM expressed in terms of its logits.
+
+$$P(v) = \frac{\exp(\ell_v)}{\sum_{v' \in V} \exp(\ell_{v'})}$$
+
+Where $\ell_v$ are the logits for each token $v \in V$ the model's vocabulary, that is the set of tokens the model is trained to output. 
+The Gumbell-Max trick provides a way to sample from this categorical distribution using additive noise drawn from the Gumbel distribution. $$ y = \arg\max_{v \in V} (\ell_v + g_v)$$
+Here each $g_v$ is independently drawn from a standard Gumbel(0,1) distribution. The Gumbel-max identity garuantees that $P(y=v)=P(v)$. Notably, these i.i.d Gumbel draws provide a reusable noise artifact which can be stored and used to recover the random state of the sampling process. This decomposition is what allows for this trick to be used in a counterfactual setting, since the random noise can be used to control exogenous variables of the language modeling stochastic process and allow for analysis of the effect various model interventions.
 
 \subsection{Hindsight Gumbel Sampling}
-Existing work has provided an initial outline for how this noise could be reused, via "Gumbel Hindsight Sampling." Work of X and Y suggest that this noise can be utilized as a 
+
+Recent work have explored the use of Gumbel noise sampling to analyze model bias \cite{chatzi2025counterfactual} or the effect of various steering techniques \cite{ravfogel2025gumbel}. These works follow a three phase procedure towards using noise for counterfactual generation: recovery, intervention, and replay. First Gumbel noise from a ``factual'' generation is recovered through an algorithmic procedure on the base, untreated language model. Second, an intervention is applied to language model such as prompt adjustment or steering. Finally, the stored noise is used to sample from treated model via the Gumbel-Max trick.
+
+In this work, we introduce a practical variant of the recovery procedure outlined by \cite{ravfogel2025gumbel} that allows for efficient, posterior noise recovery from ground truth reference text. While both works provide theoretical grounding in justifying their work, empirical validation is limited and neither work explores. We demonstrate in this work that in order to reuse Gumbel noise on a challenging but practical task, student contrastive example generation, significant hinting is required in order for the recovered noise to meaningfully change the model. We further show that the noise that emerges from this signal can also be used to sample from the model in a meaningful way.
 
 \section{Methodology}
 
 \subsection{Counterfactual Answer Generation Task}
-In our framework we view that a student answer to a short answer question as a random sequence of tokens drawn from a Large Language Model (LLM). Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the problem prompt and any relevant context. Formally, we assume a pretrained autoregressive LLM $f: \mathbf{x} \rightarrow \mathbf{y}$. Where $\mathbf{x}$ is a sequence of tokens forming the instruction (prompt) to the model and $\mathbf{y}={y_1 \dots y_N}$ is the output completion of the model.  We also introduce a counterfactual scoring model $g: \mathbf{y} \rightarrow \mathbf{z}$ which predicts the score of a model output.
+In our framework we view that a student answer to a short answer question as a random sequence of tokens drawn from a Large Language Model (LLM). Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the problem prompt and any relevant context. Formally, we assume a pretrained autoregressive LLM $f: \mathbf{x} \rightarrow \mathbf{y}$. Where $\mathbf{x}$ is a sequence of tokens forming the instruction (prompt) to the model and $\mathbf{y}={y_1 \dots y_N}$ is the output completion of the model.  We also introduce a scoring model $g: \mathbf{y} \rightarrow \mathbf{z}$ which predicts the score of a model output.
 
 We further breakdown x which includes 1. task instructions, 2. a rubric defining what each value of criteria is required, and 3. a desired score $z$ the value for the particular criteria. We posit that a student work to a given problem can be expressed as a random sequence of tokens drawn from $f$. Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the input $x$.
 
-In the counterfactual case, we define a counterfactual student answer to be an output of a prediction model for a perturbed input sequence. We consider an counterfactual input $x'$ where $z$ is adjusted to $z'$ the alternative score of a student score under the desired output. Therefore, the student counterfactual answer is $y' = f(x')$.
+In the counterfactual case, we perform a simple intervention by changing the model instructions to the desired task. Formally, we consider an counterfactual input $x'$ which includes and adjusted score $z'$ the new desired score of an output. Therefore, the student counterfactual answer is $y' = f(x')$.
 
 \subsection{Gumbel Noise Recovery}
 
-To generate a counterfactual answer, we seek to modify the scoring rubric or feedback signal while preserving the latent randomness that produced the original student work. This is achieved by a method we coin ``student Gumbell noise recovery'' which is based on the Gumbell-Max Trick and inspired by prior work which uses this trick to generate counterfactual LLM completions.
+To generate a counterfactual answer, we seek to modify the scoring rubric or feedback signal while preserving the latent randomness that produced the original student work via Gumbel. We detail the procedur in Algorithm 1 TODO ref. 
 
-Consider the probability distribution of a base model for a generated token of an LLM expressed in terms of its logits.
+\subsection{Algorithmic version WIP}
+\begin{algorithm}
+\caption{Student Gumbel Noise Recovery and Counterfactual Generation \mh{TODO 1. need to update inputs, e.g. to add intervention,  prompt components, $\beta $defined. 2. handle case where len(CF)>len(F) 3. Add comments 4. Define TruncGumbels}}
+\begin{algorithmic}[1]
+\REQUIRE Exercise prompt $E$, Scoring context $C$, Student answer $A=\{a_0,\dots,a_N\}$, Model parameters $\theta$, Vocabulary $V$
+\ENSURE Counterfactual answer $A'$
+\STATE $G \gets \{\}$ 
+\FOR{each token $a_i$ in $A$}
+    \STATE $\{l_v\}_{v\in V} = \text{LLM}(E,C,a_0 \dots a_{i-1};\theta)$
+    \STATE $l_{\max} \gets \max_{v\in V} l_v$
+    \STATE  $g_{a_i} \sim \text{LowerTruncGumbel}(l_{\max}-l_{a_i})$
+    \STATE $T \gets l_{a_i} + g_{a_i}$
+    \FOR{each $v \in V, v \neq a_i$}
+        \STATE  $g_v \sim \text{UpperTruncGumbel}(T-l_v)$
+    \ENDFOR
+    \STATE Store $g$-vector for position $i$ in $G$
+\ENDFOR
+\STATE $A' \gets \{\}$
+\STATE $a'_i \gets \text{BOS}$
+\STATE $i \gets 0$
+\WHILE{$a'_i \neq \text{EOS}$}
+\STATE $\{l_v\}_{v\in V} = \text{LLM}(E,C',a'_0\dots a'_{i-1};\theta)$
+    \IF{$i \le |A|$}
+    \STATE $g \gets G[i]$
+    \STATE $a'_i \gets \arg\max_{v\in V} (l_v + \beta g_v)$
+    \STATE $i \gets i + 1$
+    \ELSE
+    \STATE $g \gets \text{Gumbel}(0,1)$
+    \STATE $a'_i \gets \arg\max_{v\in V} (l_v + g_v)$
+    % \STATE $a'_i \gets \arg\max_{v\in V} (l_v)$
 
-$$p(v) = \frac{\exp(l_v)}{\sum_{v' \in V} \exp(l_{v'})}$$
-
-
-Where $l_v$ are the logits for each token $v$ in the vocabulary $V$. The Gumbell-Max trick provides an equivalent way to sample from this distribution. The trick by adding i.i.d. Gumbell noise to all the logits and selecting the index which has the resulting maximum value. The sampled token is then found by:
-$$ y_i = \arg\max_{v \in V} (l_v + g_v)$$
-where $g_v \sim G(0,1)$.
+    \ENDIF
+    \STATE Append $a'_i$ to $A'$
+\ENDWHILE
+\RETURN $A'$
+\end{algorithmic}
+\end{algorithm}
 
 To recover the Gumbell noise that corresponds to each token of a student's answer, we must find a noise vector $\mathbf{g} = \{g_v\}_{v \in V}$ that satisfies the condition $l_{a_i} + g_{a_i} \ge l_v + g_v$ for all $v \in V$, where $a_i$ is the index in the vocabulary of the observed student answer token. We can sample such a consistent noise vector by first sampling $g_{a_i}$ from a lower-bounded truncated Gumbell distribution, and then sampling the remaining $g_v$ for $v \neq a_i$ from a upper-bounded truncated Gumbell distribution, ensuring they satisfy $g_v \le l_{a_i} + g_{a_i} - l_v$. 
 
