@@ -31,12 +31,21 @@
 %additional package(s)
 \usepackage{graphicx}
 \usepackage{xcolor}
+\definecolor{AlgGreen}{RGB}{34,139,34}
+
+% Comment macro for algorithm right-margin annotations
+\newcommand{\algcmt}[1]{\hfill \textcolor{AlgGreen}{\ensuremath{\triangleright}\,#1}}
 \usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{bbm}
+\usepackage{booktabs}
 
 \newcommand{\ml}[1]{\textcolor{orange}{\bf [lan: #1]}}
 \newcommand{\mh}[1]{\textcolor{teal}{\bf [Hunter: #1]}}
+\newcommand{\al}[1]{\textcolor{blue}{\bf [Alex: #1]}}
 
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
@@ -44,7 +53,7 @@
 %
 % and set <dim> to something 5cm or larger.
 
-\title{Student Gumbel Machine}
+\title{Gumbel Machine: Steering LLMs for Counterfactual Generation of Student Writing via Gumbel Noise Recovery}
 
 % Author information can be set in various styles:
 % For several authors from the same institution:
@@ -114,152 +123,345 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Large Language Models (LLMs) have demonstrated strong capabilities for generating fluent text across a variety of tasks. A variety of data-driven techniques can be used to adapt these models to a desired task. However, while the text produced may accurately perform the task, the output is not always useful. And so on.
+TODO
+% Large Language Models (LLMs) have demonstrated strong capabilities for generating fluent text across a variety of tasks. A variety of data-driven techniques can be used to adapt these models to a desired task. However, while the text produced may accurately perform the task, the output is not always useful. And so on.
 
 \end{abstract}
 
 \section{Introduction}
-(1) A description of the high-level domain/environment
-(2) A key problem that happens in this high-level domain
-(3) Current solutions to that key problem
-(4) A problem with the current solutions
-(5) A glimpse at how you solve the problem in (4)
-(6) An overview of your evaluation/experiments results
 
-Counterfactual ideation and framing has a long history of studies across disciplines including philosophy, logic, history, and medicine. In construction a counterfactual scenario, we ask what would have happened if a prior condition was changed. The implications of the question can have a wide variety of consequence: from "Would my stomach have hurt if I didn't eat that last cookie?" to "Would the patient still be with us if I used a different medication?" Many applications of Natural Language Processing can also be seen under the lens of counterfactual conditioning. For example Machine Translation could broadly be seen as, "How would this thought be described if expressed in Mandarin instead of English". And computer science research explorations often ask experiments seek to answer "How would this model perform on the task if algorithm B was used in place of algorithm A?"
+% 1. Motivate counterfactual feedback as a learning tool
+Providing feedback on student work is an essential aspect of education as it helps learners identify specific areas in which their knowledge or process can be improved (Hattie et.al). In providing feedback for complex, open-ended work, instructors often utilize rubrics that break down how student work scores across a set of criteria. In theory, any rubric-based feedback implies the existence of counterfactual work, a modified version of the graded work that would receive a different score according to the rubric. To give students an opportunity to see a counterfactual version of work, instructors may share an example work that scored highly on the rubric, demonstrating to students an ideal version of work for a given assignment. While these exemplary works may provide helpful ideals for students to strive towards, the example work may be considerably different from the student's work in terms of style, topic, or sophistication. This qualitative gap between the scored example work and their own work can make it difficult for students to translate how their work could be improved and limit the learning effectiveness of the provided feedback. Ideally, when receiving feedback, a student would receive a personalized counterfactual version of their work, showing an alternative version of their work that demonstrates minimal changes for their work to be improved.
 
-In the context of education, counterfactual thinking provides instructors strategies to build off of existing student knowledge or work to ƒacilitate learning. For example, in teaching writing an instructor could comment: "If you had a stronger topic sentence this paragraph, it would have helped the reader understand your thesis." This feedback implies the existance of a alternative, counterfactual student answer which would demonstrate better mastery of a particular skill. Providing a demonstration of a counterfactual example is relatively common practice in teaching, but is often general, taking the form of answer keys or showcasing exemplary peer work for a given assignment. While general feedback is helpful, a counterfactual example which is more similar to the original student would be more helpful, as a student can more directly see how their work can be immediately improved and build off their existing ideas and interests. 
+% 2. Expose the difficulty in counterfactual feedback (tada llms are cool)
+While individualized counterfactual feedback provides a powerful learning opportunity for students, manually crafting such feedback is time-intensive, which makes it infeasible to deliver at scale. However, when student work is expressed in textual form, recent advances in natural language processing provide opportunities for automation. In particular, recent work explores approaches that leverage the capabilities of Large Language Models (LLMs) to generate counterfactual examples across a wide range of tasks, such as story rewriting (Chen 2022), augmenting training data, or model interpretability (cites). These findings suggest that the generative and instruction-following capabilities of LLMs make them well-suited for automating the generation of counterfactual feedback. 
 
-While in theory, an instructor could craft an extension of each individual students' work, in practice this is infeasible as it would require extensive time and effort.  Automating this process, or at least providing a framework for generating counterfactual student answers, could help bridge the gap between rubric-based feedback and actionable guidance tailored to individual student submissions. The generative and instruction-following capabilities of large language models (LLMs) offer a promising avenue for automating feedback and edits to student work (TODO need cites). However, the example work of LLMs often diverge from the reference work, even when explicitly instructed not to, introducing vocabulary or concepts which are often are unfamiliar to students. This can result in feedback that is less actionable or relatable, as students may struggle to connect the generated work to their own work. Ensuring that counterfactual answers remain close in style, vocabulary, and conceptual approach to the original student submission is therefore crucial for maximizing the educational value of these example work.
+% 3. Sketch existing approaches, and gaps in existing work which motivates our contributions
+Existing LLM-based approaches to automated counterfactual generation must address a central challenge in designing a counterfactual generation approach: balancing the tradeoff of task performance and similarity to the original factual text. Since these two objectives are often in opposition, a variety of approaches exist to address this tradeoff. Some approaches explicitly optimize a language model for this joint objective (cites), creating a model that explicitly encodes the tradeoff in its weights. Another common pattern across approaches is to decompose the problem into identification and replacement steps, where one model identifies words of the factual text that should be revised and a second replaces the identified words for the counterfactual task. The models used in each step are either LLMs trained for the specific step on a given task (cite) or a large pretrained LLMs. This decomposition-based approach implicitly enforces similarity by the assumption that changing only the words with maximum influence will minimize the total number of words changed, enforcing similarity. 
 
-In our work, we explore an approach towards counterfactual example generation which leverages a computational phenomena to recover random noise information from a dataset of real student answers and reuses this noise as a control signal for counterfactual example generation process. 
+While existing approaches of counterfactual generation provide promising directions towards automating counterfactual feedback, significant work remains to bridge these approaches into systems that can be used in a real classroom Filighera (cite). One factor that causes these approaches to fall short is the tight coupling between task alignment and similarity control. Most approaches to counterfactual generation require training task-specific system components, such as classifiers or control modules that jointly define what constitutes a valid output and how the counterfactual examples are generated. As a result, adapting a new task often requires retraining or redesigning the system, which limits the portability of these approaches to classroom environments that don't contain sufficient training examples or easy portability.  A second related limitation is that most existing work frames counterfactual generation in terms of nominal or categorical labels, such as sentiment, topic, or toxicity. In these settings, success if defined by crossing a decision boundary, and counterfactuals are evaluated by whether they achieve a label flip. This framing obscures the notion of degree or direction of change, as there is no representation of how much an example improves on a particular axis.  Consequently, existing methods optimize for minimal boundary-crossing edits rather than structured, incremental improvement. However, rubric-based feedback is inherently ordinal, and meaningful feedback requires nuanced adjustments rather than broad, categorical shifts. When counterfactual generation is restricted to coarse-grained labels of correctness, the resulting feedback may be technically valid but pedagogically limited.
 
-Our research questions can be summarized as follows:
+% Explicitly listing our contributions: outlining what we do in the rest of the paper
+\textbf{Contributions} In this work, we propose a counterfactual generation framework that decouples similarity control from counterfactual task alignment. For similarity control, we introduce $\beta$-Hindsight control, an inference-time LLM steering approach which recovers the stochastic state of an LLM implied by a factual example to control the LLM during generation. For counterfactual task alignment, we train a mid-sized, instruction-tuned LLM through a direct preference optimization (DPO) to generate examples aligned to an in-context rubric. 
 
-RQ1: Under what conditions does recovered Gumbel noise allow for a system that can produce counterfactual student answers that adheres to rubric guidelines while staying lexically similar to the original student answer?
-
-RQ2: How does the recovered noise interact with the autoregressive sampling of an LLM and are there conditions under which the noise is more effective at regulating output?
-
-RQ3: What information is carried by this sampling noise? Are there any inherent patterns of differences between noise values which result in high quality results and those that do not?
-
-Our findings and contributions can be summarized as:
-
-Our empirical investigations find that existing Hindsight recovery and reuse appoaches do not lead to a clear recovery signal, at least in the context of the task of counterfactual example generation.
-
-However, we find that under specific conditions that recovered noise can be used to control output generation, however the signal completely dominates the control process.
-
-Leveraging our findings, we introduce a modified sampling and recovery algorithm Beta-Hindsight sampling, which allows for a tunable tradeoff between reference similarity and task performance.
-
-We investigate the differences of 
-
-% Observed Phenomenon:
-
-% - Recovered noise does not behave as a neutral sampling perturbation.
-% - Without strong training or reference hints, generations are unstable or nonsensical
-% - With strong training/reference hinting the recovered noise overwhelms model behavior producing verbatim replicas and counterfactuality collapses
-% - With noise regularization a tuanble tradeoff emerges between task fidelity and reference proximity
-
-
-
-
-
-% Since LLMs are stochastic systems which output a probability over next word solution, in theory an LLM can generate any student reference solution by some random chance. Under this assumption, we extract the random noise used to create a given solution and seed an LLM with this noise under a counterfactual score scenario. By leveraging the stochastic nature of LLMs and controlling the decoding process, we produce personalized, actionable feedback that is closely aligned with each student's submission.
-
-
-
-% question implies the existance of a alternative, counterfactual version of student work which would have recieved a different (often improved score). However, there are infinitely many alterantive student answers some of which 
-
-
-% building off existing student knowledge and encourage critical thinking based off learned concepts "What would the graph look like if we change $a$ from 1 to 3?" 
+We evaluate our approach using a dataset of student writing summaries graded on a rubric to assess the quality of the summary across diverse criteria. Our evaluation demonstrates our approach allows for tuneable control between task validity and faithfulness to original student work on an ordinal dataset. We further perform an ablation study on prompt design to highlight the required conditions needed to use the stochastic signals recoverable from LLM logits.
 
 
 \section{Background}
+\subsection{Gumbel-Max Trick}\label{sec:trick}
 
-\subsection{Gumbel-Max Trick}
+In our approach to generating counterfactual student answers, we leverage the Gumbel-Max trick, which we briefly detail below. The Gumbel-Max trick is a procedure to sample from an arbitrary categorical distribution that involves adding noise sampled from a Gumbel distribution \cite{Maddison2014AS}. The samples from this procedure are shown to be equivalent to directly sampling from the categorical distribution, but the trick has an added benefit of decomposing the sampling into a reusable noise artifact, which can be reused to replay the randomness of the sampling process. 
+% This decomposition has properties that have allowed for its use in a variety of other scenarios in machine learning, most notably in inspiring the Gumbel-Softmax procedure, which permits gradient-based optimization over categorical variables TODO cite.
 
-Explain the trick and show the math. 
-Our approach to generating counterfactual student answers leverages the Gumbel-Max trick, a procedure that allows for sampling from an arbitrary categorical distribution by first drawing repeated samples from the Gumbel distribution and then applying these samples to logits of a distribution. We formalize this trick in terms of language modeling as follows. 
+We formally introduce this trick by first stating the output of an LLM, the probability of a next token, expressed in terms of the logits the model produces.
 
-First, we consider the probability distribution of a token predictions of an LLM expressed in terms of its logits.
+$$P(Y = v) = \frac{\exp(\ell_v)}{\sum_{v' \in V} \exp(\ell_{v'})}$$
 
-$$P(v) = \frac{\exp(\ell_v)}{\sum_{v' \in V} \exp(\ell_{v'})}$$
+Here $Y$ is a random variable for the next output token; $V$ is the model's vocabulary, the set of all tokens the model is trained to output; and $\ell_v$ are the logits, or score, for each token $v \in V$. In our work, we consider logits produced by transformer-based, neural language models that are conditioned on a prompt and previously generated tokens.
+% This equation is a simple softmax formulation to convert the un-normalized scores into a formal probability distribution over likely next tokens.
 
-Where $\ell_v$ are the logits for each token $v \in V$ the model's vocabulary, that is the set of tokens the model is trained to output. 
-The Gumbell-Max trick provides a way to sample from this categorical distribution using additive noise drawn from the Gumbel distribution. $$ y = \arg\max_{v \in V} (\ell_v + g_v)$$
-Here each $g_v$ is independently drawn from a standard Gumbel(0,1) distribution. The Gumbel-max identity garuantees that $P(y=v)=P(v)$. Notably, these i.i.d Gumbel draws provide a reusable noise artifact which can be stored and used to recover the random state of the sampling process. This decomposition is what allows for this trick to be used in a counterfactual setting, since the random noise can be used to control exogenous variables of the language modeling stochastic process and allow for analysis of the effect various model interventions.
+Since we express $Y$ in terms of logits, we can use the Gumbel-Max trick to sample the next token instead of sampling from $P(Y)$ directly. In the trick, we draw a noise sample from the Gumbel distribution for each token, which is in turn added to the logits. We then take the maximum perturbed logit index as the sample.
+$$ y = \arg\max_{v \in V} (\ell_v + g_v)$$
+Here, $g_v \sim \text{Gumbel}(0,1)$ is an independent draw from a standard Gumbel distribution. This simple procedure is mathematically equivalent to directly sampling from $P(Y=v)$. Moreover, the Gumbel noise values can be stored to preserve the random state of the sampling process, which is critical in our counterfactual sampling setting. 
+
+In our approach, we explore using the recovered Gumbel noise for counterfactual generation, as it allows us to hold the exogenous component of sampling fixed after applying an intervention to a language model--the logit generation process. In other words, we record the sampled Gumbel values, alter the language model, and then replay the Gumbel-Max trick with the recorded, ``factual'' noise values on the counterfactual logits. Recent work has explored the use of Gumbel noise recovery and replay to analyze language model bias \cite{chatzi2025counterfactual} or the relative effect of various steering techniques \cite{ravfogel2025gumbel}. 
+\mh{maybe last sentence can be moved/restated in intro}
+% an  approach to counterfactual generation, since this noise allows us to control for randomness after applying an intervention to the model.
+% We take advantage of this preservation of noise to form counterfactual outputs, since the preserved random noise can be used to control exogenous variables of the language modeling stochastic process and allow for analysis of the effect of various model interventions.
 
 \subsection{Hindsight Gumbel Sampling}
 
-Recent work have explored the use of Gumbel noise sampling to analyze model bias \cite{chatzi2025counterfactual} or the effect of various steering techniques \cite{ravfogel2025gumbel}. These works follow a three phase procedure towards using noise for counterfactual generation: recovery, intervention, and replay. First Gumbel noise from a ``factual'' generation is recovered through an algorithmic procedure on the base, untreated language model. Second, an intervention is applied to language model such as prompt adjustment or steering. Finally, the stored noise is used to sample from treated model via the Gumbel-Max trick.
+As we detail in the previous section, the Gumbel-Max trick provides a mechanism to preserve and replay the random noise used in discrete random processes. However, in practice, we often do not have access to the random process and only have access to observations from an implied random process. For example, the random process that generates student writing is the students themselves, not a computational system that produces logits. When the true random process is inaccessible, we use a proxy for the random process and recover the noise implied by the observations under that proxy. \citet{ravfogel2025gumbel} refer to the task of recovering noise from a proxy as ``Hindsight Gumbel Sampling''. In their work, the authors use an LLM as a proxy for the textual data generation process and outline an algorithmic procedure to recover Gumbel noise implied by data. 
 
-In this work, we introduce a practical variant of the recovery procedure outlined by \cite{ravfogel2025gumbel} that allows for efficient, posterior noise recovery from ground truth reference text. While both works provide theoretical grounding in justifying their work, empirical validation is limited and neither work explores. We demonstrate in this work that in order to reuse Gumbel noise on a challenging but practical task, student contrastive example generation, significant hinting is required in order for the recovered noise to meaningfully change the model. We further show that the noise that emerges from this signal can also be used to sample from the model in a meaningful way.
+In our work, we introduce a practical algorithm for Hindsight Gumbel Sampling that allows for efficient, posterior Gumbel noise recovery from ground-truth, reference text. Furthermore, we investigate leveraging this recovered noise as a control signal for the downstream task of student counterfactual example generation. To our knowledge, we present the first exploration of Hindsight Gumbel Sampling on a downstream contrastive editing task with immediate practical implications.
+% Our empirical findings suggest that recovered noise can only be used effectively under specific conditions, namely those where the model is provided specific instructions that hint at the required output. 
+% \mh{This last bit might belong in intro/related work instead}
+
+% Related work by \cite{chatzi2025counterfactual} uses a similar procedure to generate factual, counterfactual pairs with Gumbel noise but does not recover the noise from data
+
+% Recent work have explored the use of Gumbel noise sampling to analyze model bias \cite{chatzi2025counterfactual} or the effect of various steering techniques \cite{ravfogel2025gumbel}. These works follow a three phase procedure towards using noise for counterfactual generation: recovery, intervention, and replay. First Gumbel noise from a ``factual'' text is recovered through an algorithmic procedure on the base, untreated language model. Second, an intervention is applied to language model such as prompt adjustment or steering. Finally, the stored noise is used to sample from treated model via the Gumbel-Max trick. While both works provide theoretical grounding in justifying their work, empirical validation is limited in scope and focus on explaining model behavior instead of leveraging recovered noise for a downstream task.
+
+% In this work, we introduce a practical variant of the recovery procedure outlined by \cite{ravfogel2025gumbel} that allows for efficient, posterior noise recovery from ground truth reference text.  We demonstrate in this work that in order to reuse Gumbel noise on a challenging but practical task, student contrastive example generation, significant hinting is required in order for the recovered noise to meaningfully change the model. We further show that the noise that emerges from this signal can also be used to sample from the model in a meaningful way.
 
 \section{Methodology}
+In this section, we formalize the task of counterfactual example generation and our algorithm to approach this task. \al{For the following, we might want to approach our task from a more generic perspective, so that people doing CG for other domains feel like this applies to them. Essentially, I think we can drop the ``feedback'' term for the most part in this section, and then re-introduce it in the experiments section.}
 
-\subsection{Counterfactual Answer Generation Task}
-In our framework we view that a student answer to a short answer question as a random sequence of tokens drawn from a Large Language Model (LLM). Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the problem prompt and any relevant context. Formally, we assume a pretrained autoregressive LLM $f: \mathbf{x} \rightarrow \mathbf{y}$. Where $\mathbf{x}$ is a sequence of tokens forming the instruction (prompt) to the model and $\mathbf{y}={y_1 \dots y_N}$ is the output completion of the model.  We also introduce a scoring model $g: \mathbf{y} \rightarrow \mathbf{z}$ which predicts the score of a model output.
+\subsection{Counterfactual Feedback Task}
+In our setting, we treat both factual and counterfactual outputs as token sequences drawn from an LLM provided an instruction prompt. Formally, we assume a pretrained autoregressive LLM $f_{\mathbf{\theta}}: \mathbf{x} \rightarrow \mathbf{y}$, parameterized by weights $\mathbf{\theta}$. We define $\mathbf{x}={( x_1 \dots x_N)}$ as a sequence of tokens forming the instruction (prompt) to the model, and $\mathbf{y}={( y_1 \dots y_M)}$ as the output tokens sampled from the model. \al{do you ever mention that the score label goes in the prompt? since I think that's a relevant detail (otherwise people will wonder how we steer the output towards a desired score)} We define a counterfactual as an alternative output $f(\mathbf{x'})_{\mathbf{\theta}'}=\mathbf{y}_c$ obtained after some LLM intervention to the model weights $\mathbf{\theta'}$, the prompt $x'$, or both. 
 
-We further breakdown x which includes 1. task instructions, 2. a rubric defining what each value of criteria is required, and 3. a desired score $z$ the value for the particular criteria. We posit that a student work to a given problem can be expressed as a random sequence of tokens drawn from $f$. Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the input $x$.
+We extend this general counterfactual formulation to our counterfactual feedback task by introducing a score variable $\mathbf{z}$, the rubric-based score assigned to a model output. Given a factual output $\mathbf{y}*$ with score $\mathbf{z}$, our task is to produce outputs $\mathbf{y}^*_c$ that would receive an alternative target score $\mathbf{z'}$. \al{You can be a bit more generic here, since in the CG literature people care about producing an output with respect to a target ``label''. So you can introduce $z$ as a label first, and then say in our setting this corresponds to a score, but in other domains could be something else.} To evaluate an approach for this task, we assume a dataset of scored factual output tuples $(\mathbf{y}^*, \mathbf{z})$. Since manual scoring of each produced counterfactual is infeasible, we introduce a scoring model $s: \mathbf{y} \rightarrow \hat{\mathbf{z}}$ to estimate a score for an arbitrary token sequence. Thus, our objective is to generate counterfactual outputs $\mathbf{y}^*_c$ such that $s(\mathbf{y}_c)=\mathbf{z}'$ while remaining lexically similar to the original factual output $\mathbf{y}^*$. \al{This last sentence kind of comes out of nowhere. I think it might make sense to introduce our ``objective'' in plain English in the first sentence of this subsection, along with some quick motivation for why that is our task. Then, once we've established all the math notation, we can formalize it like you do here.}
 
-In the counterfactual case, we perform a simple intervention by changing the model instructions to the desired task. Formally, we consider an counterfactual input $x'$ which includes and adjusted score $z'$ the new desired score of an output. Therefore, the student counterfactual answer is $y' = f(x')$.
+% , which can be as simple as a prompt adjustment $\mathbf{x}'$ or more involved such as changing the weights of the model through training and preference alignment.
+%  We posit that any factual output is possible, however unlikely, under the model given a reasonable instruction prompt $\mathbf{x}$. 
 
-\subsection{Gumbel Noise Recovery}
+% For the counterfactual feedback task, we produce a specific subset of counterfactual outputs $\mathbf{y}^*_c$ that would receive a different score while maintaining minimal distance from the factual output $\mathbf{y}^*$.
 
-To generate a counterfactual answer, we seek to modify the scoring rubric or feedback signal while preserving the latent randomness that produced the original student work via Gumbel. We detail the procedur in Algorithm 1 TODO ref. 
+% For our interventions, we consider both adjustments to the prompt, as simple as a single character adjustment in the instructions from $z$ to $z'$, and scenarios where the model weights have changed through training and alignment.
 
-\subsection{Algorithmic version WIP}
-\begin{algorithm}
-\caption{Student Gumbel Noise Recovery and Counterfactual Generation \mh{TODO 1. need to update inputs, e.g. to add intervention,  prompt components, $\beta $defined. 2. handle case where len(CF)>len(F) 3. Add comments 4. Define TruncGumbels}}
-\begin{algorithmic}[1]
-\REQUIRE Exercise prompt $E$, Scoring context $C$, Student answer $A=\{a_0,\dots,a_N\}$, Model parameters $\theta$, Vocabulary $V$
-\ENSURE Counterfactual answer $A'$
-\STATE $G \gets \{\}$ 
-\FOR{each token $a_i$ in $A$}
-    \STATE $\{l_v\}_{v\in V} = \text{LLM}(E,C,a_0 \dots a_{i-1};\theta)$
-    \STATE $l_{\max} \gets \max_{v\in V} l_v$
-    \STATE  $g_{a_i} \sim \text{LowerTruncGumbel}(l_{\max}-l_{a_i})$
-    \STATE $T \gets l_{a_i} + g_{a_i}$
-    \FOR{each $v \in V, v \neq a_i$}
-        \STATE  $g_v \sim \text{UpperTruncGumbel}(T-l_v)$
-    \ENDFOR
-    \STATE Store $g$-vector for position $i$ in $G$
-\ENDFOR
-\STATE $A' \gets \{\}$
-\STATE $a'_i \gets \text{BOS}$
-\STATE $i \gets 0$
-\WHILE{$a'_i \neq \text{EOS}$}
-\STATE $\{l_v\}_{v\in V} = \text{LLM}(E,C',a'_0\dots a'_{i-1};\theta)$
-    \IF{$i \le |A|$}
-    \STATE $g \gets G[i]$
-    \STATE $a'_i \gets \arg\max_{v\in V} (l_v + \beta g_v)$
-    \STATE $i \gets i + 1$
-    \ELSE
-    \STATE $g \gets \text{Gumbel}(0,1)$
-    \STATE $a'_i \gets \arg\max_{v\in V} (l_v + g_v)$
-    % \STATE $a'_i \gets \arg\max_{v\in V} (l_v)$
+% In our framework we view a student answer to a short answer question as a random sequence of tokens drawn from a Large Language Model (LLM). Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the problem prompt and any relevant context.
 
-    \ENDIF
-    \STATE Append $a'_i$ to $A'$
-\ENDWHILE
-\RETURN $A'$
-\end{algorithmic}
-\end{algorithm}
+% We posit that a student work to a given problem can be expressed as a random sequence of tokens drawn from $f$. Under this framework, each student answer is viewed as a particular realization from the probabilistic output space of the LLM, conditioned on the input $x$.
+% We further breakdown $\mathbf{x}$ which includes 1. task instructions and a rubric defining what each value of criteria is required and instructions to produce an output with a desired score $z'$ the value for the particular criteria.
 
-To recover the Gumbell noise that corresponds to each token of a student's answer, we must find a noise vector $\mathbf{g} = \{g_v\}_{v \in V}$ that satisfies the condition $l_{a_i} + g_{a_i} \ge l_v + g_v$ for all $v \in V$, where $a_i$ is the index in the vocabulary of the observed student answer token. We can sample such a consistent noise vector by first sampling $g_{a_i}$ from a lower-bounded truncated Gumbell distribution, and then sampling the remaining $g_v$ for $v \neq a_i$ from a upper-bounded truncated Gumbell distribution, ensuring they satisfy $g_v \le l_{a_i} + g_{a_i} - l_v$. 
 
-Specifically, we first find the maximum logit $l_{\max} = \max_{v' \in V} l_{v'}$ and sample the noise for the student's actual token, $g_{a_i}$, from the Gumbel distribution truncated from below:
-$$g_{a_i} \sim G \mid G > l_{\max} - l_{a_i}$$
 
-This sample establishes a upper-bounded threshold $T = l_{a_i} + g_{a_i}$. Subsequently, for all other tokens $v \neq a_i$, we sample their corresponding noise values from the Gumbel distribution truncated from above:
-$$g_v \sim G \mid G \le T - l_v \quad \forall v \neq a_i$$
+\subsection{$\beta$-Hindsight Counterfactual Generation}
 
-By repeating this process for each token in the student's answer $A$, we recover the full sequence of noise vectors $\{\mathbf{g}_0, \dots, \mathbf{g}_N\}$. This sequence represents the specific latent randomness that produced the original work. This ``recovered noise'' can then be re-applied during a new generation pass with a modified scoring context $C'$ to produce a counterfactual answer that preserves the original answer's underlying stochastic path.
+% and recover the random state $\mathbf{g}$ of the model which would result in the factual output.
+
+We detail a sampling-based procedure for counterfactual feedback generation, summarized in Algorithm~\ref{alg:gumbel-cf-short}. \al{algorithm notation is a bit different (using $\ell(v)$ instead of $\ell_v$) so should make consistent} To generate counterfactual feedback, we recover noise that reproduces the original factual output under a base model and replay the noise while sampling from an intervened model.
+
+To recover the Gumbel noise that corresponds to each token of a student's answer, we construct a noise vector $\mathbf{g} = \{g_v\}_{v \in V}$ that satisfies the condition: \begin{equation} \label{max-condition}
+    \ell_{y^*_t} + g_{y_t} > \ell_v + g_v\  \forall v \in V, v \ne y_t
+\end{equation}
+Here $y^*_t$ is the index in the LLM output vocabulary $V$ of the observed student answer token at autoregressive timestep $t$, thus $\ell_{y^*_t}$ is the logit corresponding to the factual, ground-truth token. \al{I feel like this previous sentence could be simplified} This condition guarantees that, upon applying the Gumbel-Max trick, the observed factual token $y^*_t$ is selected from the Gumbel-Max prediction.
+
+In order to satisfy Condition~\ref{max-condition}, we form a noise vector by first sampling the target noise from a lower-truncated Gumbel distribution. 
+$$
+\mathrm{LowerTruncG}(\tau_{min}) \coloneqq \mathcal{L}\bigl(G \mid G > \tau_{min}\bigr),
+$$ \al{never defined $\mathcal{L}$}
+Here $\quad G \sim \mathrm{Gumbel}(0,1)$ is noise drawn from a standard Gumbel, and $\tau_{min}$ denotes the lower bound. In our approach, we compute $\tau_{min}$ as the difference between the ground truth token logit $\ell_{y_t^*}$ and the maximum observed logit $\ell_{max}$ for each timestep. \al{could include this in the formula, i.e., $\tau_{min} = \ell_{max} - \ell_{y^*_t}$} \al{and motivate why - ``so that the augmented logit for the ground-truth token will be greater than the logit for any other token''}
+
+\input{latex/algo_v1_short}
+
+The sampled target noise establishes a maximum ceiling $T_{t} = l_{y^*_t} + g_{y^*_t}$ and subsequently, for all other tokens $v \neq y^*_t$, we sample their corresponding noise values from an upper-truncated Gumbel distribution. \al{again motivate why - ``so that no token becomes more likely than the ground-truth token after adding noise''}
+$$
+\mathrm{UpperTruncG}(\tau_{max}) \coloneqq \mathcal{L}\bigl(G \mid G < \tau_{max}\bigr),
+$$ 
+Here $\tau_{max}$ denotes the upper bound, which we compute as the difference between the ceiling \al{specify this is the new logit value for the ground-truth token} and the current logit value for all other tokens in the vocabulary. The recovered Gumbel noise values satisfy (\ref{max-condition}) by construction and represent a possible series of noise values that would have led to the ground-truth output $\mathbf{y*}$.
+
+\al{I think we can also briefly talk about how we compute the truncated Gumbel, since I believe this is a novel contribution.}
+
+Given the recovered noise values, we then use the Gumbel-max trick to replay the noise on an intervened LLM. \al{Maybe clarify what this ``replay'' procedure is, and/or include comments in the algorithm denoting the ``recovery'' and ``replay'' parts} We make one modification to the replay procedure and include a hyperparameter $\beta$ which scales the applied noise. We empirically observe that scaling the recovered Gumbel noise provides a tunable control signal to regulate how lexically similar the generated outputs align with the ground truth. \al{This $\beta$ idea is a major contribution, so maybe hype it up a little bit and mention it in the first paragraph of the subsection. also, saying ``we empirically observe'' sounds like it's just something that happens to work rather than some major thing that we're proposing to control a tradeoff (even if it's the case lol, it's still a nice idea you came up with)} We further detail our findings in section~\ref{sec:foresight}.
+
+Our algorithm introduces a couple of key differences to the procedure proposed in \cite{ravfogel2025gumbel}. First, Ravfogel et. al sample their noise values from a Gumbel distribution centered in a derived logit space and then re-center during Gumbel-Max sampling. While mathematically equivalent, their procedure requires computing the normalization constant, which, in practice, is more computationally expensive than simply computing the observed logit maximum. Second, their replay procedure does not include $\beta$ regularization on replay, as their work is more theoretical in nature and not focused on using Gumbel noise for a downstream task.
+\mh{Not sure exactly where the last paragraph belongs, maybe a footnote?} \al{I think it's okay here, but it's definitely worth saying these things. Related work would also be a reasonable place.}
+
+\subsection{Model Fine-tuning and Alignment}
+\al{Personally, I think it's worth talking about the role of SFT and DPO in this section. Even though they're less ``theoretical'', they're still important parts of the method and will have implications on how other people adapt the work (if I was reading this on arxiv I would probably only read the methods section, and would certainly want to see those details)}
+
+\subsection{Prompt Structure}
+
+% First, in deriving the noise value for the ground truth token our procedure uses the actual observed maximum logits as opposed to a sampling procedure that requires computing the normalization constant. Second, our samples are shifted from the logit space at sampling time as opposed to application. Both algorithms accomplish the same goal of hindsight sampling from data, where \cite{ravfogel2025gumbel} work focuses on the theoretical implications of a connection of the procedure to Structural Equation Models, our work focuses on a practical application which exploits this applied noise as a control signal for a downstream NLP task.
+
+% Formally, let $G$ be a standard Gumbel random variable with CDF $F(g) = \exp(-e^{-g})$, 
+% i.e., from the standard Gumbel distribution truncated to $(\tau_t,\infty)$.
+% Equivalently, $g_{y_t}$ has CDF
+% \[
+% F_{\mathrm{LTG}(\tau_t)}(g)
+% = \mathbb{P}(G \le g \mid G > \tau_t)
+% = \frac{F(g) - F(\tau_t)}{1 - F(\tau_t)}, \qquad g > \tau_t.
+% \]
+
+% \begin{equation}
+%     p(g_{y_t} \mid g_{y_t} \ge \tau) = \frac{1}{Z} \text{Gumbel}(g_{y_t}) \cdot \mathbbm{1}_{[\tau, \infty)}(g_{y_t})
+% \end{equation}
+% where $\text{Gumbel}(x) = e^{-(x + e^{-x})}$ is the standard Gumbel density, $\mathbbm{1}_{[\tau, \infty)}(\cdot)$ is the indicator function over the support, and $Z = 1 - F_G(\tau)$ is the normalization constant defined by the cumulative distribution function $F_G$.
+
+\section{Experimental Setup}
+In this section, we detail our experiments, which we conduct to evaluate the effectiveness of our methodology for the task of counterfactual feedback generation.
+
+\subsection{Dataset}
+We evaluate our approach on the Common Lit Augmented Student Summary Evaluation (CLASSE) dataset, a corpus of student-authored summaries to short reading passages \cite{crossley-etal-2024-world}. \al{include the grade level} The dataset contains 4,689 summaries from 101 unique passages. Human raters evaluate each summary on 6 grading criteria related to writing quality on an increasing scale from 1 to 4. We report each criterion as \textbf{Main Idea}, \textbf{Details}, \textbf{Cohesion}, \textbf{Objectivity}, \textbf{Wording}, and \textbf{Language}. We further detail the criteria and provide sample scoring rubrics in Appendix Section TODO.
+
+\al{some reviewers get mad if you don't include statistics like token count for prompts and outputs (can go in appendix)}
+
+\mh{Currently, I'm evaluating on a subset of this dataset to prevent a combinatorial explosion. I generate all score permutations for each of the 4.5k data points and then perform stratified sampling across all score permutations (e.g. 4->1 has the same count as 2->3). I cap this at 400 samples per criterion to yield a total of 2400 total. Not writing this up formally yet, in case we change this setup.}
+
+\al{let's maybe try to think of a second dataset to have in our back pocket for rebuttal time}
+
+% Could include here details about filtering/cleaning if needed.
+
+\subsection{Metrics}
+We measure two competing properties of the generated counterfactual examples, similarity to the factual summary and task validity, following existing work on counterfactual generation \cite{wang-etal-2024-survey}. \al{How about ``coherence'' or something like that, via perplexity on a larger model or llm-as-a-judge?}
+
+\subsubsection{Similarity}
+In our experiments, we measure the similarity between the factual answer, the student-written summary, and the generated counterfactual feedback. \al{sentence phrasing makes it sound like there's 3 things being compared} We report the average normalized character-level Levenshtein distance averaged across all counterfactual outputs for a given setting.
+
+$$Similarity=\frac{1}{N}\sum_{i=1}^N1 -\frac{\text{Lev}(y_i, y_i')}{\text{max}(\lVert y_i \rVert, \lVert y_i' \rVert)}$$
+Here, $y_i$ is the ground truth output, $y_i'$ the counterfactual for $N$ outputs. This metric outputs a score in $[0,1]$ where 1 indicates complete text similarity.
+
+\begin{table*}[!h]
+\centering
+\small
+\begin{tabular}{llcccccc}
+\toprule
+\textbf{Method} & \textbf{Metric} & \textbf{Main Idea} & \textbf{Details} & \textbf{Cohesion} & \textbf{Objective} & \textbf{Wording} & \textbf{Language} \\
+\midrule
+\multicolumn{8}{c}{\textbf{Base}} \\
+\midrule
+Ours & Similarity & \textbf{0.547} & \textbf{0.596} & \textbf{0.599} & \textbf{0.649} & \textbf{0.591} & \textbf{0.559} \\
+Baseline (Llama3.1) & Similarity & 0.311 & 0.318 & 0.298 & 0.333 & 0.340 & 0.316 \\
+Baseline (Llama4) & Similarity & 0.327 & 0.320 & 0.314 & 0.362 & 0.380 & 0.375 \\
+\cmidrule{1-8}
+Ours & Validity & 0.238 & \underline{0.648} & \textbf{0.584} & 0.477 & \textbf{0.697} & \textbf{0.727} \\
+Baseline (Llama3.1) & Validity & \textbf{0.331} & 0.397 & 0.371 & 0.318 & 0.330 & 0.406 \\
+Baseline (Llama4) & Validity & 0.303 & \textbf{0.709} & 0.528 & \textbf{0.539} & 0.741 & 0.593 \\
+\midrule
+\multicolumn{8}{c}{\textbf{SFT}} \\
+\midrule
+Ours & Similarity & \textbf{0.730} & \textbf{0.900} & \textbf{0.924} & \textbf{0.867} & \textbf{0.861} & \textbf{0.885} \\
+Baseline & Similarity & 0.303 & 0.456 & 0.380 & 0.364 & 0.342 & 0.388 \\
+\cmidrule{1-8}
+Ours & Validity & 0.062 & \textbf{0.466} & 0.621 & \textbf{0.456} & \textbf{0.469} & \textbf{0.559} \\
+Baseline & Validity & \textbf{0.288} & 0.099 & \textbf{0.654} & 0.115 & 0.098 & 0.184 \\
+\midrule
+\multicolumn{8}{c}{\textbf{DPO}} \\
+\midrule
+Ours & Similarity & \textbf{0.504} & \textbf{0.486} & \textbf{0.542} & \textbf{0.534} & \textbf{0.527} & \textbf{0.543} \\
+Baseline & Similarity & 0.329 & 0.284 & 0.325 & 0.286 & 0.311 & 0.363 \\
+\cmidrule{1-8}
+Ours & Validity & 0.522 & \textbf{0.829} & \textbf{0.800} & 0.826 & \textbf{0.705} & \textbf{0.804} \\
+Baseline & Validity & \textbf{0.763} & 0.748 & 0.653 & \textbf{0.840} & 0.624 & 0.574 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+\subsubsection{Task Validity}
+We consider a generated counterfactual valid if it achieves the desired target output. \al{phrasing is a bit vague} Existing work on counterfactual generation evaluates tasks with nominal data (e.g. sentiment or topic classification) and thus reports exact match measures of validity, such as flip rate \cite{ross-etal-2021-explaining}. In our work, we instead consider ordinal scores and therefore report a Quadratic Weight Kappa (QWK) as a validity metric. Specifically, we report the QWK agreement between the desired, intervened counterfactual score $z'$ and an estimated score provided by a scoring model $s(y_c)=\hat{z}'$. QWK compares weighted observed disagreement to the expected by chance, producing a score in $[-1,1]$ where high values indicate higher task validity. 
+\mh{If we prefer to report correlation or bias instead, the trends are similar. I have the values}
+
+\begin{equation*}
+Validity \;=\; 1 \;-\;
+\frac{\displaystyle \sum_{i=1}^{k} \sum_{j=1}^{k} w_{ij} \, O_{ij}}
+{\displaystyle \sum_{i=1}^{k} \sum_{j=1}^{k} w_{ij} \, E_{ij}},
+\end{equation*}
+Here $O$ is the observed confusion matrix, $E$ is the expected counts under independence, $w_{ij}$ is the standard quadratic rating $w_{ij} = \frac{(i-j)^{2}}{(k-1)^{2}}$, and $k=4$ in our dataset. \al{might not need to show the formula to save space}
+
+\subsection{Scoring Model}
+For a scoring model, we use an LLM-judge approach to automated scoring of the output relative to the criteria. \al{roundabout wording, maybe ``We use LLM-as-a-judge to automatically score generated counterfactuals using a scoring rubric.''} Specifically, we prompt \texttt{GPT-4.1} with the 4-point rubric for a given criterion and instruct the model to rate a given passage in a Chain-of-Thought (CoT) style manner. We validate the reliability of this scoring model by comparing LLM judge scores to those reported in the ground truth data. We see an average agreement of 0.474 \mh{0.53 if we exclude ``objective language''} across criteria; compared to the ground truth inter-human rating agreement of 0.642. We provide our prompt structure and further details of the scoring model setup in Appendix \textbf{TODO}. \al{did the bert scoring model not perform as well? if it didn't can throw in ``this approach performed better than a fine-tuned BERT model in preliminary experiments''}
+
+% \begin{equation}
+% Validity \;=\; 1 \;-\;
+% \frac{\displaystyle \sum_{i=1}^{k} \sum_{j=1}^{k} w_{ij} \, O_{ij}}
+% {\displaystyle \sum_{i=1}^{k} \sum_{j=1}^{k} w_{ij} \, E_{ij}},
+% \qquad 
+% w_{ij} = \frac{(i-j)^{2}}{(k-1)^{2}}
+% \end{equation}
+
+
+% \subsubsection{Coherence}
+% \mh{I have some work in this direction but not consistent results on all runs. Could add it in though}
+
+\subsection{Experimental Settings and Details}
+
+We evaluate our approach under a variety of model weight interventions. In our experiments, we use the open source \texttt{Llama3.1-8B-Instruct} LLM for all settings. \al{Trying on different model sizes (ex: 3.2 3b/1b) would be a nice addition.}
+
+\textbf{Base} The default pre-trained model weights. 
+
+\textbf{SFT} We perform Supervised Fine Tuning (SFT) with a subset of the CLASSE dataset to obtain a trained variant of the base model. Specifically, we perform an 80-20 train test split and train a LoRA (cite) adapter for each criterion.
+
+\textbf{DPO} We further align the model to the data after using Direct Preference Optimization (DPO). We apply this round of alignment to the model after SFT, and form preference pairs by taking positive score examples and negative scores for each passage-criteria tuple. \al{should be more specific about how pairs are formed}
+
+\al{Again, I'd prefer to see SFT and DPO introduced in methods since it's different than the other counterfactual papers. Can also give some motivation for why we do this, mainly, 1) to get the distribution closer to the student (data-generating) distribution, and 2) to improve the model's ability to focus on the score}
+
+Across all experimental settings, we report our $\beta$-Hindsight sampling approach (Ours) to standard categorical random sampling (Baseline). \al{More baselines would be really good for reviewers, especially if we get people who are familiar with this area. 2 recent representative methods and maybe 1 older but gold standard method would be great (if no time for all of these just do 1 or 2 and save the others for the rebuttal). Alternatively, if there are no other methods out there that can do our particular task, discuss that and include examples of other works that are close but not quite applicable.} In all cases, we instruct the LLM to adhere to the factual student summary while generating a counterfactual response. To induce a counterfactual from the LLM, we instruct the model to form an output for a different expected score by simply changing a single character of the prompt corresponding to the desired score value $z'$. We provide further details on exact model prompts and training details in the Appendix TODO.
+
+To sample from the truncated Gumbel distributions, we perform inverse transform sampling (cite). \mh{Maybe this is a footnote.} \al{Maybe it's a methods! I think it warrants a couple formulas since I don't think it's been done elsewhere (and I don't think it's obvious either)}
+
+% May need to explain these things as well, depending on how results are presented.
+% \begin{itemize}
+%     \item Ref vs No Ref
+%     \item Gumbel Value
+%     \item Exact sampling setup (stubbed in comment)
+%     \item Llama-4 baseline prompting (baseline)
+% \end{itemize}
+
+\section{Results, Analysis, Discussion}
+
+\subsection{Gumbel Noise is an Effective Control Signal}
+In Table~\ref{tab:metrics} we report the results of our approach, $\beta$-hindsight sampling compared to baseline sampling approaches. \al{The table is a bit big. I think you don't need to break down by topic for this table, and then can do a smaller table later that examines the per-topic performance.} In all cases, we set $\beta=0.1$, which we empirically tuned via linear search on a subset of our dataset. We observe across all settings that our method produces counterfactual outputs that are significantly similar to the original factual student response. The observed similarity trend holds across all training setups, indicating that our approach is robust to model weight interventions. Interestingly, we see that in the \textbf{SFT} setting, the model generates outputs that are very similar to the factual compared to other settings. We suspect that the increased similarity in SFT arises because, during supervised fine-tuning, the model weights are directly updated to produce outputs similar to the factual summaries it is later instructed to adhere to, resulting in a stronger recovered control signal. 
+
+In terms of validity, we see that while our approach generally produces counterfactual outputs with higher validity across criteria, with the notable exception of the \textbf{Main Idea} criterion. The \textbf{Main Idea} criterion evaluates the presence of a clear topic sentence at the beginning of the summary. We hypothesize that lower performance on this metric arises from the quantity of character insertions or deletions required to alter the factual output for this criterion. Since the Gumbel noise signal is applied at a fixed position independent of any desired structural change, we suspect that a misalignment occurs between the relative position of the noise in the factual and counterfactual outputs, which may adversely affect the resulting output. This analysis suggests that an alternative algorithm, which more intelligently aligns the recovered factual token noise with the expected token position in the counterfactual, could result in a more general system robust to a wider variety of output changes.
+
+\subsection{Effective Hindsight Sampling Requires Foresight}\label{sec:foresight}
+\mh{Work in progress from here onwards, do not read!}
+\begin{table}[!t]
+\centering
+\small
+\begin{tabular}{llccc}
+\toprule
+\textbf{Setting} & \textbf{Metric} 
+& \textbf{w/ Foresight} 
+& \multicolumn{2}{c}{\textbf{w/o Foresight}} \\
+ &  
+& $\beta=0.1$ 
+& $\beta=0.1$ 
+& $\beta=1.0$ \\
+\midrule
+\multicolumn{5}{c}{\textbf{Base (Main Idea)}} \\
+\midrule
+Ours & Validity $\uparrow$     & 0.238 & 0.295 & 0.356 \\
+Ours & Similarity $\downarrow$ & 0.453 & $0.764^*$ & $0.653^*$ \\
+\midrule
+\multicolumn{5}{c}{\textbf{SFT (Main Idea)}} \\
+\midrule
+Ours & Validity $\uparrow$     & 0.062 & 0.220 & 0.269 \\
+Ours & Similarity $\downarrow$ & 0.270 & $0.743^*$ & $0.610^*$ \\
+\midrule
+\multicolumn{5}{c}{\textbf{DPO (Main Idea)}} \\
+\midrule
+Ours & Validity $\uparrow$     & 0.522 & 0.xxx & 0.715 \\
+Ours & Similarity $\downarrow$ & 0.496 & 0.xxx & 0.757 \\
+\bottomrule
+\end{tabular}
+\caption{Ablation study on foresight strength for the \textit{Main Idea} criterion, comparing Gumbel noise replay with foresight ($\beta=0.1$) and without foresight ($\beta=0.1, 1.0$).}
+\label{tab:foresight_ablation}
+\end{table}
+
+Here I can compare noise added without reference versus noise with reference. Do this on one criterion (Main Idea) for now and then extend to others? TODO complete this table, and run with a second criterion as well (Details maybe). \al{the foresight idea is pretty critical to the approach but isn't really discussed prior to here, I think you should include it in methods (doesn't have to be a big deal but should be clear what you're doing)}
+
+\subsection{A Tunable Tradeoff}
+TODO Here show a Tradeoff curve for Main Idea. Or maybe check this on a ``successful'' criteron and see if it still holds. My current understanding is that regulating gamma between 0 and 1 results in a tradeoff between these two metrics.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.95\linewidth]{latex/figs/tradeoff_beta_0.png}
+    \caption{A tradeoff curve showing the varying effect of different $\beta$ values on our metrics. We see that increasing values of beta increases similarity at the tradeoff of task performance \mh{Need to iterate on this, maybe more values of beta or multiple tasks in the same graph. Experimental design implications for this}}
+    \label{fig:placeholder}
+\end{figure}
+\subsection{Inspecting the Gumbell Noise}
+Here, I plan to analyze the Noise values across settings of interest. For example difference between ref/no ref or base models/trained models. I could look at descriptive statistics on measures such as overall magnitude or the values of the bounds.
+
+\subsection{Additional Ablations/Subquestions}
+One ablation - a simple boost for all tokens in the reference?
+
+% Importance of training, tradeoff curve b/w perf and similarity with $\beta$ regularization
+
+\subsection{Discussion}
+
+
+\section{Brainstorming/TODO lists}
+% \subsection{Sources of Evidence}
+% \begin{itemize}
+%     \item Scoring Model tests
+%     \item Main idea only: Gumbel w/o ref has similar task performance with DPO and slightly worse similarity
+%     \item Main Idea only: Gumbel w/ ref has lower task performance with DPO but significantly better similarity
+%     \item Main Idea only: Tuning shows a general pattern emerge
+%     \item Main Idea 50: Shows that scaling gumbel creates a pattern on the tradeoff curve
+%     \item Cross criteria: Gumbel w/ ref $\beta=0.1$ QWK always higher except for Main, while similarity is better in all cases
+% \end{itemize}
+
+\subsection{Further Experiment Ideas}
+\begin{itemize}
+    \item Try tradeoff with another criterion P1
+    \item See if the tradeoff trend holds across training settings P2
+    \item Examine the differences between the recovered noise w/ and w/o reference. Total magnitude of noise and min/max of distributions/upper truncates. Maybe even descriptive statistics of the noise/lower\&upper bounds/
+    \item Examine noise differences with different levels of training
+    \item If this holds on a different task (movie positive prediction) would strengthen validity. Might also be akin to
+    \item Question: should the noise reproduce randomness exactly in theory? Null hypothesis test would be that it doesn't reproduce perfectly with the same prompt. Worth checking this, although may not need to.
+    \item report coherence
+\end{itemize}
+
+\subsection{Visualizations}
+\begin{itemize}
+    \item Noise recovery and replay algorithm (page 1 figure)
+    \item "Pipeline" figure if we go that route
+    \item Patreo Curve tradeoff graph?
+    \item A good qualitative example
+    \item Motivating diagram for task/method (full column or half)
+\end{itemize}
 
 \section{Related Work}
 We owe it all to sample citation\cite{Ando2005}.
-
-
-\section{Results}
 
 \section{Conclusions and Future Work}
 
@@ -282,5 +484,6 @@ We owe it all to sample citation\cite{Ando2005}.
 \label{sec:appendix}
 
 This is an appendix.
+\input{latex/algo_v1}
 
 \end{document}
