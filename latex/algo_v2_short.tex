@@ -1,0 +1,34 @@
+\begin{algorithm}[t]
+\caption{$\beta$-Hindsight Control}
+\label{alg:gumbel-cf-short}
+\begin{algorithmic}[1]
+
+\STATE \textbf{def} BetaHindsight$(\mathbf x, \mathbf y, \mathbf x', \theta, \beta)$:
+\STATE \quad $\mathbf G \gets \varnothing$
+
+\STATE \quad \textbf{for} $t = 1,\dots,|\mathbf y|$: \algcmt{Recover Noise}
+\STATE \qquad $\ell \gets \mathrm{LLM}(\mathbf x, \mathbf y_{<t};\theta)$
+\STATE \qquad $\ell_{max} \gets \max_{v\in V} \ell[v]$
+\STATE \qquad $\mathbf g_t[y_t] \sim \mathrm{LowerTruncG}(\ell_{max} - \ell[y_t])$
+\STATE \qquad $T_t \gets \ell[y_t] + \mathbf g_t[y_t]$
+\STATE \qquad \textbf{for} $v \in V \setminus \{y_t\}$:
+\STATE \qquad\quad $\mathbf g_t[v] \sim \mathrm{UpperTruncG}(T_t - \ell[v])$
+\STATE \qquad store $\mathbf g_t$ in $\mathbf G$
+
+\STATE \quad $\mathbf y' \gets \varnothing$
+\STATE \quad $y'_1 \gets \mathrm{BOS},\; t \gets 1$
+
+\STATE \quad \textbf{while} $y'_t \neq \mathrm{EOS}$: \algcmt{Replay noise}
+\STATE \qquad $\ell \gets \mathrm{LLM}(\mathbf x', \mathbf y'_{<t}; \theta)$
+\STATE \qquad \textbf{if} $t \le |\mathbf y|$:
+\STATE \qquad\quad $\mathbf g_t \gets \mathbf G[t]$
+\STATE \qquad\quad $y'_t \gets \arg\max_{v\in V}\bigl(\ell[v] + \beta \cdot \mathbf g_t[v]\bigr)$
+\STATE \qquad \textbf{else}:
+\STATE \qquad\quad $\mathbf u_t \sim \mathrm{Gumbel}(0,1)^{|V|}$
+\STATE \qquad\quad $y'_t \gets \arg\max_{v\in V}\bigl(\ell[v] + \mathbf u_t[v]\bigr)$
+\STATE \qquad append $y'_t$ to $\mathbf y'$, $t \gets t+1$
+
+\STATE \quad \textbf{return} $\mathbf y'$
+
+\end{algorithmic}
+\end{algorithm}

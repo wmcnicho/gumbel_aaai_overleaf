@@ -1,0 +1,47 @@
+\begin{algorithm*}
+\caption{Expanded $\beta$-Hindsight Control Algorithm with Comments}
+\label{alg:gumbel-cf-long}
+\begin{algorithmic}[1]
+
+\STATE \textbf{def} RecoverNoise$(\mathbf x, \mathbf y, \theta)$:
+\STATE \quad $\mathbf G \gets \varnothing$
+\STATE \quad \textbf{for} $t = 1,\dots,|\mathbf y|$:
+\STATE \qquad $\ell \gets \mathrm{LLM}(\mathbf x, \mathbf y_{<t};\theta)$ \algcmt{compute logits}
+\STATE \qquad $\ell_{max} \gets \max_{v\in V} \ell[v]$ 
+\STATE \qquad $\mathbf g_t[y_t] \sim \mathrm{LowerTruncG}(\ell_{max} - \ell[y_t])$
+        \algcmt{recover noise for observed token}
+\STATE \qquad $T_t \gets \ell[y_t] + \mathbf g_t[y_t]$ 
+\STATE \qquad \textbf{for} $v \in V \setminus \{y_t\}$:
+\STATE \qquad\quad $\mathbf g_t[v] \sim \mathrm{UpperTruncG}(T_t - \ell[v])$
+        \algcmt{recover shifted noise}
+\STATE \qquad store $\mathbf g_t$ in $\mathbf G$
+\STATE \quad \textbf{return} $\mathbf G$
+\vspace{6pt}
+
+\STATE \textbf{def} GenerateCF$(\mathbf x', \mathbf G, \mathbf y, \theta, \beta)$:
+\STATE \quad $\mathbf y' \gets \varnothing$
+\STATE \quad $y'_1 \gets \mathrm{BOS},\; t \gets 1$
+\STATE \quad \textbf{while} $y'_t \neq \mathrm{EOS}$:
+\STATE \qquad $\ell \gets \mathrm{LLM}(\mathbf x', \mathbf y'_{<t}; \theta)$
+        \algcmt{logits under intervened model}
+\STATE \qquad \textbf{if} $t \le |\mathbf y|$:
+\STATE \qquad\quad $\mathbf g_t \gets \mathbf G[t]$ \algcmt{reuse recovered noise}
+\STATE \qquad\quad $y'_t \gets \arg\max_{v\in V}\bigl(\ell[v] + \beta \cdot \mathbf g_t[v]\bigr)$
+        \algcmt{$\beta$-scaled noise Gumbel-max sample}
+\STATE \qquad \textbf{else}:
+\STATE \qquad\quad $\mathbf u_t \sim \mathrm{Gumbel}(0,1)^{|V|}$
+        \algcmt{standard Gumbel-max sample beyond original length}
+\STATE \qquad\quad $y'_t \gets \arg\max_{v\in V}\bigl(\ell[v] + \mathbf u_t[v]\bigr)$
+\STATE \qquad append $y'_t$ to $\mathbf y'$, $t \gets t+1$
+\STATE \quad \textbf{return} $\mathbf y'$
+\vspace{6pt}
+
+\STATE \textbf{def} BetaHindsight$(\mathbf x, \mathbf y, \mathbf x', \theta, \beta)$:
+\STATE \quad $\mathbf G \gets$ RecoverNoise$(\mathbf x, \mathbf y, \theta)$
+        \algcmt{recover posterior noise}
+\STATE \quad $\mathbf y' \gets$ GenerateCF$(\mathbf x', \mathbf G, \mathbf y, \theta, \beta)$
+        \algcmt{construct counterfactual via replay}
+\STATE \quad \textbf{return} $\mathbf y'$
+
+\end{algorithmic}
+\end{algorithm*}
