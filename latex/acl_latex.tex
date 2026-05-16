@@ -464,44 +464,48 @@ We generate counterfactuals for a stratified subset of score changes. Specifical
 
 \begin{table*}[t]
 \centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{l | cc | cc | cc | cc}
+\begin{tabular}{l | cc | cc}
 \toprule
-& \multicolumn{4}{c|}{\textbf{CLASSE}} & \multicolumn{4}{c}{\textbf{DRESS}} \\
-\cmidrule(lr){2-5} \cmidrule(lr){6-9}
-& \multicolumn{2}{c|}{Llama} & \multicolumn{2}{c|}{Qwen} & \multicolumn{2}{c|}{Llama} & \multicolumn{2}{c}{Qwen} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
-\textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+& \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DRESS}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+\textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
 \midrule
+\multicolumn{5}{l}{\textit{Llama}} \\
 Minimal-Edit
     & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
-    & $0.577 \pm 0.093$ & $0.232 \pm 0.043$
-    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$
-    & $0.297 \pm 0.009$ & $0.196 \pm 0.069$ \\
+    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
 ICL
     & $0.308 \pm 0.013$ & $0.327 \pm 0.127$
-    & $0.400 \pm 0.123$ & $0.190 \pm 0.045$
-    & $0.330 \pm 0.024$ & $0.264 \pm 0.055$
-    & $0.338 \pm 0.045$ & $0.146 \pm 0.077$ \\
+    & $0.330 \pm 0.024$ & $0.264 \pm 0.055$ \\
 Identify-and-Replace
     & $0.498 \pm 0.036$ & $0.103 \pm 0.011$
-    & $0.448 \pm 0.055$ & $0.364 \pm 0.107$
-    & $0.308 \pm 0.013$ & $0.325 \pm 0.191$
-    & $0.328 \pm 0.076$ & $\textbf{0.537} \pm 0.207$ \\
+    & $0.308 \pm 0.013$ & $0.325 \pm 0.191$ \\
 $\beta$-Hindsight (ours)
     & $\textbf{0.560} \pm 0.020$ & $0.168 \pm 0.024$
-    & $\textbf{0.613} \pm 0.095$ & $0.221 \pm 0.046$
-    & $0.402 \pm 0.048$ & $0.148 \pm 0.067$
-    & $0.300 \pm 0.007$ & $0.207 \pm 0.078$ \\
+    & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
 $\beta$-Hindsight (aligned)
     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
+    & $\textbf{0.493} \pm 0.147$ & $\textbf{0.395} \pm 0.102$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Qwen}} \\
+Minimal-Edit
+    & $0.577 \pm 0.093$ & $0.232 \pm 0.043$
+    & $0.297 \pm 0.009$ & $0.196 \pm 0.069$ \\
+ICL
+    & $0.400 \pm 0.123$ & $0.190 \pm 0.045$
+    & $0.338 \pm 0.045$ & $0.146 \pm 0.077$ \\
+Identify-and-Replace
+    & $0.448 \pm 0.055$ & $0.364 \pm 0.107$
+    & $0.328 \pm 0.076$ & $\textbf{0.537} \pm 0.207$ \\
+$\beta$-Hindsight (ours)
+    & $\textbf{0.613} \pm 0.095$ & $0.221 \pm 0.046$
+    & $0.300 \pm 0.007$ & $0.207 \pm 0.078$ \\
+$\beta$-Hindsight (aligned)
     & $0.575 \pm 0.092$ & $\textbf{0.566} \pm 0.185$
-    & $\textbf{0.493} \pm 0.147$ & $\textbf{0.395} \pm 0.102$
     & $\textbf{0.607} \pm 0.098$ & $0.287 \pm 0.112$ \\
 \bottomrule
 \end{tabular}
-\caption{Results on CLASSE and DRESS datasets across Llama and Qwen base models. Best result per column in \textbf{bold}.}
+\caption{Results on CLASSE and DRESS datasets across Llama and Qwen base models. Best result per column within each model block in \textbf{bold}.}
 \label{tab:main_results}
 \end{table*}
 
