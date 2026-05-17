@@ -522,8 +522,8 @@ GM ($g{=}0.50$)
   & ICL                   & 0.359 & $\underline{0.604}$ & 0.418 & $\textbf{0.484}$ \\
   & Identify-and-Replace  & $\underline{0.554}$ & 0.434 & -- & -- \\
 \midrule
-Llama  & GM (ours)         & 0.391 & $\textbf{0.668}$ & $\underline{0.493}$ & 0.395 \\
-Qwen   & GM (ours)         & $\textbf{0.575}$ & 0.566 & $\textbf{0.607}$ & 0.287 \\
+Llama  & GM ($g{=}0.10$)   & 0.391 & $\textbf{0.668}$ & $\underline{0.493}$ & 0.395 \\
+Qwen   & GM ($g{=}0.10$)   & $\textbf{0.575}$ & 0.566 & $\textbf{0.607}$ & 0.287 \\
 \bottomrule
 \end{tabular}
 \caption{Gumbel Machine (GM) on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. GM rows use Gumbel scale $g{=}0.10$. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Sonnet Identify-and-Replace on DRESS was held back due to budget constraints. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
