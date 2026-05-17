@@ -1,3 +1,4 @@
+% !TEX root = ../main.tex
 \documentclass[11pt]{article}
 
 % Change "review" to "final" to generate the final (sometimes called camera-ready) version.
@@ -470,7 +471,6 @@ We generate counterfactuals for a stratified subset of score changes. Specifical
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
 \textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
 \midrule
-\multicolumn{5}{l}{\textit{Llama}} \\
 Minimal-Edit
     & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
     & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
@@ -480,33 +480,54 @@ ICL
 Identify-and-Replace
     & $0.498 \pm 0.036$ & $0.103 \pm 0.011$
     & $0.308 \pm 0.013$ & $0.325 \pm 0.191$ \\
-$\beta$-Hindsight (ours)
+$\beta$-Hindsight ($g{=}0.05$)
+    & -- & --
+    & $0.392$ & $0.151$ \\
+$\beta$-Hindsight ($g{=}0.10$)
     & $\textbf{0.560} \pm 0.020$ & $0.168 \pm 0.024$
     & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
-$\beta$-Hindsight (aligned)
+GM ($g{=}0.05$)
+    & -- & --
+    & $\underline{0.477} \pm 0.137$ & $\textbf{0.404} \pm 0.084$ \\
+GM ($g{=}0.10$)
     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $\textbf{0.493} \pm 0.147$ & $\textbf{0.395} \pm 0.102$ \\
-\midrule
-\multicolumn{5}{l}{\textit{Qwen}} \\
-Minimal-Edit
-    & $0.577 \pm 0.093$ & $0.232 \pm 0.043$
-    & $0.297 \pm 0.009$ & $0.196 \pm 0.069$ \\
-ICL
-    & $0.400 \pm 0.123$ & $0.190 \pm 0.045$
-    & $0.338 \pm 0.045$ & $0.146 \pm 0.077$ \\
-Identify-and-Replace
-    & $0.448 \pm 0.055$ & $0.364 \pm 0.107$
-    & $0.328 \pm 0.076$ & $\textbf{0.537} \pm 0.207$ \\
-$\beta$-Hindsight (ours)
-    & $\textbf{0.613} \pm 0.095$ & $0.221 \pm 0.046$
-    & $0.300 \pm 0.007$ & $0.207 \pm 0.078$ \\
-$\beta$-Hindsight (aligned)
-    & $0.575 \pm 0.092$ & $\textbf{0.566} \pm 0.185$
-    & $\textbf{0.607} \pm 0.098$ & $0.287 \pm 0.112$ \\
+    & $\textbf{0.493}$ & $\underline{0.395}$ \\
+GM ($g{=}0.25$)
+    & $0.444$ & $\underline{0.595}$
+    & -- & -- \\
+GM ($g{=}0.50$)
+    & $\underline{0.506}$ & $0.423$
+    & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{Results on CLASSE and DRESS datasets across Llama and Qwen base models. Best result per column within each model block in \textbf{bold}.}
-\label{tab:main_results}
+\caption{Llama results across all methods on CLASSE and DRESS. The Gumbel scale $g$ is swept for $\beta$-Hindsight and Gumbel Machine (GM); lower $g$ favors validity, higher $g$ favors reference similarity. Values report mean $\pm$ sample standard deviation across criteria where computed. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
+\label{tab:llama_results}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\begin{tabular}{ll | cc | cc}
+\toprule
+& & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DRESS}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\textbf{Model} & \textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+\midrule
+\multirow{3}{*}{Haiku}
+  & Minimal-Edit          & 0.280 & 0.144 & 0.312 & 0.093 \\
+  & ICL                   & 0.281 & 0.312 & 0.314 & 0.125 \\
+  & Identify-and-Replace  & 0.451 & 0.388 & 0.384 & $\underline{0.441}$ \\
+\midrule
+\multirow{3}{*}{Sonnet}
+  & Minimal-Edit          & 0.376 & 0.344 & 0.375 & 0.439 \\
+  & ICL                   & 0.359 & $\underline{0.604}$ & 0.418 & $\textbf{0.484}$ \\
+  & Identify-and-Replace  & $\underline{0.554}$ & 0.434 & -- & -- \\
+\midrule
+Llama  & GM (ours)         & 0.391 & $\textbf{0.668}$ & $\underline{0.493}$ & 0.395 \\
+Qwen   & GM (ours)         & $\textbf{0.575}$ & 0.566 & $\textbf{0.607}$ & 0.287 \\
+\bottomrule
+\end{tabular}
+\caption{Gumbel Machine (GM) on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. GM rows use Gumbel scale $g{=}0.10$. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Sonnet Identify-and-Replace on DRESS was held back due to budget constraints. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
+\label{tab:gm_vs_closed}
 \end{table*}
 
 
