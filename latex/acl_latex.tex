@@ -482,7 +482,7 @@ Identify-and-Replace
     & $0.308 \pm 0.013$ & $0.325 \pm 0.191$ \\
 $\beta$-Hindsight ($g{=}0.05$)
     & -- & --
-    & $0.392$ & $0.151$ \\
+    & $0.392 \pm 0.048$ & $0.151 \pm 0.069$ \\
 $\beta$-Hindsight ($g{=}0.10$)
     & $\textbf{0.560} \pm 0.020$ & $0.168 \pm 0.024$
     & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
@@ -491,21 +491,23 @@ GM ($g{=}0.05$)
     & $\underline{0.477} \pm 0.137$ & $\textbf{0.404} \pm 0.084$ \\
 GM ($g{=}0.10$)
     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $\textbf{0.493}$ & $\underline{0.395}$ \\
+    & $\textbf{0.493} \pm 0.147$ & $\underline{0.395} \pm 0.102$ \\
 GM ($g{=}0.25$)
-    & $0.444$ & $\underline{0.595}$
+    & $0.444 \pm 0.047$ & $\underline{0.595} \pm 0.221$
     & -- & -- \\
 GM ($g{=}0.50$)
-    & $\underline{0.506}$ & $0.423$
+    & $\underline{0.506} \pm 0.057$ & $0.423 \pm 0.302$
     & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{Llama results across all methods on CLASSE and DRESS. The Gumbel scale $g$ is swept for $\beta$-Hindsight and Gumbel Machine (GM); lower $g$ favors validity, higher $g$ favors reference similarity. Values report mean $\pm$ sample standard deviation across criteria where computed. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
+\caption{Llama results across all methods on CLASSE and DRESS. The Gumbel scale $g$ is swept for $\beta$-Hindsight and Gumbel Machine (GM); lower $g$ favors validity, higher $g$ favors reference similarity. Values report mean $\pm$ sample standard deviation across criteria. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
 \label{tab:llama_results}
 \end{table*}
 
 \begin{table*}[t]
 \centering
+\small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{ll | cc | cc}
 \toprule
 & & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DRESS}} \\
@@ -513,20 +515,57 @@ GM ($g{=}0.50$)
 \textbf{Model} & \textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
 \midrule
 \multirow{3}{*}{Haiku}
-  & Minimal-Edit          & 0.280 & 0.144 & 0.312 & 0.093 \\
-  & ICL                   & 0.281 & 0.312 & 0.314 & 0.125 \\
-  & Identify-and-Replace  & 0.451 & 0.388 & 0.384 & $\underline{0.441}$ \\
+  & Minimal-Edit
+    & $0.280 \pm 0.009$ & $0.144 \pm 0.141$
+    & $0.312 \pm 0.023$ & $0.093 \pm 0.037$ \\
+  & ICL
+    & $0.281 \pm 0.011$ & $0.312 \pm 0.190$
+    & $0.314 \pm 0.012$ & $0.125 \pm 0.039$ \\
+  & Identify-and-Replace
+    & $0.451 \pm 0.044$ & $0.388 \pm 0.187$
+    & $0.384 \pm 0.066$ & $\underline{0.441} \pm 0.195$ \\
 \midrule
 \multirow{3}{*}{Sonnet}
-  & Minimal-Edit          & 0.376 & 0.344 & 0.375 & 0.439 \\
-  & ICL                   & 0.359 & $\underline{0.604}$ & 0.418 & $\textbf{0.484}$ \\
-  & Identify-and-Replace  & $\underline{0.554}$ & 0.434 & -- & -- \\
+  & Minimal-Edit
+    & $0.376 \pm 0.043$ & $0.344 \pm 0.260$
+    & $0.375 \pm 0.051$ & $0.439 \pm 0.094$ \\
+  & ICL
+    & $0.359 \pm 0.024$ & $\underline{0.604} \pm 0.153$
+    & $0.418 \pm 0.073$ & $\textbf{0.484} \pm 0.088$ \\
+  & Identify-and-Replace
+    & $\underline{0.554} \pm 0.055$ & $0.434 \pm 0.206$
+    & -- & -- \\
 \midrule
-Llama  & GM ($g{=}0.10$)   & 0.391 & $\textbf{0.668}$ & $\underline{0.493}$ & 0.395 \\
-Qwen   & GM ($g{=}0.10$)   & $\textbf{0.575}$ & 0.566 & $\textbf{0.607}$ & 0.287 \\
+\multirow{4}{*}{Llama}
+  & GM ($g{=}0.05$)
+    & -- & --
+    & $0.477 \pm 0.137$ & $0.404 \pm 0.084$ \\
+  & GM ($g{=}0.10$)
+    & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
+    & $0.493 \pm 0.147$ & $0.395 \pm 0.102$ \\
+  & GM ($g{=}0.25$)
+    & $0.444 \pm 0.047$ & $0.595 \pm 0.221$
+    & -- & -- \\
+  & GM ($g{=}0.50$)
+    & $0.506 \pm 0.057$ & $0.423 \pm 0.302$
+    & -- & -- \\
+\midrule
+\multirow{4}{*}{Qwen}
+  & GM ($g{=}0.001$)
+    & -- & --
+    & $0.589 \pm 0.091$ & $0.323 \pm 0.134$ \\
+  & GM ($g{=}0.01$)
+    & $0.530 \pm 0.097$ & $0.602 \pm 0.179$
+    & $0.589 \pm 0.091$ & $0.322 \pm 0.133$ \\
+  & GM ($g{=}0.05$)
+    & $0.550 \pm 0.099$ & $0.588 \pm 0.184$
+    & $\underline{0.593} \pm 0.092$ & $0.315 \pm 0.129$ \\
+  & GM ($g{=}0.10$)
+    & $\textbf{0.575} \pm 0.092$ & $0.566 \pm 0.185$
+    & $\textbf{0.607} \pm 0.098$ & $0.287 \pm 0.112$ \\
 \bottomrule
 \end{tabular}
-\caption{Gumbel Machine (GM) on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. GM rows use Gumbel scale $g{=}0.10$. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Sonnet Identify-and-Replace on DRESS was held back due to budget constraints. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
+\caption{Gumbel Machine (GM) sweep on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Sonnet Identify-and-Replace on DRESS was held back due to budget constraints. Dashes indicate sweep points not run for that model/dataset combination. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
 \label{tab:gm_vs_closed}
 \end{table*}
 
