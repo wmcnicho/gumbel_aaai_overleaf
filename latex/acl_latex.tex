@@ -361,12 +361,13 @@ Prompting alone can yield reasonable counterfactuals, but we find that training 
 \section{Experimental Setup}
 In this section, we detail our experiments to evaluate the effectiveness of our approach.
 
-\subsection{Dataset}
-We evaluate our approach on the Common Lit Augmented Student Summary Evaluation (CLASSE) dataset, a corpus of student-authored summaries to short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries from 101 unique passages authored by students in grades 3-12. Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring on this criterion in preliminary experiments.~\ref{apx:classe}}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:classe}.
+\subsection{Datasets}
+We evaluate our approach on two datasets of scored student writing samples, covering both reading passage summarization and open-ended student writing from a variety of proficiency levels. For reading passage summarization, we use the Common Lit Augmented Student Summary Evaluation (CLASSE) dataset, a corpus of student-authored summaries to short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries from 101 unique passages authored by students in grades 3-12. Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring on this criterion in preliminary experiments.~\ref{apx:classe}}. For open-ended writing, we use the Dataset for Rubric-based Essay Scoring on EFL Writing (DREsS) dataset,  a corpus of student-authored responses to writing prompts \cite{yoo_dress_2025}. We specifically use the $\text{DREsS}_{\text{New}}$ which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an
+English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:classe}\mh{TODO add DRESS details to apx}.
 
 % Could include here details about filtering/cleaning if needed.
 \subsection{Scoring Model}
-We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we prompt \texttt{GPT-4.1} with the 4-point rubric for a given criterion and instruct the model to rate a given passage in a Chain-of-Thought (CoT) style manner. In preliminary experiments, we observed that this scoring model approach performed better than a fine-tuned BERT encoder model \cite{devlin_bert_2019}. The average Quadratic Weighted Kappa (QWK) agreement across criteria between this LLM score and human score is 0.53, compared to the inter-rater agreement of 0.642 between scores given by multiple human evaluators. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt and further details in Appendix~\ref{apx:scoring}. 
+We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. In preliminary experiments, we observed that this scoring model approach performed better than a fine-tuned BERT encoder model \cite{devlin_bert_2019}, or direct scoring prompting of a larger \texttt{GPT-4.1} model. We evaluate each scoring model on a held-out validation set of student work. We report the average Quadratic Weighted Kappa (QWK) agreement across criteria between this LLM score and human score for each dataset as 0.6242 and 0.6012, respectively for CLASSE and DREsS. An overall inter-rater agreement of 0.642 is reported for the CLASSE dataset, while DREsS is scored by a single annotator. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt and further details in Appendix~\ref{apx:scoring}.\mh{TODO add dress and training details, BERT details as well} 
 
 \subsection{Metrics}
 We measure two competing properties of the generated counterfactuals, i) similarity to a factual example and ii) task validity, following existing work on counterfactual generation \cite{wang-etal-2024-survey}. 
@@ -403,19 +404,27 @@ We consider a generated counterfactual valid if its score, given by the scoring 
 
 In this section, we detail the experimental configurations we use to evaluate our approach: the settings and baseline approaches.
 
-\subsubsection{Similarity Control Baselines}
+\subsubsection{Counterfactual Generation Baselines}
 
-We compare our controlled decoding mechanism to other inference-time decoding strategies.
+% We compare our controlled decoding mechanism to other inference-time decoding strategies.
+We compare our approach to three other LLM-based counterfactual text generation strategies.
 
 \begin{itemize}
-\item \textbf{$\beta$-Hindsight (Ours)}: Our proposed decoding mechanism, which leverages recovered Gumbel noise to control similarity to a reference via a continuous control parameter $\beta$.
-\item \textbf{Fixed Boost}: A decoding strategy similar to the one proposed in \cite{yang_fudge_2021}, a controlled $\alpha$ value is added to all logits for all tokens that are in the reference summary.
-% \item \textbf{PPLM}: Plug-and-play language model (PPLM), a controlled decoding approach that applies gradient-based steering toward a desired score during generation \cite{dathathri_plug_2019}. This approach modifies the activations of an LLM to make tokens in a bag of words more likely. To adapt this approach to our setting, we create bags of words for each of the 16 score-criterion tuples using our dataset (e.g. MainIdea-1, Details-3, etc.).
-\item \textbf{Nucleus Sampling}: A standard top-$p$ sampling procedure applied during decoding \cite{holtzman_curious_2020}. For hyperparameters, we use $T=0.6$ and $p=0.9$.
+    \item \textbf{Gumbel Machine (GM)}, our proposed approach, which leverages recovered Gumbel noise and preference alignment to create similar, rubric-aligned counterfactuals.
+    \item \textbf{Minimal-Edit (ME)} Following Gat et al. [1], we include in the prompt instructions for the LLM to minimally edit the reference as a zero-shot approach.
+    \item \textbf{In-Context Learning In-Context Learning (ICL)}. Following Li et al. [2],  we include in-context demonstrations of each score level in the prompt.
+    \item \textbf{Identify-and-Replace (I\&R)}. Following Youssef et al. [3], we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions can be thought of as demonstrating ``Chain-of-Thought (CoT)’’ for the task to the LLM. \mh{TODO add CoT prompt to appendix}
 \end{itemize}
 
+% \begin{itemize}
+% \item \textbf{$\beta$-Hindsight (Ours)}: Our proposed decoding mechanism, which leverages recovered Gumbel noise to control similarity to a reference via a continuous control parameter $\beta$.
+% \item \textbf{Fixed Boost}: A decoding strategy similar to the one proposed in \cite{yang_fudge_2021}, a controlled $\alpha$ value is added to all logits for all tokens that are in the reference summary.
+% % \item \textbf{PPLM}: Plug-and-play language model (PPLM), a controlled decoding approach that applies gradient-based steering toward a desired score during generation \cite{dathathri_plug_2019}. This approach modifies the activations of an LLM to make tokens in a bag of words more likely. To adapt this approach to our setting, we create bags of words for each of the 16 score-criterion tuples using our dataset (e.g. MainIdea-1, Details-3, etc.).
+% \item \textbf{Nucleus Sampling}: A standard top-$p$ sampling procedure applied during decoding \cite{holtzman_curious_2020}. For hyperparameters, we use $T=0.6$ and $p=0.9$.
+% \end{itemize}
+
 \subsubsection{Language Models}
-We evaluate across a variety of LLM configurations with varying levels of instruction-following capabilities, utilizing open-source LLMs. 
+\mh{TODO update this to Qwen/llama/haiku/sonnet} We evaluate across a variety of LLM configurations with varying levels of instruction-following capabilities, utilizing open-source LLMs. 
 % All models are prompted using the same counterfactual generation template shown in Appendix \textbf{TODO}.
 
 \textbf{Llama-3} We use \texttt{LLaMA-3.1-8B-Instruct}, trained with instruction tuning and preference optimization \cite{grattafiori2024llama3herdmodels}. This model serves as our primary model due to its strong instruction-following behavior and wide adoption. 
@@ -426,27 +435,65 @@ We evaluate across a variety of LLM configurations with varying levels of instru
 \textbf{Llama-4} We also experiment with \texttt{LLaMA-4-Scout-17B-16E-Instruct}, a 109B parameter LLM with substantially stronger instruction-following capabilities
 %a Mixture-of-Experts (MoE) model with 109B total parameters and sparse expert activation 
 \cite{meta2024llama4}. 
-% \ml{the reviewer does not need to you to tell them what this model is, unless this aspect is key to your approach. not the case here.} 
-%This model exhibits substantially stronger reasoning and instruction adherence than earlier generations, allowing us to evaluate whether increased model capacity reduces the trade-off between validity and similarity or merely shifts the attainable frontier. 
 
-% \textbf{GPT2-XL} We use \texttt{GPT-2 XL} (1.5B parameters) as a lightweight, non-instruction-tuned baseline. This model is used primarily for compatibility with PPLM, which was originally developed and evaluated using GPT-2–style architectures \cite{radford2019language, dathathri_plug_2019}. \ml{i'm sure there's a good reason, but having GPT-2 in a 2026 paper looks bad. it's one of those things where it'll take forever to make this baseline work properly with a newer model (100\%), but tbh these things only work with either 0\% or 100\% but not in between. perhaps good to just leave this one out (0\%).}
-
-\begin{figure*}[!ht]
-    \centering
-    \includegraphics[width=0.99\textwidth]{latex/figs/tradeoff_curve_save_v5.png}
-    \caption{Similarity–validity trade-offs across models (colors) and decoding strategies (shapes). Gumbel Machine combines model alignment (purple) and $\beta$-Hindsight control (star), which yields counterfactuals with higher validity and reference similarity compared to a larger Llama-4 model. $\beta$-Hindsight control traverses a wider-range of the trade-off curve with higher validity compared to Fixed Boost (circle).}
-    \label{fig:tradeoff-curves}
-\end{figure*}
-
-\subsubsection{Reference Conditioning and Control Hyperparameters}
-
-For decoding approaches with a scalar control signal, we vary the control of the signal across a range of values. For $\beta$-Hindsight, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.01, 0.1, 0.5, 1.0\}$. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Fixed Boost, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 0.1, 1.0, 5.0, 10.0\}$. Higher values of $\alpha$ induce stronger similarity to reference tokens. We derive both ranges in smaller-scale experiments where we observe that values outside these ranges result in minimal change in performance.
-
-For standard nucleus sampling, we evaluate both \emph{reference-based} and \emph{reference-free} settings. In the reference condition (``Ref''), we provide the original student summary to the model during generation, along with instructions to adhere to the reference. In the no-reference condition (“No Ref”), we only provide the model the task instruction and target score. See Appendix~\ref{apx:prompts} for further details.
+\begin{table*}[h!t]
+\centering
+\begin{tabular}{l | cc | cc}
+\toprule
+& \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+\textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+\midrule
+ME %Minimal-Edit
+    & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
+    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
+ICL
+    & $0.308 \pm 0.013$ & $\underline{0.327} \pm 0.127$
+    & $0.330 \pm 0.024$ & $0.264 \pm 0.055$ \\
+I\&R %Identify-and-Replace
+    & $\textbf{0.498} \pm 0.036$ & $0.103 \pm 0.011$
+    & $0.308 \pm 0.013$ & $0.325 \pm 0.191$ \\
+GM  & $\underline{0.391} \pm 0.047$ & $\textbf{0.668} \pm 0.210$
+    & $\textbf{0.477} \pm 0.137$ & $\textbf{0.404} \pm 0.084$ \\
+ % $\beta$-Hindsight ($\beta{=}0.05$)
+ %     & -- & --
+ %     & $0.392 \pm 0.048$ & $0.151 \pm 0.069$ \\
+ % $\beta$-H ($\beta{=}0.10$)
+ %     & $\textbf{0.560} \pm 0.020$ & $0.168 \pm 0.024$
+ %     & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
+ % GM ($\beta{=}0.05$)
+ %     & -- & --
+ %     & $\underline{0.477} \pm 0.137$ & $\textbf{0.404} \pm 0.084$ \\
+ % GM ($\beta{=}0.10$)
+ %     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
+ %     & $\textbf{0.493} \pm 0.147$ & $\underline{0.395} \pm 0.102$ \\
+ % GM ($\beta{=}0.25$)
+ %     & $0.444 \pm 0.047$ & $\underline{0.595} \pm 0.221$
+ %     & -- & -- \\
+ % GM ($\beta{=}0.50$)
+ %     & $\textbf{0.506} \pm 0.057$ & $0.423 \pm 0.302$
+ %     & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Results comparing Gumbel Machine to existing methods. Best result per column in \textbf{bold}, second-best \underline{underlined}. We observe that GM provides noticeable improvements in validity for both datasets without sacrificing validity, resulting in counterfactuals that respect rubric changes while maintaining similarity to the reference work. }
+\label{tab:llama_results}
+\end{table*}
 
 \subsubsection{Data Sampling Strategy}
 
-We generate counterfactuals for a stratified subset of score changes. Specifically, we sample uniformly across all ordered score transitions (e.g., $4 \rightarrow 1$, $2 \rightarrow 3$), capping the total at 400 examples per rubric criterion and balancing across reading passages. This setting results in 2,000 total generations per experimental datapoint shown in Figure~\ref{fig:tradeoff-curves}. This strategy ensures balanced representation of both small and large counterfactual shifts in scores.
+We generate counterfactuals for a stratified subset of score changes sampled from a held-out validation set for each dataset. Specifically, we perform and 80-20 train-validation split and sample uniformly from the validation split across all ordered score transitions (e.g., $4 \rightarrow 1$, $2 \rightarrow 3$), capping the total at 400 examples per rubric criterion and balancing across student writing tasks. This setting results in 2,000 total generations per experimental datapoint. This strategy ensures balanced representation of both small and large counterfactual shifts in scores.
+
+% \begin{figure*}[!ht]
+%     \centering
+%     \includegraphics[width=0.99\textwidth]{latex/figs/tradeoff_curve_save_v5.png}
+%     \caption{Similarity–validity trade-offs across models (colors) and decoding strategies (shapes). Gumbel Machine combines model alignment (purple) and $\beta$-Hindsight control (star), which yields counterfactuals with higher validity and reference similarity compared to a larger Llama-4 model. $\beta$-Hindsight control traverses a wider-range of the trade-off curve with higher validity compared to Fixed Boost (circle).}
+%         \label{fig:tradeoff-curves}
+% \end{figure*}
+
+\section{Results, Analysis, Discussion}
+
+
+
 
 
 % Across all experimental settings, we report our $\beta$-Hindsight sampling approach (Ours) to standard categorical random sampling (Baseline).  In all cases, we instruct the LLM to adhere to the factual student summary while generating a counterfactual response. To induce a counterfactual from the LLM, we instruct the model to form an output for a different expected score by simply changing a single character of the prompt corresponding to the desired score value $z'$. We provide further details on exact model prompts and training details in the Appendix TODO.
@@ -461,48 +508,7 @@ We generate counterfactuals for a stratified subset of score changes. Specifical
 
 
 
-\section{Results, Analysis, Discussion}
 
-\begin{table*}[t]
-\centering
-\begin{tabular}{l | cc | cc}
-\toprule
-& \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DRESS}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5}
-\textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
-\midrule
-Minimal-Edit
-    & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
-    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
-ICL
-    & $0.308 \pm 0.013$ & $0.327 \pm 0.127$
-    & $0.330 \pm 0.024$ & $0.264 \pm 0.055$ \\
-Identify-and-Replace
-    & $0.498 \pm 0.036$ & $0.103 \pm 0.011$
-    & $0.308 \pm 0.013$ & $0.325 \pm 0.191$ \\
-$\beta$-Hindsight ($g{=}0.05$)
-    & -- & --
-    & $0.392 \pm 0.048$ & $0.151 \pm 0.069$ \\
-$\beta$-Hindsight ($g{=}0.10$)
-    & $\textbf{0.560} \pm 0.020$ & $0.168 \pm 0.024$
-    & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
-GM ($g{=}0.05$)
-    & -- & --
-    & $\underline{0.477} \pm 0.137$ & $\textbf{0.404} \pm 0.084$ \\
-GM ($g{=}0.10$)
-    & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $\textbf{0.493} \pm 0.147$ & $\underline{0.395} \pm 0.102$ \\
-GM ($g{=}0.25$)
-    & $0.444 \pm 0.047$ & $\underline{0.595} \pm 0.221$
-    & -- & -- \\
-GM ($g{=}0.50$)
-    & $\underline{0.506} \pm 0.057$ & $0.423 \pm 0.302$
-    & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{Llama results across all methods on CLASSE and DRESS. The Gumbel scale $g$ is swept for $\beta$-Hindsight and Gumbel Machine (GM); lower $g$ favors validity, higher $g$ favors reference similarity. Values report mean $\pm$ sample standard deviation across criteria. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
-\label{tab:llama_results}
-\end{table*}
 
 \begin{table*}[t]
 \centering
@@ -510,107 +516,155 @@ GM ($g{=}0.50$)
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{ll | cc | cc}
 \toprule
-& & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DRESS}} \\
+& & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
 \textbf{Model} & \textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
 \midrule
 \multirow{3}{*}{Haiku}
-  & Minimal-Edit
+  & ME %Minimal-Edit
     & $0.280 \pm 0.009$ & $0.144 \pm 0.141$
     & $0.312 \pm 0.023$ & $0.093 \pm 0.037$ \\
   & ICL
     & $0.281 \pm 0.011$ & $0.312 \pm 0.190$
     & $0.314 \pm 0.012$ & $0.125 \pm 0.039$ \\
-  & Identify-and-Replace
+  & I\&R %Identify-and-Replace
     & $0.451 \pm 0.044$ & $0.388 \pm 0.187$
     & $0.384 \pm 0.066$ & $\underline{0.441} \pm 0.195$ \\
 \midrule
 \multirow{3}{*}{Sonnet}
-  & Minimal-Edit
+  & ME %Minimal-Edit
     & $0.376 \pm 0.043$ & $0.344 \pm 0.260$
     & $0.375 \pm 0.051$ & $0.439 \pm 0.094$ \\
   & ICL
     & $0.359 \pm 0.024$ & $\underline{0.604} \pm 0.153$
     & $0.418 \pm 0.073$ & $\textbf{0.484} \pm 0.088$ \\
-  & Identify-and-Replace
+  & I\&R %Identify-and-Replace
     & $\underline{0.554} \pm 0.055$ & $0.434 \pm 0.206$
-    & -- & -- \\
+    & $\underline{0.477} \pm 0.081$ & $0.405 \pm 0.179$ \\
 \midrule
-\multirow{4}{*}{Llama}
-  & GM ($g{=}0.05$)
-    & -- & --
-    & $0.477 \pm 0.137$ & $0.404 \pm 0.084$ \\
-  & GM ($g{=}0.10$)
+\multirow{1}{*}{Llama}
+ & GM
     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $0.493 \pm 0.147$ & $0.395 \pm 0.102$ \\
-  & GM ($g{=}0.25$)
-    & $0.444 \pm 0.047$ & $0.595 \pm 0.221$
-    & -- & -- \\
-  & GM ($g{=}0.50$)
-    & $0.506 \pm 0.057$ & $0.423 \pm 0.302$
-    & -- & -- \\
+    & $\underline{0.477} \pm 0.137$ & $0.404 \pm 0.084$ \\
+  % & GM ($\beta{=}0.05$)
+  %   & -- & --
+  %   & $0.477 \pm 0.137$ & $0.404 \pm 0.084$ \\
+  % & GM ($\beta{=}0.10$)
+  %   & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
+  %   & $0.493 \pm 0.147$ & $0.395 \pm 0.102$ \\
+  % & GM ($\beta{=}0.25$)
+  %   & $0.444 \pm 0.047$ & $0.595 \pm 0.221$
+  %   & -- & -- \\
+  % & GM ($\beta{=}0.50$)
+  %   & $0.506 \pm 0.057$ & $0.423 \pm 0.302$
+  %   & -- & -- \\
 \midrule
-\multirow{4}{*}{Qwen}
-  & GM ($g{=}0.001$)
-    & -- & --
-    & $0.589 \pm 0.091$ & $0.323 \pm 0.134$ \\
-  & GM ($g{=}0.01$)
-    & $0.530 \pm 0.097$ & $0.602 \pm 0.179$
-    & $0.589 \pm 0.091$ & $0.322 \pm 0.133$ \\
-  & GM ($g{=}0.05$)
-    & $0.550 \pm 0.099$ & $0.588 \pm 0.184$
-    & $\underline{0.593} \pm 0.092$ & $0.315 \pm 0.129$ \\
-  & GM ($g{=}0.10$)
+\multirow{1}{*}{Qwen}
+  & GM
     & $\textbf{0.575} \pm 0.092$ & $0.566 \pm 0.185$
-    & $\textbf{0.607} \pm 0.098$ & $0.287 \pm 0.112$ \\
+    & $\textbf{0.593} \pm 0.092$ & $0.315 \pm 0.129$ \\
+  % & GM ($\beta{=}0.001$)
+  %   & -- & --
+  %   & $0.589 \pm 0.091$ & $0.323 \pm 0.134$ \\
+  % & GM ($\beta{=}0.01$)
+  %   & $0.530 \pm 0.097$ & $0.602 \pm 0.179$
+  %   & $0.589 \pm 0.091$ & $0.322 \pm 0.133$ \\
+  % & GM ($\beta{=}0.05$)
+  %   & $0.550 \pm 0.099$ & $0.588 \pm 0.184$
+  %   & $\underline{0.593} \pm 0.092$ & $0.315 \pm 0.129$ \\
+  % & GM ($\beta{=}0.10$)
+  %   & $\textbf{0.575} \pm 0.092$ & $0.566 \pm 0.185$
+  %   & $\textbf{0.607} \pm 0.098$ & $0.287 \pm 0.112$ \\
 \bottomrule
 \end{tabular}
-\caption{Gumbel Machine (GM) sweep on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Sonnet Identify-and-Replace on DRESS was held back due to budget constraints. Dashes indicate sweep points not run for that model/dataset combination. Best result per column in \textbf{bold}, second-best \underline{underlined}.}
+\caption{Gumbel Machine (GM) sweep on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Best result per column in \textbf{bold}, second-best \underline{underlined}.}
 \label{tab:gm_vs_closed}
 \end{table*}
 
+% \begin{table*}[t]
+% \centering
+% \begin{tabular}{l | cc | cc}
+% \toprule
+% & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+% \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+% \textbf{Configuration} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+% \midrule
+% $\beta$-Hindsight (decoding only)
+%     & $0.560 \pm 0.020$ & $0.168 \pm 0.024$
+%     & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
+% + SFT (no DPO)
+%     & $\textbf{0.795} \pm 0.036$ & $-0.026 \pm 0.073$
+%     & $\textbf{0.733} \pm 0.053$ & $-0.005 \pm 0.062$ \\
+% + SFT + DPO \emph{(full GM)}
+%     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
+%     & $0.493 \pm 0.147$ & $\textbf{0.395} \pm 0.102$ \\
+% \bottomrule
+% \end{tabular}
+% \caption{Alignment ablation on Llama at $\beta{=}0.10$. Each row adds a stage of the GM pipeline on top of $\beta$-Hindsight decoding: SFT alone collapses validity (rubric-adherence is lost while similarity to the reference is maximized), while adding DPO recovers validity at the cost of some similarity. Best result per column in \textbf{bold}.}
+% \label{tab:ablation_alignment}
+% \end{table*}
+
 \begin{table*}[t]
 \centering
-\begin{tabular}{l | cc | cc}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ll | cc | cc}
 \toprule
-& \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DRESS}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5}
-\textbf{Configuration} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+& & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\textbf{Logit Control} & \textbf{Training} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
 \midrule
-$\beta$-Hindsight (decoding only)
+\multirow{3}{*}{None}
+  & Base
+    & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
+    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
+  & $+$SFT
+    & $0.382 \pm 0.045$ & $0.151 \pm 0.130$
+    & $0.290 \pm 0.021$ & $0.102 \pm 0.049$ \\
+  & $+$DPO
+    & $0.324 \pm 0.031$ & $\textbf{0.688} \pm 0.109$
+    & $0.224 \pm 0.021$ & $\textbf{0.608} \pm 0.182$ \\
+\midrule
+\multirow{3}{*}{Gumbel}
+  & Base
     & $0.560 \pm 0.020$ & $0.168 \pm 0.024$
     & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
-+ SFT (no DPO)
+  & $+$SFT
     & $\textbf{0.795} \pm 0.036$ & $-0.026 \pm 0.073$
     & $\textbf{0.733} \pm 0.053$ & $-0.005 \pm 0.062$ \\
-+ SFT + DPO \emph{(full GM)}
+  & $+$SFT $+$DPO \emph{(GM)}
     & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $0.493 \pm 0.147$ & $\textbf{0.395} \pm 0.102$ \\
+    & $0.477 \pm 0.137$ & $0.404 \pm 0.084$ \\
 \bottomrule
 \end{tabular}
-\caption{Alignment ablation on Llama at $g{=}0.10$. Each row adds a stage of the GM pipeline on top of $\beta$-Hindsight decoding: SFT alone collapses validity (rubric-adherence is lost while similarity to the reference is maximized), while adding DPO recovers validity at the cost of some similarity. Best result per column in \textbf{bold}.}
+\caption{Alignment ablation on Llama at $\beta{=}0.10$. Each row adds a stage of the GM pipeline on top of $\beta$-Hindsight decoding: SFT alone collapses validity (rubric-adherence is lost while similarity to the reference is maximized), while adding DPO recovers validity at the cost of some similarity. Best result per column in \textbf{bold}.}
 \label{tab:ablation_alignment}
 \end{table*}
 
+\subsection{Counterfactual Approach Comparisons}
+
+In Table~\ref{tab:llama_results}, we report the results of our experiments comparing Gumbel Machine to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively. For the CLASSE dataset, we observe that our approach noticeably improves validity on both datasets while providing higher similarity scores. While the I\&R approach shows a higher similarity score compared to GM the validity is lowest compared to other approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference work but are not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and closer to the reference work. On the DresS, dataset we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This result suggests the GM is an effective counterfactual approach for both shorter summarization tasks and longer open-ended writing, but produces more rubric-aligned counterfactuals when the writing samples are more homogeneous.
+
+
+\begin{figure}
+        \centering
+        \includegraphics[width=1\linewidth]{paper_tradeoff_v3.png}
+        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias approach. Gumbel Machine provides a tunable tradeoff between competing metrics occupying a different region of Pareto front.}
+        \label{fig:pareto-front}
+\end{figure}
 
 \subsection{Gumbel Noise: A Flexible Control Signal}
 
-In Figure~\ref{fig:tradeoff-curves}, we report the results of our experiments comparing the components of our approach to baselines (see Appendix~\ref{apx:tradeoffs} for per-criterion breakdowns). We note that the two metrics in the curve are inherently in opposition: a counterfactual must differ to be valid, decreasing similarity. An ideal approach is one with high validity that preserves similarity where possible.
+In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the Gumbel Machine. In these experiments, we vary the control signals across a range of values and run the CLASSE validation set on Gumbel Machine and a baseline. As a comparative baseline, we run Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For Gumbel Machine, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.01, 0.1, 0.5, 1.0\}$. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 0.1, 1.0, 5.0, 10.0\}$. Higher values of $\alpha$ induce stronger similarity to reference tokens. We derive both ranges in smaller-scale experiments where we observe that values outside these ranges result in minimal change in performance. \mh{TODO update to final values}
 
-First, we report on the performance of the model settings without logit perturbation, i.e., nucleus sampling. In terms of validity, we see that \texttt{Llama-3 Aligned} outperforms both the base \texttt{Llama-3} and \texttt{Llama-4}, which is expected as the base models were not specifically trained on the dataset. In terms of similarity, comparing the ``Ref'' and ``No Ref'' settings, we observe that all models exhibit higher similarity when provided reference instructions, and that the similarity score is almost the same across all model configurations. However, we see that only \texttt{Llama-4} improves similarity without loss to validity. This observation suggests that there is a limit to prompt-based similarity that does not improve with model scale or training, but scale does help the LLM maintain task validity when provided instructions with conflicting objectives.
+Comparing the two approaches, we observe that for Gumbel Machine, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that Gumbel Machine tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
 
-Next, we report on the performance of the controlled decoding methods: Fixed Boost and $\beta$-Hindsight control. In comparison to nucleus sampling with reference hinting, we observe that both decoding methods improve counterfactual similarity with little cost to validity, in aligned and base model settings. However, we notice that for $\beta$-Hindsight, increasing values of $\beta$ enable a tunable trade-off between similarity that can explore a much wider range of the tradeoff curve compared to Fixed Boost. Further, we observe that $\beta$-Hindsight tends to maintain higher validity with increasing similarity values, particularly in the base Llama-3 setting. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. Taken together, these findings suggest that good counterfactual summaries arise not from model scale alone but can result from controllable generation and task adaptation. 
+\subsection{Additional Language Models}
 
-% Corroborating these results, we observe that the Gumbel machine, which combines $\beta$-hindsight control with task-specific alignment, yields counterfactual summaries that are both more valid and more similar to the reference summary than those produced by a significantly larger, \texttt{Llama-4} model with reference hinting. 
-% \ml{i guess that given this is how the curve looks, a slicing analysis would be more convincing, like holding the similarity fixed and compare validity or holding the validity fixed and compare similarity. i thought the baselines would be more obviously worse, strictly to the down and left of your curve, but that's not the case}
+In Table~\ref{tab:gm_vs_closed} we report on experiments comparing our method to baseline approaches on closed-weight models and run Gumbel Machine with an additional open-weight model, Qwen.
 
+\subsection{Ablation Study}
 
-% Taken together, these findings suggest that good counterfactual summaries arise not from model scale alone but can result from controllable generation mechanisms and domain-specific adaptation. 
-%The combined strategies also suggest a notable step towards an automated counterfactual feedback generation system usable in a classroom setting, and perhaps in other counterfactual generation tasks.
-% We also note that $\beta$-hindsight sampling affords a much wider range of similarity control than the Fixed Boost baseline across both metrics. These results suggest that capturing the generative randomness is more effective than using token-level heuristics for similarity control. 
-% and considerably better performance than PPLM
-%This finding suggests that similarity in generative models is better understood as a property of the sampling trajectory rather than a surface-level token alignment problem, and leveraging this property is critical for controlling similarity of generative outputs.
-
+\subsection{Teacher Evaluation}
 
 \subsection{Foresight Enhances Hindsight Control}\label{sec:foresight}
 
