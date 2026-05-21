@@ -48,6 +48,9 @@
 \newcommand{\mh}[1]{\textcolor{teal}{\bf [Hunter: #1]}}
 \newcommand{\al}[1]{\textcolor{blue}{\bf [Alex: #1]}}
 
+% Compact standard-deviation suffix for table cells: $0.314\std{0.016}$.
+\newcommand{\std}[1]{{\scriptstyle\,\pm #1}}
+
 \usepackage[most]{tcolorbox}
 \usepackage{multirow}
 
@@ -444,23 +447,24 @@ We evaluate across a range of LLMs spanning two open-weight families (Llama, Qwe
 
 \begin{table*}[h!t]
 \centering
-\begin{tabular}{l | cc | cc}
+\begin{tabular}{l  cc  cc}
 \toprule
-& \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+& \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-\textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+\multirow{-2}{*}{\textbf{Method}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
 \midrule
 ME %Minimal-Edit
-    & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
-    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
+    & $0.314\std{0.016}$ & $0.183\std{0.062}$
+    & $0.305\std{0.009}$ & $0.188\std{0.119}$ \\
 ICL
-    & $0.308 \pm 0.013$ & $\underline{0.327} \pm 0.127$
-    & $0.330 \pm 0.024$ & $0.264 \pm 0.055$ \\
+    & $0.308\std{0.013}$ & $\underline{0.327}\std{0.127}$
+    & $0.330\std{0.024}$ & $0.264\std{0.055}$ \\
 I\&R %Identify-and-Replace
-    & $\textbf{0.498} \pm 0.036$ & $0.103 \pm 0.011$
-    & $0.308 \pm 0.013$ & $0.325 \pm 0.191$ \\
-GM  & $\underline{0.391} \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $\textbf{0.477} \pm 0.137$ & $\textbf{0.404} \pm 0.084$ \\
+    & $\textbf{0.498}\std{0.036}$ & $0.103\std{0.011}$
+    & $0.308\std{0.013}$ & $0.325\std{0.191}$ \\
+GM (Ours)
+    & $\underline{0.391}\std{0.047}$ & $\textbf{0.668}\std{0.210}$
+    & $\textbf{0.477}\std{0.137}$ & $\textbf{0.404}\std{0.084}$ \\
  % $\beta$-Hindsight ($\beta{=}0.05$)
  %     & -- & --
  %     & $0.392 \pm 0.048$ & $0.151 \pm 0.069$ \\
@@ -516,42 +520,41 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
 
 
 
-\begin{table*}[t]
+\begin{table*}[h!t]
 \centering
-% \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{ll | cc | cc}
+\begin{tabular}{ll  cc  cc}
 \toprule
-& & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+& & \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
-\textbf{Model} & \textbf{Method} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+\multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
 \midrule
 \multirow{3}{*}{Haiku}
   & ME %Minimal-Edit
-    & $0.280 \pm 0.009$ & $0.144 \pm 0.141$
-    & $0.312 \pm 0.023$ & $0.093 \pm 0.037$ \\
+    & $0.280\std{0.009}$ & $0.144\std{0.141}$
+    & $0.312\std{0.023}$ & $0.093\std{0.037}$ \\
   & ICL
-    & $0.281 \pm 0.011$ & $0.312 \pm 0.190$
-    & $0.314 \pm 0.012$ & $0.125 \pm 0.039$ \\
+    & $0.281\std{0.011}$ & $0.312\std{0.190}$
+    & $0.314\std{0.012}$ & $0.125\std{0.039}$ \\
   & I\&R %Identify-and-Replace
-    & $0.451 \pm 0.044$ & $0.388 \pm 0.187$
-    & $0.384 \pm 0.066$ & $\underline{0.441} \pm 0.195$ \\
+    & $0.451\std{0.044}$ & $0.388\std{0.187}$
+    & $0.384\std{0.066}$ & $\underline{0.441}\std{0.195}$ \\
 \midrule
 \multirow{3}{*}{Sonnet}
   & ME %Minimal-Edit
-    & $0.376 \pm 0.043$ & $0.344 \pm 0.260$
-    & $0.375 \pm 0.051$ & $0.439 \pm 0.094$ \\
+    & $0.376\std{0.043}$ & $0.344\std{0.260}$
+    & $0.375\std{0.051}$ & $0.439\std{0.094}$ \\
   & ICL
-    & $0.359 \pm 0.024$ & $\underline{0.604} \pm 0.153$
-    & $0.418 \pm 0.073$ & $\textbf{0.484} \pm 0.088$ \\
+    & $0.359\std{0.024}$ & $\underline{0.604}\std{0.153}$
+    & $0.418\std{0.073}$ & $\textbf{0.484}\std{0.088}$ \\
   & I\&R %Identify-and-Replace
-    & $\underline{0.554} \pm 0.055$ & $0.434 \pm 0.206$
-    & $\underline{0.477} \pm 0.081$ & $0.405 \pm 0.179$ \\
+    & $\underline{0.554}\std{0.055}$ & $0.434\std{0.206}$
+    & $\underline{0.477}\std{0.081}$ & $0.405\std{0.179}$ \\
 \midrule
 \multirow{1}{*}{Llama}
- & GM
-    & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $\underline{0.477} \pm 0.137$ & $0.404 \pm 0.084$ \\
+ & GM (Ours)
+    & $0.391\std{0.047}$ & $\textbf{0.668}\std{0.210}$
+    & $\underline{0.477}\std{0.137}$ & $0.404\std{0.084}$ \\
   % & GM ($\beta{=}0.05$)
   %   & -- & --
   %   & $0.477 \pm 0.137$ & $0.404 \pm 0.084$ \\
@@ -566,9 +569,9 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
   %   & -- & -- \\
 \midrule
 \multirow{1}{*}{Qwen}
-  & GM
-    & $\textbf{0.575} \pm 0.092$ & $0.566 \pm 0.185$
-    & $\textbf{0.593} \pm 0.092$ & $0.315 \pm 0.129$ \\
+  & GM (Ours)
+    & $\textbf{0.575}\std{0.092}$ & $0.566\std{0.185}$
+    & $\textbf{0.593}\std{0.092}$ & $0.315\std{0.129}$ \\
   % & GM ($\beta{=}0.001$)
   %   & -- & --
   %   & $0.589 \pm 0.091$ & $0.323 \pm 0.134$ \\
@@ -610,36 +613,36 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
 % \label{tab:ablation_alignment}
 % \end{table*}
 
-\begin{table*}[t]
+\begin{table*}[h!t]
 \centering
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{ll | cc | cc}
+\begin{tabular}{ll  cc  cc}
 \toprule
-& & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+& & \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
 \cmidrule(lr){3-4} \cmidrule(lr){5-6}
-\textbf{Logit Control} & \textbf{Training} & Sim ($\uparrow$) & Val ($\uparrow$) & Sim ($\uparrow$) & Val ($\uparrow$) \\
+\multirow{-2}{*}{\textbf{Logit Control}} & \multirow{-2}{*}{\textbf{Training}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
 \midrule
 \multirow{3}{*}{None}
   & Base
-    & $0.314 \pm 0.016$ & $0.183 \pm 0.062$
-    & $0.305 \pm 0.009$ & $0.188 \pm 0.119$ \\
+    & $0.314\std{0.016}$ & $0.183\std{0.062}$
+    & $0.305\std{0.009}$ & $0.188\std{0.119}$ \\
   & $+$SFT
-    & $0.382 \pm 0.045$ & $0.151 \pm 0.130$
-    & $0.290 \pm 0.021$ & $0.102 \pm 0.049$ \\
+    & $0.382\std{0.045}$ & $0.151\std{0.130}$
+    & $0.290\std{0.021}$ & $0.102\std{0.049}$ \\
   & $+$DPO
-    & $0.324 \pm 0.031$ & $\textbf{0.688} \pm 0.109$
-    & $0.224 \pm 0.021$ & $\textbf{0.608} \pm 0.182$ \\
+    & $0.324\std{0.031}$ & $\textbf{0.688}\std{0.109}$
+    & $0.224\std{0.021}$ & $\textbf{0.608}\std{0.182}$ \\
 \midrule
 \multirow{3}{*}{Gumbel}
   & Base
-    & $0.560 \pm 0.020$ & $0.168 \pm 0.024$
-    & $0.402 \pm 0.048$ & $0.148 \pm 0.067$ \\
+    & $0.560\std{0.020}$ & $0.168\std{0.024}$
+    & $0.402\std{0.048}$ & $0.148\std{0.067}$ \\
   & $+$SFT
-    & $\textbf{0.795} \pm 0.036$ & $-0.026 \pm 0.073$
-    & $\textbf{0.733} \pm 0.053$ & $-0.005 \pm 0.062$ \\
+    & $\textbf{0.795}\std{0.036}$ & $-0.026\std{0.073}$
+    & $\textbf{0.733}\std{0.053}$ & $-0.005\std{0.062}$ \\
   & $+$SFT $+$DPO \emph{(GM)}
-    & $0.391 \pm 0.047$ & $\textbf{0.668} \pm 0.210$
-    & $0.477 \pm 0.137$ & $0.404 \pm 0.084$ \\
+    & $0.391\std{0.047}$ & $\textbf{0.668}\std{0.210}$
+    & $0.477\std{0.137}$ & $0.404\std{0.084}$ \\
 \bottomrule
 \end{tabular}
 \caption{Alignment ablation on Llama at $\beta{=}0.10$. Each row adds a stage of the GM pipeline on top of $\beta$-Hindsight decoding: SFT alone collapses validity (rubric-adherence is lost while similarity to the reference is maximized), while adding DPO recovers validity at the cost of some similarity. Best result per column in \textbf{bold}.}
