@@ -445,13 +445,15 @@ We evaluate across a range of LLMs spanning two open-weight families (Llama, Qwe
 % %a Mixture-of-Experts (MoE) model with 109B total parameters and sparse expert activation 
 % \cite{meta2024llama4}. 
 
-\begin{table*}[h!t]
+\begin{table}[h!t]
 \centering
+\small
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{l  cc  cc}
 \toprule
 & \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-\multirow{-2}{*}{\textbf{Method}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
+\multirow{-2}{*}{\textbf{Method}} & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
 \midrule
 ME %Minimal-Edit
     & $0.314\std{0.016}$ & $0.183\std{0.062}$
@@ -487,7 +489,7 @@ GM (Ours)
 \end{tabular}
 \caption{Results comparing Gumbel Machine to existing methods. Best result per column in \textbf{bold}, second-best \underline{underlined}. We observe that GM provides noticeable improvements in validity for both datasets without sacrificing validity, resulting in counterfactuals that respect rubric changes while maintaining similarity to the reference work. }
 \label{tab:llama_results}
-\end{table*}
+\end{table}
 
 \subsubsection{Data Sampling Strategy}
 
