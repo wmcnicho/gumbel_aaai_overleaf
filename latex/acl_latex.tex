@@ -429,12 +429,18 @@ We compare our approach to three other LLM-based counterfactual text generation 
 
 \textbf{Llama-3} We use \texttt{LLaMA-3.1-8B-Instruct}, trained with instruction tuning and preference optimization \cite{grattafiori2024llama3herdmodels}. This model serves as our primary model due to its strong instruction-following behavior and wide adoption. 
 
-\textbf{Llama-3 Aligned} To align a model to reliably follow task instructions, we train \texttt{LLaMA-3.1-8B-Instruct} using Low-Rank Adaptation (LoRA) \cite{hu2021loralowrankadaptationlarge}. For each evaluation criterion, we train a separate LoRA adapter using supervision derived from rubric-aligned feedback, detailed in Section~\ref{train-setup}. These adapters are applied at inference time on top of the base model. 
+\textbf{Qwen-3} We use \texttt{Qwen3-4B-Instruct}, ...\mh{cite and fill in}
+
+\textbf{Haiku} We use claude haiku 4.5 ...\mh{cite and fill in}
+
+\textbf{Sonnet} We use claude sonnet 4.6 ..\mh{cite and fill in, justify that we use claude to prevent LLM bias judge from OpenAI models with a cite}
+
+% \textbf{Llama-3 Aligned} To align a model to reliably follow task instructions, we train \texttt{LLaMA-3.1-8B-Instruct} using Low-Rank Adaptation (LoRA) \cite{hu2021loralowrankadaptationlarge}. For each evaluation criterion, we train a separate LoRA adapter using supervision derived from rubric-aligned feedback, detailed in Section~\ref{train-setup}. These adapters are applied at inference time on top of the base model. 
 % This setup enables us to assess how explicit alignment toward rubric-following behavior interacts with controllability mechanisms such as $\beta$-Hindsight, while keeping the underlying language model fixed.
 
-\textbf{Llama-4} We also experiment with \texttt{LLaMA-4-Scout-17B-16E-Instruct}, a 109B parameter LLM with substantially stronger instruction-following capabilities
-%a Mixture-of-Experts (MoE) model with 109B total parameters and sparse expert activation 
-\cite{meta2024llama4}. 
+% \textbf{Llama-4} We also experiment with \texttt{LLaMA-4-Scout-17B-16E-Instruct}, a 109B parameter LLM with substantially stronger instruction-following capabilities
+% %a Mixture-of-Experts (MoE) model with 109B total parameters and sparse expert activation 
+% \cite{meta2024llama4}. 
 
 \begin{table*}[h!t]
 \centering
@@ -660,15 +666,20 @@ Comparing the two approaches, we observe that for Gumbel Machine, increasing val
 
 \subsection{Additional Language Models}
 
-In Table~\ref{tab:gm_vs_closed} we report on experiments comparing our method to baseline approaches on closed-weight models and run Gumbel Machine with an additional open-weight model, Qwen.
-
-\subsection{Ablation Study}
+In Table~\ref{tab:gm_vs_closed} we report on experiments comparing our method to baseline approaches on closed-weight models and run Gumbel Machine with an additional open-weight model, Qwen. \mh{TODO say a bit more here}
 
 \subsection{Teacher Evaluation}
 
-\subsection{Foresight Enhances Hindsight Control}\label{sec:foresight}
+We conduct a human evaluation study to evaluate the effectiveness of the generated counterfactual student work. We employ $k=5$ evaluators via Upwork (cite) all of whom have experience teaching English at a mixture of middle school, high school, and university level. We focus our evaluation on student summaries from the CLASSE dataset, as the student work is shorter in length and easier to evaluate at scale then the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of the student work and ask them to evaluate each rewrite and compare them on three dimensions: improvement, similarity, and overall pedagogical utility. We select 10 writing samples across each of the 5 criteria and stratify the sampling across the original student score on each criterion to ensure a balance between quality of student samples. We generated counterfactual rewrites set to the maximum score of 4 for the evaluated criterion, sampling from GM and ME baseline. When the criterion rewrite is target value of 4, both methods display a similar automated score (3.64/4 and 3.68/4) respectively. The ordering of the rewrites is randomized and source generation approach is not disclosed to prevent bias.
 
-% In Table~\ref{tab:foresight_ablation}, we report results of an ablation study comparing $\beta$-hindsight sampling with and without access to the reference summary. In this ablation, we hold $\beta$ fixed at a value of $1.0$ and run hindsight sampling on the base Llama-3 setting. We see that, across all criteria, the presence of the reference student context in the prompt has a significant impact on the similarity of the resulting counterfactuals. This result indicates that the recovered Gumbel noise captures more than stochastic variation alone. Instead, it encodes structured information that interacts with the conditioning context during generation. This finding suggests that recovered noise implicitly encodes aspects of the generative trajectory induced by the original input, rather than functioning as an independent source of randomness. \mh{TODO think about this a bit more and add 1-2 implication/interpretation sentences}
+We report the results of this evaluation in Table TODO. \mh{Then we analyze the final results here. Key points: similarity is noticeably higher for GM. Consistently see improvements. GM rated as helpful. Maybe more insights on slices TBD once all results come in}
+
+\subsection{Ablation Studies}\label{sec:foresight}
+% \subsection{Foresight Enhances Hindsight Control}
+
+In order to understand the interaction of the various components of GM, we conduct ablation studies and compare the results controlling the training, logit pertubation, and prompting approach.
+
+In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and Gumbel noise control components of GM. We observe \mh{TODO write interpretation of table, SFT not enough, Need DPO and Logit control via Gumbel needed for sim, etc}
 
 In Table~\ref{tab:foresight_ablation}, we report results of an ablation study where we compare how inclusion and exclusion of the reference summary in the prompt influence the effectiveness of $\beta$-Hindsight control. In this ablation, we include/exclude the reference both during noise recovery and replay, set $\beta=1.0$, and run hindsight sampling on the base Llama-3 setting. We see an average counterfactual similarity score of $0.331$ when excluding the reference, which is similar to uncontrolled nucleus sampling with reference hinting. However, when including the reference at recovery, the generated counterfactual summary is much more similar to the reference. These results suggest a nuanced interaction between the replayed Gumbel noise and the conditioning context, highlighting the importance of reference inclusion for effective $\beta$-Hindsight control. One possible explanation is that, when the reference tokens are highly certain (logit value of the reference token significantly exceeds that of other ones), the recovered noise is not strong enough to significantly alter the LLM's overall output trajectory, and only provides small adjustments at a given timestep. On the contrary, when the reference tokens are less certain, the recovered noise encodes nuanced information, resulting in a volatile control signal with conflicting objectives that can significantly alter the output trajectory. We leave further investigation into the mechanics of effective controllable Gumbel noise recovery as an interesting direction for future work.
 % only encodes the likelihood of a simple instruction-following process with high precision
