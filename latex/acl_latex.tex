@@ -81,10 +81,11 @@
 }
 
 % Qualitative counterfactual example box (appendix).
+% title is braced so commas inside the title don't get parsed as pgfkeys.
 \newtcolorbox{examplebox}[1]{
   colback=gray!4,
   colframe=gray!50!black,
-  title=#1,
+  title={#1},
   fonttitle=\bfseries,
   arc=2mm,
   boxrule=0.6pt,
