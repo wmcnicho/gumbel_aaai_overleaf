@@ -385,12 +385,12 @@ We evaluate our approach on two datasets of scored student writing samples.
 %, covering both reading passage summarization and open-ended student writing from a variety of proficiency levels. 
 The first dataset is Common Lit Augmented Student Summary Evaluation (\textbf{CLASSE}), a corpus of student-authored summaries of short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries of 101 unique passages authored by students in grades 3-12. Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring in preliminary experiments; see Appendix~\ref{apx:classe}.}.
 %
-The second is Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}) dataset, a corpus of student-authored responses to open-ended writing prompts \cite{yoo_dress_2025}. We use $\text{DREsS}_{\text{New}}$, which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:classe}\mh{TODO add DRESS details to apx}.
+The second is Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}) dataset, a corpus of student-authored responses to open-ended writing prompts \cite{yoo_dress_2025}. We use $\text{DREsS}_{\text{New}}$, which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:classe}.
 
 % Could include here details about filtering/cleaning if needed.
 \subsection{Scoring Model}
 We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. We find that this approach performs better than a fine-tuned BERT-based scoring model \cite{devlin_bert_2019} and directly prompting \texttt{GPT-4.1}. %We evaluate each scoring model on a held-out validation set of student work. \al{what's the train/val split?} 
-The average Quadratic Weighted Kappa (QWK) agreement across scoring criteria between this model and human scores are 0.6242 and 0.6012, respectively, for CLASSE and DREsS. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), which shows that our scoring model is a good proxy of human scoring. See Appendix~\ref{apx:scoring} for details. \mh{to appendix add dress and training details, BERT scoring details as well} 
+The average Quadratic Weighted Kappa (QWK) agreement across scoring criteria between this model and human scores are 0.6242 and 0.6012, respectively, for CLASSE and DREsS. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), which shows that our scoring model is a good proxy of human scoring. See Appendix~\ref{apx:scoring} for details.
 %. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt and further details in .
 
 \subsection{Metrics}
@@ -436,7 +436,7 @@ We compare our approach, \textbf{Gumbel Machine (GM)}, to three other LLM-based 
 %\noindent, our proposed approach, which leverages recovered Gumbel noise and preference alignment to create similar, rubric-aligned counterfactuals.
 \textbf{Minimal-Edit (ME)}: Following \citep{gat_faithful_2023}, we include in the prompt instructions for the LLM to minimally edit the reference as a zero-shot prompting approach.
 \textbf{In-Context Learning (ICL)}: Following \citep{li_prompting_2024}, we include in-context demonstrations of each score level in the prompt.
-\textbf{Identify-and-Replace (I\&R)}: Following \citep{nguyen_llms_2024}, we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions loosely resemble a ``Chain-of-Thought (CoT)'' for our task. \mh{TODO add CoT prompt to appendix}
+\textbf{Identify-and-Replace (I\&R)}: Following \citep{nguyen_llms_2024}, we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions loosely resemble a ``Chain-of-Thought (CoT)'' for our task (\mh{Cite}).
 
 % \begin{itemize}
 % \item \textbf{$\beta$-Hindsight (Ours)}: Our proposed decoding mechanism, which leverages recovered Gumbel noise to control similarity to a reference via a continuous control parameter $\beta$.
@@ -663,6 +663,7 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
 % \end{table*}
 
 \begin{table}[h!t]
+\small
 \centering
 \setlength{\tabcolsep}{3pt}
 \scalebox{.95}{
@@ -686,8 +687,8 @@ $-$ & \checkmark & \checkmark
     & $\underline{0.560}$ & $0.168$
     & $0.402$ & $0.148$ \\
 \checkmark & \checkmark & $-$
-    & $\textbf{0.795}$ & $-0.026$
-    & $\textbf{0.733}$ & $-0.005$ \\
+    & $\textbf{0.795}$ & $\text{-}0.026$
+    & $\textbf{0.733}$ & $\text{-}0.005$ \\
 \checkmark & \checkmark & \checkmark
     & $0.391$ & $\underline{0.668}$
     & $\underline{0.477}$ & $\underline{0.404}$ \\
@@ -699,28 +700,14 @@ $-$ & \checkmark & \checkmark
 
 \subsection{Counterfactual Approach Comparisons}
 
-In Table~\ref{tab:llama_results}, we report the results of our experiments comparing GM to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively. \ml{drop a note saying the tradeoff figure is in appendix? otherwise people may ask why just these values} On CLASSE, we observe that our approach noticeably improves validity on both datasets while providing higher similarity scores. While the I\&R approach shows a higher similarity score compared to GM, its validity is lowest compared to other approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference but not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and closer to the reference work. On DresS, we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This observation may suggest that GM can produce more rubric-aligned counterfactuals when the writing samples are more homogeneous, e.g., for summarization compared to open-ended writing. 
+In Table~\ref{tab:llama_results}, we report the results of our experiments comparing GM to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively derived from tuning experiments we report in Appendix~\ref{apx:tuning}. On CLASSE, we observe that our approach noticeably improves validity on both datasets while providing higher similarity scores. While the I\&R approach shows a higher similarity score compared to GM, its validity is lowest compared to other approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference but not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and closer to the reference work. On DresS, we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This observation may suggest that GM can produce more rubric-aligned counterfactuals when the writing samples are more homogeneous, e.g., for summarization compared to open-ended writing. 
 %This result suggests the GM is an effective counterfactual approach for both shorter summarization tasks and longer open-ended writing, but produces more .
-
-
-\begin{figure}
-        \centering
-        \includegraphics[width=1\linewidth]{latex/figs/paper_tradeoff_v4.png}
-        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias approach. Gumbel Machine provides a tunable tradeoff between competing metrics occupying a different region of Pareto front. \ml{can we add other methods as dots, or will that go to another figure?}}
-        \label{fig:pareto-front}
-\end{figure}
-
-\subsection{Gumbel Noise: A Flexible Control Signal}
-
-In Figure~\ref{fig:pareto-front} in the appendix \ml{this part should go to appendix, but you can refer to it above and say above that results on controlling beta can be found there}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values on CLASSE for GM. We also experiment with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$. Higher values of $\alpha$ induce stronger similarity to reference tokens. We derive both ranges in smaller-scale experiments where we observe that values outside these ranges result in minimal change in performance.
-
-Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
 
 \subsection{Cross-LLM Comparisons}
 
 In Table~\ref{tab:gm_vs_closed}, we report results comparing our approach to other models, Qwen-3 and Claude (prompting-only). 
 %For both open-weight models we run our method with the same $\beta$ values of $0.1$ and $0.05$ for CLASSE and DREsS respectively. 
-On CLASSE, Llama-3-based GM outperforms the strongest Sonnet-based validity baseline (ICL) on both metrics; Qwen-3-based GM outperforms Sonnet's strongest similarity baseline (Identify-and-Replace) across both metrics. On DREsS, GM improves on similarity compared to proprietary models, but does not reach the same levels of validity on some settings. This result suggests that, for longer open-ended writing tasks, the capacity of a larger and more capable base LLM helps 
+On CLASSE, Llama-3-based GM outperforms the strongest Sonnet-based validity baseline (ICL) on both metrics; Qwen-3-based GM outperforms Sonnet's strongest similarity baseline (Identify-and-Replace) across both metrics. On DREsS, GM improves on similarity compared to proprietary models, but does not reach the same levels of validity on some settings. This result suggests that, for longer open-ended writing tasks, the capacity of a larger and more capable base LLM helps. 
 %is required to maintain validity over longer time horizons beyond what is possible with training for smaller models. 
 Moreover, combining our approach with a larger open-weight model may result in further improvement, but at the expense of more computing costs. Overall, these results suggest that our GM approach is generalizable across open-weight model families; more importantly, we get counterfactuals that are better than or similar to that generated by a much larger, proprietary model.
 
@@ -744,21 +731,21 @@ Helpfulness       & 2.42 & 2.47 & 0.58 & 72/66/12 & 52\% & 0.67 & \textbf{68\%} 
 \label{tab:human_eval}
 \end{table*}
 
-We conduct an IRB-approved human evaluation study to evaluate the effectiveness of the generated counterfactual student work. We employ $k=5$ evaluators via Upwork, all of whom have experience teaching English in the United States at a mixture of middle school, high school, and university level \cite{upwork}. The task took evaluators roughly 2 hours, and we paid them \$60 each, which is significantly higher than the minimum wage. All evaluators gave consent before participating. We provide the consent form, instructions, and a screenshot of the interface in Appendix~\ref{sec:apdx-human-eval}.
+We conduct an IRB-approved human evaluation study to evaluate the effectiveness of the generated counterfactual student work. We employ $k=5$ evaluators via Upwork, all of whom have experience teaching English in the United States at a mixture of middle school, high school, and university level \cite{upwork}. The task took evaluators roughly 2 hours, and we paid them \$60 each, which is significantly higher than the minimum wage. All evaluators gave consent before participating.
 
 We focus our evaluation on student summaries from the CLASSE dataset, as the student work is shorter in length and easier to evaluate at scale than the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of the student work and ask them to evaluate each rewrite and compare them on three dimensions: improvement, similarity, and overall pedagogical utility. We select 10 writing samples across each of the 5 criteria and stratify the sampling across the original student score on each criterion to ensure a balance between the quality of student samples. We generate rewrites set to the maximum score of 4 for the evaluated criterion, sampling from the GM and ME baseline. When the criterion rewrite is the target value of 4, both methods display a similar automated score of $3.64/4$ and $3.68/4$ respectively. This sampling ensures a comparison between methods with comparable validity but distinctly different rewrites. The ordering of the rewrites is randomized and source generation approach is not disclosed to prevent bias.
 
-We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 63\% of contested cases $p=0.024$, and a significantly higher aggregate similarity rating. We find no significant difference between the methods in terms of improvement and utility. However, we observe that in the cases where the evaluator judges the GM rewrite as more similar, they also prefer GM on overall helpfulness in 68\% of contested cases with a $\chi^2(4)=23.4$ and $p=0.000105$. In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. These results suggest that, while the two methods are similar in terms of overall improvement and utility, GM produces counterfactual work that is noticeably more similar, and, in these cases, preferred by teachers for pedagogical use. We report further details and results on our teacher evaluation in Appendix\mh{TODO}.
+We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 63\% of contested cases $p=0.024$, and a significantly higher aggregate similarity rating. We find no significant difference between the methods in terms of improvement and utility. However, we observe that in the cases where the evaluator judges the GM rewrite as more similar, they also prefer GM on overall helpfulness in 68\% of contested cases with a $\chi^2(4)=23.4$ and $p=0.000105$. 
+% In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. 
+These results suggest that, while the two methods are similar in terms of overall improvement and utility, GM produces counterfactual work that is noticeably more similar, and, in these cases, preferred by teachers for pedagogical use. We report further details and results on our teacher evaluation in Appendix~\ref{sec:apdx-human-eval}.
 
 \subsection{Ablation Studies}\label{sec:foresight}
 % \subsection{Foresight Enhances Hindsight Control}
 
-We now conduct ablation studies on the training configuration, logit perturbation, and prompting approach. In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and logit control components of GM, running each configuration on Llama-3. We observe a distinctive trend in introducing each of the approach components. With $\beta$-Hindsight decoding alone and no training, we observe improved similarity at margnially lower validity. This result suggests that recovered Gumbel noise can steer the sampling trajectory toward the reference but does not induce rubric-adherent counterfactuals. Training the model with SFT on student writing amplifies the control influence of the model, resulting in a large jump in similarity while validity collapses to near zero. This result suggests that SFT is necessary to make the model adapt to student writing, which the pre-trained model is not necessarily familiar with. 
+In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and logit control components of GM, running each configuration on Llama-3. We observe a distinctive trend in introducing each of the approach components. With $\beta$-Hindsight decoding alone and no training, we observe improved similarity at margnially lower validity. This result suggests that recovered Gumbel noise can steer the sampling trajectory toward the reference but does not induce rubric-adherent counterfactuals. Training the model with SFT on student writing amplifies the control influence of the model, resulting in a large jump in similarity while validity collapses to near zero. This result suggests that SFT is necessary to make the model adapt to student writing, which the pre-trained model is not necessarily familiar with. 
 %This collapse suggests an increased model sensitivity to the Gumbel noise control, and could be explained that the model has a strong preference to vocabularly and word sequences that are frequent in the trained student writing samples. 
-Notably, adding DPO after SFT significantly improves the model's capability on this task. This result suggests that by contrasting generations with different scores, DPO helps the LLM with controllable generation, while $\beta$-Hindsight remains key to maintaining similarity to original student writing, which prompting alone cannot achieve. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference.
+Notably, adding DPO after SFT significantly improves the model's capability on this task. This result suggests that by contrasting generations with different scores, DPO helps the LLM with controllable generation, while $\beta$-Hindsight remains key to maintaining similarity to original student writing, which prompting alone cannot achieve. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference. We report the results of an additional ablation study on the prompt configuration in Appendix~\ref{apx:prompt-ablate}. 
 
-\ml{i suggest this one to go to appendix; the previous one is perhaps a more obviously needed ablation. do drop a sentence there to refer to this one tho}
-In Table~\ref{tab:foresight_ablation}, we report results of an ablation study where we compare how inclusion and exclusion of the reference summary in the prompt influence the effectiveness of $\beta$-Hindsight control. In this ablation, we include/exclude the reference both during noise recovery and replay, set $\beta=1.0$, and run hindsight sampling on the base Llama-3 setting. We see an average counterfactual similarity score of $0.331$ when excluding the reference, which is similar to uncontrolled nucleus sampling with reference hinting. However, when including the reference at recovery, the generated counterfactual summary is much more similar to the reference. These results suggest a nuanced interaction between the replayed Gumbel noise and the conditioning context, highlighting the importance of reference inclusion for effective $\beta$-Hindsight control. One possible explanation is that, when the reference tokens are highly certain (logit value of the reference token significantly exceeds that of other ones), the recovered noise is not strong enough to significantly alter the LLM's overall output trajectory, and only provides small adjustments at a given timestep. On the contrary, when the reference tokens are less certain, the recovered noise encodes nuanced information, resulting in a volatile control signal with conflicting objectives that can significantly alter the output trajectory. We leave further investigation into the mechanics of effective controllable Gumbel noise recovery as an interesting direction for future work.
 % only encodes the likelihood of a simple instruction-following process with high precision
 
 % must capture not only information needed to produce the style but also the information needed to  needs to capture this stylistic control but also the random c
@@ -787,26 +774,6 @@ In Table~\ref{tab:foresight_ablation}, we report results of an ablation study wh
 % Importance of training, tradeoff curve b/w perf and similarity with $\beta$ regularization
 
 % \subsection{Discussion}
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{lcc}
-\toprule
-\textbf{Criterion} & \textbf{Reference} & \textbf{No Reference} \\
-\midrule
-Main Idea  & 0.626 & 0.347 \\
-Details    & 0.604 & 0.315 \\
-Cohesion   & 0.597 & 0.315 \\
-Wording    & 0.611 & 0.352 \\
-Language   & 0.622 & 0.325 \\
-\midrule
-\textbf{Overall} & 0.612 & 0.331 \\
-\bottomrule
-\end{tabular}
-\caption{Ablation study on reference conditioning influence on recovered Gumbel noise control effectiveness. Table reports average similarity scores across counterfactuals. Across all criteria, reference hinting shows higher effectiveness of the recovered noise.}
-\label{tab:foresight_ablation}
-\end{table}
 
 \section{Related Work}
 
@@ -854,7 +821,7 @@ While our results suggest that recovered Gumbel noise can serve as a practical s
 
 Our approach also assumes access to carefully engineered prompts that specify the rubric, request adherence to a reference, and clearly define the target score change. As shown in our ablation study, reference conditioning is a key enabling condition for effective control, which suggests some sensitivity to prompt variation that does not preserve this structure. In addition, we train separate alignment adapters per rubric criterion, which improves controllability in our experiments but may not scale cleanly to richer, multi-criterion feedback without more advanced multitask or compositional alignment strategies.
 
-Finally, our evaluation relies on automated proxies for both validity and similarity. We use an LLM-as-a-judge to score counterfactuals rather than expert human evaluation, which enables scalability but may introduce systematic biases and may not fully capture pedagogical usefulness. Similarly, we measure similarity using normalized character-level Levenshtein distance. Although this is common practice in related literature, the measure is sensitive to surface edits and not semantics-aware. 
+Finally, our evaluation relies on automated proxies for both validity and similarity. We use an LLM-as-a-judge to score counterfactuals rather than expert human evaluation, which enables scalability but may introduce systematic biases and may not fully capture pedagogical usefulness \mh{TODO fix}. Similarly, we measure similarity using normalized character-level Levenshtein distance. Although this is common practice in related literature, the measure is sensitive to surface edits and not semantics-aware. 
 
 \section*{Ethical Considerations}
 Counterfactual student writing, even when intended as illustrative feedback, risks being perceived as an “ideal rewrite” rather than a pedagogical example, which could unintentionally discourage student agency or mask the student’s original voice. If deployed without appropriate framing, such systems may encourage over-reliance on AI-generated revisions, shifting learning from skill development toward imitation. These risks underscore the importance of positioning counterfactuals as illustrative demonstrations rather than authoritative corrections in classroom environments.
@@ -881,73 +848,8 @@ On fairness, bias, and accountability, both the generation and evaluation compon
 
 \subsection{Per-Criterion Results} \label{apx:tradeoffs}
 
-Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-criterion expansion of the aggregate similarity and validity numbers reported for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct in the main paper. For each (model, dataset) pair we show all five counterfactual generation methods. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones: $\beta$-Hindsight (BH) tends to maximize similarity, GM tends to maximize validity, and the prompting baselines occupy intermediate positions. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that for paraphrase-heavy criteria the in-context demonstration baseline can be competitive with logit-level control.
-
-\subsection{Instruction Prompts} \label{apx:prompts}
-
-We include the details of the instructions passed to the various open-weight models during counterfactual generation. The base counterfactual prompt is shown both including the reference summary (Figure~\ref{apx:prompt_ref}) and excluding it (Figure~\ref{fig:exc_prompt}) for two distinct criteria. The Identify-and-Replace (I\&R) prompt is shown in Figure~\ref{fig:ir_prompt}, illustrated on the DREsS ``Language'' criterion. Format is identical for other criteria with rubric details replaced.
-
-\subsection{Scoring Model} \label{apx:scoring}
-
-Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
-
-\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
-
-For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
-
-\subsection{Dataset Details} \label{apx:classe}
-
-We report detailed descriptions for each CLASSE criterion in Table~\ref{apx:criteria} and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation). We report detailed descriptions for each DREsS criterion in Table~\ref{apx:dress_criteria} and Table~\ref{apx:dress_rubric} details score definitions for each possible value. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.
-
-\subsection{Training Details} \label{apx:training}
-
-We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} and \texttt{Qwen3-4B-Instruct-2507}. The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. For both stages, we train a rank-$32$ LoRA adapter with dropout $0.05$ for all attention and MLP projections using an AdamW optimizer. For SFT, we use a constant learning rate of $5\!\times\!10^{-5}$ with weight decay $0.01$, and in DPO we use a cosine schedule at $2\!\times\!10^{-5}$ against the frozen SFT LoRA as the reference policy.
-
-\paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
-
-\paragraph{Selected DPO hyperparameters.} We selected the DPO learning rate via a small sweep on Llama-3 / DREsS with an SFT prior at LoRA rank $r{=}16$. Raising LR from $5\!\times\!10^{-6}$ (initial value) to $2\!\times\!10^{-5}$ produced a substantial gain in DPO reward accuracy across criteria: $+0.08$ on Content ($0.66\rightarrow0.75$), $+0.10$ on Organization ($0.68\rightarrow0.78$), and $+0.13$ on Language ($0.74\rightarrow0.87$). Subsequently increasing the SFT-prior LoRA rank from $16$ to $32$ (with $\alpha{=}32$) added an additional $\approx0.02$ reward accuracy on average. With the final LR $2\!\times\!10^{-5}$ / $r{=}32$ configuration, CLASSE DPO reaches $0.85$--$0.88$ reward accuracy across its five criteria.
-
-\subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
-
-\paragraph{Recruitment and demographics.} The five evaluators were recruited via Upwork \cite{upwork} with explicit screening for documented K--12 or post-secondary English teaching experience. All evaluators reported at least eight years of English teaching experience, with several reporting twenty-five or more years, spanning middle school, high school, and university settings in the United States. Each evaluator completed an IRB-approved consent process before participating; the task took approximately two hours and evaluators were compensated \$60.
-
-\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating method was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$, summarized in Table~\ref{tab:eval_questions}.
-
-\paragraph{Calibration material.} Evaluators were provided with a multi-section reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. The full instructional document is approximately twenty pages and is released alongside our code artifacts.
-
-\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}).
-
-\paragraph{Sample.} The headline analysis is computed over $150$ ratings from three contributing evaluators on $50$ stratified $(\text{passage}, \text{summary}, \text{rewrite~A}, \text{rewrite~B})$ tuples, balanced as $10$ tuples per CLASSE criterion and stratified across the original student score on the target criterion. The pair of rewrites for each tuple was sampled with one rewrite from GM and one from the Minimal-Edit baseline at matched automated validity (target score~$4$).
-
-\paragraph{Per-criterion preferences.} Table~\ref{tab:eval_per_criterion} reports the per-criterion GM win rate on the three pairwise questions (ties excluded). Aggregated across criteria, the headline pattern is that GM is preferred on similarity (63\% GM wins, $p\!=\!0.024$) and roughly tied on improvement and feedback. The criterion-level breakdown reveals that this aggregate hides substantial criterion-specific variation: GM is preferred on every dimension for the Language and Details criteria, while it loses on Main Idea and on the criterion-targeted comparison for Organization (Cohesion), where evaluators preferred the Minimal-Edit rewrites despite GM's clear similarity advantage on the same criterion (88\% GM win on the similarity comparison).
-
-\paragraph{Preferences scale with student score.} The student's original score on the target criterion (always less than the target of $4$) appears to modulate GM's similarity advantage. Table~\ref{tab:eval_per_ref} bins ratings by the student's reference score; the GM win rate on the ``more similar'' comparison rises sharply from $48\%$ at reference~$1$ to $92\%$ at reference~$3$ (binomial $p\!<\!10^{-3}$), and a Spearman rank correlation between the reference score and the GM-minus-ME Likert difference on the per-rewrite similarity item gives $\rho = 0.279$ ($p = 0.0004$, $n = 150$). The criterion preferences also drift in the same direction, with GM moving from a slight loss at reference~$1$ to a slight win at reference~$3$, though neither end is individually significant. This pattern is consistent with GM being most useful when the student writing is already close to the target rubric score, leaving room for minimal-edit-style improvement.
-
-\paragraph{Similarity preference predicts overall preference.} Conditioning on the same evaluator's response to the ``more similar'' comparison reveals a strong interaction between the similarity judgment and the other two pairwise picks. When the evaluator marks GM as more similar to the student writing, GM is preferred on improvement in $65\%$ of those cases and on feedback in $68\%$; when the evaluator marks Minimal-Edit as more similar, GM's win rate on improvement drops to $39\%$ and on feedback to $38\%$. The full $3\!\times\!3$ contingency table is significant for both the improvement comparison ($\chi^2(4) = 14.8$, $p = 5.2\!\times\!10^{-3}$) and the feedback comparison ($\chi^2(4) = 23.4$, $p = 1.1\!\times\!10^{-4}$). This is consistent with the main-text claim that evaluators who recognize the similarity advantage of GM also prefer it pedagogically.
-
-\paragraph{Inter-rater agreement.} Cohen's $\kappa$ on the pairwise comparisons across the three rater pairs (averaged) is $0.03$ for ``better on criterion,'' $0.16$ for ``more similar,'' and $-0.02$ for ``better feedback''; quadratic-weighted $\kappa$ on the per-rewrite Likert items is $0.15$--$0.27$. These values are at the lower end of typical human-evaluation reliability and reflect the difficulty of grading subtle differences between two rewrites that already share matched automated validity. Despite the low pairwise agreement on individual tuples, the per-rater marginal preferences (Table~\ref{tab:eval_per_rater}) are directionally consistent across the three evaluators, with all three favoring GM on similarity and clustering around chance for improvement and feedback. We therefore interpret the headline findings as aggregate preference patterns rather than reliable per-task judgments.
-
-%% =====================================================================
-%% QUALITATIVE EXAMPLES
-%% =====================================================================
-
-\onecolumn
-\subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
-
-\input{latex/examples/civil_service}
-
-\input{latex/examples/global_warming}
-
-\input{latex/examples/ecological_pyramids}
-\twocolumn
-
-%% =====================================================================
-%% NUMERICAL TABLES
-%% =====================================================================
-
 \begin{table*}[h]
 \centering
-\small
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{ll  cc  cc  cc  cc  cc}
 \toprule
@@ -979,13 +881,12 @@ We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLa
   & GM (Ours) & 0.506 & $\textbf{0.729}$ & 0.455 & $\textbf{0.761}$ & $\textbf{0.624}$ & $\textbf{0.483}$ & 0.615 & 0.312 & $\textbf{0.677}$ & $\textbf{0.544}$ \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{CLASSE} dataset for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct, across all five counterfactual generation methods. Best result per column within each model block in \textbf{bold}.}
+\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{CLASSE} dataset.}
 \label{tab:appendix_classe}
 \end{table*}
 
 \begin{table*}[h]
 \centering
-\small
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{ll  cc  cc  cc}
 \toprule
@@ -1013,9 +914,30 @@ We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLa
   & GM (Ours) & $\textbf{0.511}$ & 0.414 & $\textbf{0.604}$ & 0.200 & $\textbf{0.707}$ & 0.248 \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{DREsS} dataset for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct, across all five counterfactual generation methods. Best result per column within each model block in \textbf{bold}.}
+\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{DREsS} dataset.}
 \label{tab:appendix_dress}
 \end{table*}
+We report a per-criterion expansion of the aggregate similarity and validity measurements reported for Llama-3 and Qwen3 in 
+Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress}. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones where GM tends to maximize validity with minimal tradeoff for similarity. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that Qwen has exceptional paraphrase capabilities when provided in-context demonstrations .
+
+\subsection{Instruction Prompts} \label{apx:prompts}
+
+We include the details of the instructions passed to the various open-weight models during counterfactual generation. The base counterfactual prompt is shown both including the reference summary (Figure~\ref{apx:prompt_ref}) and excluding it (Figure~\ref{fig:exc_prompt}) for two distinct criteria. The Identify-and-Replace (I\&R) prompt is shown in Figure~\ref{fig:ir_prompt}, illustrated on the DREsS ``Language'' criterion. Format is identical for other criteria with rubric details replaced.
+
+\subsection{Tuning Gumbel Noise Control} \label{apx:tuning}
+
+In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values on CLASSE for GM. We also experiment with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$. Higher values of $\alpha$ induce stronger similarity to reference tokens. We derive both ranges in smaller-scale experiments where we observe that values outside these ranges result in collapses in model fluency due to excessive logit manipulation.
+
+Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
+
+\subsection{Scoring Model} \label{apx:scoring}
+
+\begin{figure}
+        \centering
+        \includegraphics[width=1\linewidth]{latex/figs/paper_tradeoff_baselines_v1.png}
+        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias approach. Gumbel Machine provides a tunable tradeoff between competing metrics occupying a different region of Pareto frontier.}
+        \label{fig:pareto-front}
+\end{figure}
 
 \begin{table*}[h]
 \centering
@@ -1036,7 +958,7 @@ Language      & 0.423 & 0.543 & 0.497 & \textbf{0.598} \\
 \textbf{Mean} & 0.551 & 0.521 & 0.464 & \textbf{0.624} \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion QWK agreement between scoring models and human raters on the CLASSE held-out validation set. The fine-tuned \texttt{GPT-4.1-mini} (column~4) is the LLM-as-a-judge used throughout the paper. Best per row in \textbf{bold}.}
+\caption{Per-criterion QWK agreement between scoring models and human raters on the CLASSE validation set.}
 \label{apx:scoring_classe}
 \end{table*}
 
@@ -1057,69 +979,224 @@ Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
 \textbf{Mean} & 0.502 & 0.232 & 0.251 & \textbf{0.601} \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion QWK agreement between scoring models and human raters on the DREsS held-out validation set. The fine-tuned \texttt{GPT-4.1-mini} (column~4) is the LLM-as-a-judge used throughout the paper. Best per row in \textbf{bold}.}
+\caption{Per-criterion QWK agreement between scoring models and human raters on the DREsS validation set.}
 \label{apx:scoring_dress}
 \end{table*}
 
-\begin{table}[h]
+Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
+
+\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
+
+For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
+
+\subsection{Prompt Ablation} \label{apx:prompt-ablate}
+
+\begin{table}[t]
 \centering
 \small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{l ccc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Criterion} & Better-on-criterion & More similar & Better feedback \\
+\textbf{Criterion} & \textbf{Reference} & \textbf{No Reference} \\
 \midrule
-Main Idea     & 33\% & 47\% & 44\% \\
-Details       & 61\% & 58\% & 62\% \\
-Organization\textsuperscript{*}  & 24\% & 88\% & 24\% \\
-Wording       & 58\% & 50\% & 60\% \\
-Language      & 70\% & 73\% & 71\% \\
+Main Idea  & 0.626 & 0.347 \\
+Details    & 0.604 & 0.315 \\
+Cohesion   & 0.597 & 0.315 \\
+Wording    & 0.611 & 0.352 \\
+Language   & 0.622 & 0.325 \\
 \midrule
-\textbf{All}  & 49\% & 63\% & 52\% \\
+\textbf{Overall} & 0.612 & 0.331 \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion GM win rate on the three pairwise comparisons against the Minimal-Edit baseline (ties excluded). Each criterion has $30$ ratings ($10$ tuples $\times$ $3$ evaluators).\protect\\
-\textsuperscript{*}Labeled as ``Cohesion'' in the underlying dataset; we use the paper's terminology.}
-\label{tab:eval_per_criterion}
+\caption{Ablation study on reference conditioning influence on recovered Gumbel noise control effectiveness. Table reports average similarity scores across counterfactuals. Across all criteria, reference hinting shows higher effectiveness of the recovered noise.}
+\label{tab:foresight_ablation}
 \end{table}
 
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{c c ccc}
-\toprule
-\textbf{Ref.\ score} & $n$ & Better-on-criterion & More similar & Better feedback \\
-\midrule
-1 & 60 & 49\% & 48\% & 51\% \\
-2 & 45 & 47\% & 50\% & 49\% \\
-3 & 45 & 51\% & \textbf{92\%} ($p\!<\!10^{-3}$) & 58\% \\
-\bottomrule
-\end{tabular}
-\caption{GM win rate (ties excluded) broken down by the student's original score on the target criterion. Bolded cell indicates $p\!<\!0.001$ on a two-sided binomial test against chance.}
-\label{tab:eval_per_ref}
-\end{table}
+In Table~\ref{tab:foresight_ablation}, we report results of an ablation study where we compare how inclusion and exclusion of the reference summary in the prompt influence the effectiveness of $\beta$-Hindsight control. In this ablation, we include/exclude the reference both during noise recovery and replay, set $\beta=1.0$, and run hindsight sampling on the base Llama-3 setting. We see an average counterfactual similarity score of $0.331$ when excluding the reference, which is similar to ME. However, when including the reference at recovery, the generated counterfactual summary is much more similar to the reference. These results suggest a nuanced interaction between the replayed Gumbel noise and the conditioning context, highlighting the importance of reference inclusion for effective $\beta$-Hindsight control. One possible explanation is that, when the reference tokens are highly certain (logit value of the reference token significantly exceeds that of other ones), the recovered noise is not strong enough to significantly alter the LLM's overall output trajectory, and only provides small adjustments at a given timestep. On the contrary, when the reference tokens are less certain, the recovered noise encodes nuanced information, resulting in a volatile control signal with conflicting objectives that can significantly alter the output trajectory. 
+% We leave further investigation into the mechanics of effective controllable Gumbel noise recovery as an interesting direction for future work.
 
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{l cccccc}
-\toprule
-& \multicolumn{3}{c}{\textbf{GM win \%}} & \multicolumn{3}{c}{\textbf{GM/ME/Tie}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7}
-\textbf{Evaluator} & Imp & Sim & Fb & Imp & Sim & Fb \\
-\midrule
-E1 (Amy)    & 49\% & 50\% & 54\% & 20/21/9 & 7/7/36 & 22/19/9 \\
-E2 (Julia)  & 52\% & 63\% & 55\% & 23/21/6 & 27/16/7 & 26/21/3 \\
-E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
-\midrule
-\textbf{All}        & 49\% & 63\% & 52\% & 66/69/15 & 50/29/71 & 72/66/12 \\
-\bottomrule
-\end{tabular}
-\caption{Per-evaluator marginal preferences for the three pairwise comparisons (improvement / similarity / feedback). Win rates exclude ties.}
-\label{tab:eval_per_rater}
-\end{table}
+\subsection{Dataset Details} \label{apx:classe}
+
+We report detailed descriptions for each CLASSE criterion in Table~\ref{apx:criteria} and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation). We report detailed descriptions for each DREsS criterion in Table~\ref{apx:dress_criteria} and Table~\ref{apx:dress_rubric} details score definitions for each possible value. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.
+
+\subsection{Training Details} \label{apx:training}
+
+We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} and \texttt{Qwen3-4B-Instruct-2507}. The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. For both stages, we train a rank-$32$ LoRA adapter with dropout $0.05$ for all attention and MLP projections using an AdamW optimizer. For SFT, we use a constant learning rate of $5\!\times\!10^{-5}$ with weight decay $0.01$, and in DPO we use a cosine schedule at $2\!\times\!10^{-5}$ against the frozen SFT LoRA as the reference policy.
+
+% \paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
+
+\subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
+
+% \paragraph{Recruitment and demographics.} The five evaluators were recruited via Upwork \cite{upwork} with explicit screening for documented K--12 or post-secondary English teaching experience. All evaluators reported at least eight years of English teaching experience, with several reporting twenty-five or more years, spanning middle school, high school, and university settings in the United States. Each evaluator completed an IRB-approved consent process before participating; the task took approximately two hours and evaluators were compensated \$60.
+
+\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating method was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$.
+
+\paragraph{Calibration material.} Evaluators were provided with a reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. 
+
+\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}).
+
+% \paragraph{Sample.} The headline analysis is computed over $150$ ratings from three contributing evaluators on $50$ stratified $(\text{passage}, \text{summary}, \text{rewrite~A}, \text{rewrite~B})$ tuples, balanced as $10$ tuples per CLASSE criterion and stratified across the original student score on the target criterion. The pair of rewrites for each tuple was sampled with one rewrite from GM and one from the Minimal-Edit baseline at matched automated validity (target score~$4$).
+
+% \paragraph{Per-criterion preferences.} Table~\ref{tab:eval_per_criterion} reports the per-criterion GM win rate on the three pairwise questions (ties excluded). Aggregated across criteria, the headline pattern is that GM is preferred on similarity (63\% GM wins, $p\!=\!0.024$) and roughly tied on improvement and feedback. The criterion-level breakdown reveals that this aggregate hides substantial criterion-specific variation: GM is preferred on every dimension for the Language and Details criteria, while it loses on Main Idea and on the criterion-targeted comparison for Organization (Cohesion), where evaluators preferred the Minimal-Edit rewrites despite GM's clear similarity advantage on the same criterion (88\% GM win on the similarity comparison).
+
+% \paragraph{Preferences scale with student score.} The student's original score on the target criterion (always less than the target of $4$) appears to modulate GM's similarity advantage. Table~\ref{tab:eval_per_ref} bins ratings by the student's reference score; the GM win rate on the ``more similar'' comparison rises sharply from $48\%$ at reference~$1$ to $92\%$ at reference~$3$ (binomial $p\!<\!10^{-3}$), and a Spearman rank correlation between the reference score and the GM-minus-ME Likert difference on the per-rewrite similarity item gives $\rho = 0.279$ ($p = 0.0004$, $n = 150$). The criterion preferences also drift in the same direction, with GM moving from a slight loss at reference~$1$ to a slight win at reference~$3$, though neither end is individually significant. This pattern is consistent with GM being most useful when the student writing is already close to the target rubric score, leaving room for minimal-edit-style improvement.
+
+% \paragraph{Similarity preference predicts overall preference.} Conditioning on the same evaluator's response to the ``more similar'' comparison reveals a strong interaction between the similarity judgment and the other two pairwise picks. When the evaluator marks GM as more similar to the student writing, GM is preferred on improvement in $65\%$ of those cases and on feedback in $68\%$; when the evaluator marks Minimal-Edit as more similar, GM's win rate on improvement drops to $39\%$ and on feedback to $38\%$. The full $3\!\times\!3$ contingency table is significant for both the improvement comparison ($\chi^2(4) = 14.8$, $p = 5.2\!\times\!10^{-3}$) and the feedback comparison ($\chi^2(4) = 23.4$, $p = 1.1\!\times\!10^{-4}$). This is consistent with the main-text claim that evaluators who recognize the similarity advantage of GM also prefer it pedagogically.
+
+\paragraph{Inter-rater agreement.} Cohen's $\kappa$ on the pairwise comparisons across the three rater pairs (averaged) is $0.03$ for ``better on criterion,'' $0.16$ for ``more similar,'' and $-0.02$ for ``better feedback''; quadratic-weighted $\kappa$ on the per-rewrite Likert items is $0.15$--$0.27$. These values are at the lower end of typical human-evaluation reliability and reflect the difficulty of grading subtle differences between two rewrites that already share matched automated validity. 
+% Despite the low pairwise agreement on individual tuples, the per-rater marginal preferences (Table~\ref{tab:eval_per_rater}) are directionally consistent across the three evaluators, with all three favoring GM on similarity and clustering around chance for improvement and feedback. We therefore interpret the headline findings as aggregate preference patterns rather than reliable per-task judgments.
+
+%% =====================================================================
+%% QUALITATIVE EXAMPLES
+%% =====================================================================
+
+\onecolumn
+\subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
+
+\input{latex/examples/civil_service}
+
+\clearpage
+
+\input{latex/examples/global_warming}
+
+\clearpage
+
+\input{latex/examples/ecological_pyramids}
+\twocolumn
+
+%% =====================================================================
+%% NUMERICAL TABLES
+%% =====================================================================
+
+% \begin{table*}[h]
+% \centering
+% \setlength{\tabcolsep}{3pt}
+% \begin{tabular}{ll  cc  cc  cc  cc  cc}
+% \toprule
+% & & \multicolumn{2}{c}{\textbf{Main Idea}}
+% & \multicolumn{2}{c}{\textbf{Details}}
+% & \multicolumn{2}{c}{\textbf{Organization}}
+% & \multicolumn{2}{c}{\textbf{Wording}}
+% & \multicolumn{2}{c}{\textbf{Language}} \\
+% \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-12}
+% \multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}}
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
+% \midrule
+% \multirow{5}{*}{Llama}
+%   & ME       & 0.305 & 0.165 & 0.315 & 0.224 & 0.299 & 0.265 & 0.341 & 0.154 & 0.310 & 0.107 \\
+%   & ICL      & 0.288 & 0.272 & 0.308 & 0.381 & 0.305 & 0.516 & 0.320 & 0.182 & 0.320 & 0.282 \\
+%   & I\&R     & 0.528 & 0.117 & 0.440 & 0.096 & 0.529 & 0.112 & 0.498 & 0.092 & 0.494 & 0.099 \\
+%   % & BH       & $\textbf{0.546}$ & 0.171 & $\textbf{0.557}$ & 0.145 & $\textbf{0.554}$ & 0.165 & $\textbf{0.596}$ & 0.152 & $\textbf{0.548}$ & 0.206 \\
+%   & GM (Ours) & 0.364 & $\textbf{0.820}$ & 0.334 & $\textbf{0.780}$ & 0.387 & $\textbf{0.769}$ & 0.412 & $\textbf{0.666}$ & 0.458 & $\textbf{0.306}$ \\
+% \midrule
+% \multirow{5}{*}{Qwen}
+%   & ME       & 0.648 & 0.163 & 0.667 & 0.247 & 0.579 & 0.239 & 0.558 & 0.281 & 0.432 & 0.230 \\
+%   & ICL      & 0.349 & 0.190 & 0.347 & 0.248 & 0.359 & 0.156 & $\textbf{0.620}$ & 0.217 & 0.326 & 0.137 \\
+%   & I\&R     & 0.524 & 0.282 & 0.403 & 0.540 & 0.474 & 0.328 & 0.388 & $\textbf{0.385}$ & 0.450 & 0.286 \\
+%   % & BH       & $\textbf{0.693}$ & 0.140 & $\textbf{0.702}$ & 0.236 & 0.619 & 0.244 & 0.585 & 0.252 & 0.468 & 0.235 \\
+%   & GM (Ours) & 0.506 & $\textbf{0.729}$ & 0.455 & $\textbf{0.761}$ & $\textbf{0.624}$ & $\textbf{0.483}$ & 0.615 & 0.312 & $\textbf{0.677}$ & $\textbf{0.544}$ \\
+% \bottomrule
+% \end{tabular}
+% \caption{Per-criterion breakdown of Similarity and Validity on the \textbf{CLASSE} dataset.}
+% \label{tab:appendix_classe}
+% \end{table*}
+
+% \begin{table*}[h]
+% \centering
+% \setlength{\tabcolsep}{4pt}
+% \begin{tabular}{ll  cc  cc  cc}
+% \toprule
+% & & \multicolumn{2}{c}{\textbf{Content}}
+% & \multicolumn{2}{c}{\textbf{Language}}
+% & \multicolumn{2}{c}{\textbf{Organization}} \\
+% \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+% \multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}}
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+%   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
+% \midrule
+% \multirow{5}{*}{Llama}
+%   & ME       & 0.312 & 0.323 & 0.307 & 0.143 & 0.295 & 0.097 \\
+%   & ICL      & 0.357 & 0.327 & 0.320 & 0.239 & 0.312 & 0.227 \\
+%   & I\&R     & 0.296 & $\textbf{0.489}$ & 0.322 & 0.116 & 0.307 & 0.370 \\
+%   % & BH       & 0.448 & 0.220 & 0.405 & 0.136 & $\textbf{0.353}$ & 0.087 \\
+%   & GM (Ours) & $\textbf{0.637}$ & 0.307 & $\textbf{0.498}$ & $\textbf{0.371}$ & 0.344 & $\textbf{0.507}$ \\
+% \midrule
+% \multirow{5}{*}{Qwen}
+%   & ME       & 0.298 & 0.266 & 0.305 & 0.195 & 0.287 & 0.128 \\
+%   & ICL      & 0.301 & 0.235 & 0.388 & 0.104 & 0.324 & 0.100 \\
+%   & I\&R     & 0.248 & $\textbf{0.718}$ & 0.337 & $\textbf{0.312}$ & 0.351 & $\textbf{0.582}$ \\
+%   % & BH       & 0.299 & 0.297 & 0.308 & 0.166 & 0.294 & 0.159 \\
+%   & GM (Ours) & $\textbf{0.511}$ & 0.414 & $\textbf{0.604}$ & 0.200 & $\textbf{0.707}$ & 0.248 \\
+% \bottomrule
+% \end{tabular}
+% \caption{Per-criterion breakdown of Similarity and Validity on the \textbf{DREsS} dataset.}
+% \label{tab:appendix_dress}
+% \end{table*}
+
+% \begin{table*}[h]
+% \centering
+% \small
+% \setlength{\tabcolsep}{6pt}
+% \begin{tabular}{l  c  ccc}
+% \toprule
+% & \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
+% \cmidrule(lr){2-2} \cmidrule(lr){3-5}
+% \textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
+% \midrule
+% Main Idea     & 0.566 & 0.632 & 0.590 & \textbf{0.683} \\
+% Details       & 0.616 & 0.473 & 0.476 & \textbf{0.690} \\
+% Organization  & 0.607 & 0.495 & 0.393 & \textbf{0.628} \\
+% Wording       & 0.542 & 0.463 & 0.366 & \textbf{0.522} \\
+% Language      & 0.423 & 0.543 & 0.497 & \textbf{0.598} \\
+% \midrule
+% \textbf{Mean} & 0.551 & 0.521 & 0.464 & \textbf{0.624} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Per-criterion QWK agreement between scoring models and human raters on the CLASSE validation set.}
+% \label{apx:scoring_classe}
+% \end{table*}
+
+% \begin{table*}[h]
+% \centering
+% \small
+% \setlength{\tabcolsep}{6pt}
+% \begin{tabular}{l  c  ccc}
+% \toprule
+% & \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
+% \cmidrule(lr){2-2} \cmidrule(lr){3-5}
+% \textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
+% \midrule
+% Content      & 0.540 & 0.211 & 0.289 & \textbf{0.652} \\
+% Organization & 0.490 & 0.278 & 0.213 & \textbf{0.598} \\
+% Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
+% \midrule
+% \textbf{Mean} & 0.502 & 0.232 & 0.251 & \textbf{0.601} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Per-criterion QWK agreement between scoring models and human raters on the DREsS validation set.}
+% \label{apx:scoring_dress}
+% \end{table*}
+
+% \begin{table}[h]
+% \centering
+% \small
+% \setlength{\tabcolsep}{4pt}
+% \begin{tabular}{c c ccc}
+% \toprule
+% \textbf{Ref.\ score} & $n$ & Better-on-criterion & More similar & Better feedback \\
+% \midrule
+% 1 & 60 & 49\% & 48\% & 51\% \\
+% 2 & 45 & 47\% & 50\% & 49\% \\
+% 3 & 45 & 51\% & \textbf{92\%} ($p\!<\!10^{-3}$) & 58\% \\
+% \bottomrule
+% \end{tabular}
+% \caption{GM win rate (ties excluded) broken down by the student's original score on the target criterion. Bolded cell indicates $p\!<\!0.001$ on a two-sided binomial test against chance.}
+% \label{tab:eval_per_ref}
+% \end{table}
 
 %% =====================================================================
 %% ALGORITHM
@@ -1134,14 +1211,14 @@ E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
 \begin{figure*}[h]
     \centering
     \includegraphics[width=1\linewidth]{latex/figs/label_interface_1.png}
-    \caption{Teacher evaluation interface --- per-rewrite questions (Q1--Q3) for rewrites A and B.}
+    \caption{Teacher evaluation interface per-rewrite questions (Q1--Q3) for rewrites A and B.}
     \label{fig:label_interface_1}
 \end{figure*}
 
 \begin{figure*}[h]
     \centering
     \includegraphics[width=1\linewidth]{latex/figs/label_interface_2.png}
-    \caption{Teacher evaluation interface --- pairwise comparison questions (Q4--Q6).}
+    \caption{Teacher evaluation interface pairwise comparison questions (Q4--Q6).}
     \label{fig:label_interface_2}
 \end{figure*}
 
@@ -1290,7 +1367,7 @@ This criterion measures the student's control of vocabulary and grammatical stru
 
 \begin{figure*}
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_2.png}
+    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_3.jpg}
     \caption{Token count statistics for the summaries and passages in the CLASSE dataset. Summaries are approximately 68 words in length and passages are approximately 297 words.}
     \label{fig:token_counts}
 \end{figure*}
