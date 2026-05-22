@@ -1621,10 +1621,10 @@ E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
 \onecolumn
 \subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
 
-We provide three illustrative tuples drawn from the teacher evaluation set, spanning the CLASSE Details and Main Idea criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the normalized character-level similarity to the original student writing, which is the quantity we are most interested in: a higher value indicates the rewrite preserves more of the student's text. Both rewrites achieve comparable automated rubric scores (omitted here for focus); the contrast across the five examples is in the similarity gap between GM and ME. Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here and place the GM rewrite first in every example. Student writing is shown verbatim, including original spelling and punctuation.
+We provide three illustrative tuples drawn from the teacher evaluation set, spanning the CLASSE Details and Main Idea criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the normalized character-level similarity to the original student writing, which is the quantity we are most interested in: a higher value indicates the rewrite preserves more of the student's text. Both rewrites achieve comparable automated rubric scores (omitted here for focus); the contrast across the three examples is in the similarity gap between GM and ME. Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here and place the GM rewrite first in every example. Student writing is shown verbatim, including original spelling and punctuation.
 
-\begin{examplebox}{Example 1 --- Details criterion (target score 4, student baseline 3)}
-\textbf{Student writing} (judge score 2):
+\begin{examplebox}{Example 1 --- Details criterion}
+\textbf{Student writing} (Score 3):
 
 \begin{quote}\itshape
 Civil service jobs are available for all people.\,\, These jobs have fair pay from the merit system.\,\, These jobs are filled by the top applicants.\,\, This process is time consuming, but he benefits to having a civil service job out ways the steps that need to be taken.
@@ -1643,8 +1643,8 @@ Civil service jobs offer opportunities to men and women at various levels of gov
 \end{quote}
 \end{examplebox}
 
-\begin{examplebox}{Example 2 --- Main Idea criterion (target score 4, student baseline 1)}
-\textbf{Student writing} (judge score 2):
+\begin{examplebox}{Example 2 --- Main Idea criterion}
+\textbf{Student writing} (Score 1):
 
 \begin{quote}\itshape
 Most people in California are more environmentally conscious than in other places in the country. They also don't believe that the government is doing enough to stop this.
@@ -1667,8 +1667,8 @@ Californians want the state to start working on the problem as soon as possible,
 \end{quote}
 \end{examplebox}
 
-\begin{examplebox}{Example 3 --- Details criterion (target score 4, student baseline 3)}
-\textbf{Student writing} (judge score 2):
+\begin{examplebox}{Example 3 --- Details criterion}
+\textbf{Student writing} (Score 3):
 
 \begin{quote}\itshape
 Ecologists construct a pyramid of numbers based on the population sizes of organisms in each trophic level. Sometimes population sizes decrease at each higher trophic level. This is not always true. For example, one tree can be food for 50,000 insects. In this case, the pyramid would be inverted.
