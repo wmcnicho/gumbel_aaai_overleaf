@@ -1082,7 +1082,7 @@ Your task is to write an essay for a given prompt.
 
 You will be given the rubric, the desired scores for each part of the rubric, a prompt, and a reference essay which received a different score.
 Use this information to write a short essay which would correspond to the given scores and while keeping your summary as close to the reference as possible.
-Your essay should be 1 paragraph and approximately 200 words.
+Your essay should be similar length to the provided reference text.
 
 \#\# Scoring Rubric
 
@@ -1098,41 +1098,69 @@ Your essay should be 1 paragraph and approximately 200 words.
 
 - 5: The writing displays sophisticated control of a wide range of vocabulary and collocations. The essay follows grammar and usage rules throughout the essay. Spelling and punctuation are correct throughout the essay.
 
-\#\# Examples:
-
-\textit{[Five demonstrations are included in the actual prompt, one at each rubric score level $(1, 2, 3, 4, 5)$, each formatted as:}
-
-\hspace{1em}\texttt{Prompt: <writing prompt>}
-
-\hspace{1em}\texttt{Desired scores: **Language Score:** <X>}
-
-\hspace{1em}\texttt{Essay: <example essay achieving score X>}
-
-\textit{Demonstration content is elided here for brevity; full demonstrations are available in our code release.]}
-
 \#\# Target Essay Prompt
 
 \{\{ prompt \}\}
-
-\#\# Desired Scores
-
-**Language Score:** \{\{ language\_score \}\}
 
 \#\# Reference Essay
 
 \{\{ gt\_reference \}\}
 
-End your response directly after giving the Essay.
+\#\# Original Scores
 
-Do not provide explanation, justification, or notes before or after the summary.
+**Language Score:** \{\{ original\_language\_score \}\}
 
-Do not preface with ``Here is the essay...''
+\#\# Desired Scores
 
-Do not postface the summary with ``Note:''
+**Language Score:** \{\{ language\_score \}\}
 
-\#\# Essay:
+Follow this step-by-step reasoning process to write your essay.
+
+STEP\_1: Identify phrases, words, sentences in the Reference essay leading to the Original score.
+
+STEP\_2: Propose minimal edits to those phrases, words, sentences so that the revised essay would receive the Desired score.
+
+STEP\_3: Produce the revised essay by applying the STEP\_2 edits to the Reference essay.
+
+Your goal: rewrite the Reference essay with minimal changes so it would receive the Desired score.
+
+IMPORTANT: The task is NOT complete until the FINAL\_JSON block is printed.
+
+You MUST:
+
+1) Output STEP\_1, STEP\_2, STEP\_3 reasoning.
+
+2) THEN output the FINAL\_JSON block.
+
+3) The FINAL\_JSON block must appear EXACTLY ONCE.
+
+4) The FINAL\_JSON block must be the LAST thing in your response.
+
+5) Do NOT stop after STEP\_3.
+
+6) Do NOT omit the FINAL\_JSON block.
+
+Inside the FINAL\_JSON block:
+
+- Output ONLY valid JSON.
+
+- The JSON must contain exactly one key: ``final\_essay''.
+
+- The value must be a single-line string.
+
+- Do not include newline characters inside the string.
+
+- Do not output any additional text after \texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}.
+
+SENTINELS (exact):
+
+\texttt{<{}<{}<FINAL\_JSON>{}>{}>}
+
+\{ ``final\_essay'': ``...'' \}
+
+\texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}
 \end{promptbox}
-\caption{Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion. The prompt includes the rubric with score-level descriptions, five in-context demonstrations (one per rubric score, elided here for brevity), the writing prompt, the desired target score, and the reference essay. Other DREsS criteria share this structure with the rubric block and demonstrations swapped. The CLASSE I\&R prompt follows the same structure adapted to the 1--4 CLASSE scale.}
+\caption{Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion. The model is prompted with the rubric, the writing prompt, the reference essay, the reference's original score, and the desired target score, and is instructed to follow a three-step chain-of-thought (identify spans, propose minimal edits, produce the revised essay). The final essay is emitted as JSON inside explicit sentinels, which we parse from the response. Other DREsS criteria share this structure with the rubric block replaced; the CLASSE I\&R prompt follows the same structure adapted to the 1--4 CLASSE scale.}
 \label{fig:ir_prompt}
 \end{figure*}
 
