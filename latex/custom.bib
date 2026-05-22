@@ -815,3 +815,42 @@
     primaryClass={cs.CL},
     url={https://arxiv.org/abs/2404.13076}
 }
+@inproceedings{li_prompting_2024,
+    address = {Torino, Italia},
+    title = {Prompting {Large} {Language} {Models} for {Counterfactual} {Generation}: {An} {Empirical} {Study}},
+    shorttitle = {Prompting {Large} {Language} {Models} for {Counterfactual} {Generation}},
+    url = {https://aclanthology.org/2024.lrec-main.1156/},
+    abstract = {Large language models (LLMs) have made remarkable progress in a wide range of natural language understanding and generation tasks. However, their ability to generate counterfactuals has not been examined systematically. To bridge this gap, we present a comprehensive evaluation framework on various types of NLU tasks, which covers all key factors in determining LLMs' capability of generating counterfactuals. Based on this framework, we 1) investigate the strengths and weaknesses of LLMs as the counterfactual generator, and 2) disclose the factors that affect LLMs when generating counterfactuals, including both the intrinsic properties of LLMs and prompt designing. The results show that, though LLMs are promising in most cases, they face challenges in complex tasks like RE since they are bounded by task-specific performance, entity constraints, and inherent selection bias. We also find that alignment techniques, e.g., instruction-tuning and reinforcement learning from human feedback, may potentially enhance the counterfactual generation ability of LLMs. On the contrary, simply increasing the parameter size does not yield the desired improvements. Besides, from the perspective of prompt designing, task guidelines unsurprisingly play an important role. However, the chain-of-thought approach does not always help due to inconsistency issues.},
+    urldate = {2025-12-23},
+    booktitle = {Proceedings of the 2024 {Joint} {International} {Conference} on {Computational} {Linguistics}, {Language} {Resources} and {Evaluation} ({LREC}-{COLING} 2024)},
+    publisher = {ELRA and ICCL},
+    author = {Li, Yongqi and Xu, Mayi and Miao, Xin and Zhou, Shen and Qian, Tieyun},
+    editor = {Calzolari, Nicoletta and Kan, Min-Yen and Hoste, Veronique and Lenci, Alessandro and Sakti, Sakriani and Xue, Nianwen},
+    month = may,
+    year = {2024},
+    pages = {13201--13221},
+}
+@inproceedings{nguyen_llms_2024,
+    address = {Miami, Florida, USA},
+    title = {{LLMs} for {Generating} and {Evaluating} {Counterfactuals}: {A} {Comprehensive} {Study}},
+    shorttitle = {{LLMs} for {Generating} and {Evaluating} {Counterfactuals}},
+    url = {https://aclanthology.org/2024.findings-emnlp.870/},
+    doi = {10.18653/v1/2024.findings-emnlp.870},
+    abstract = {As NLP models become more complex, understanding their decisions becomes more crucial. Counterfactuals (CFs), where minimal changes to inputs flip a model's prediction, offer a way to explain these models. While Large Language Models (LLMs) have shown remarkable performance in NLP tasks, their efficacy in generating high-quality CFs remains uncertain. This work fills this gap by investigating how well LLMs generate CFs for three tasks. We conduct a comprehensive comparison of several common LLMs, and evaluate their CFs, assessing both intrinsic metrics, and the impact of these CFs on data augmentation. Moreover, we analyze differences between human and LLM-generated CFs, providing insights for future research directions. Our results show that LLMs generate fluent CFs, but struggle to keep the induced changes minimal. Generating CFs for Sentiment Analysis (SA) is less challenging than NLI and Hate Speech (HS) where LLMs show weaknesses in generating CFs that flip the original label. This also reflects on the data augmentation performance, where we observe a large gap between augmenting with human and LLM CFs. Furthermore, we evaluate LLMs' ability to assess CFs in a mislabelled data setting, and show that they have a strong bias towards agreeing with the provided labels. GPT4 is more robust against this bias, but it shows strong preference to its own generations. Our analysis suggests that safety training is causing GPT4 to prefer its generations, since these generations do not contain harmful content. Our findings reveal several limitations and point to potential future work directions.},
+    urldate = {2026-02-19},
+    booktitle = {Findings of the {Association} for {Computational} {Linguistics}: {EMNLP} 2024},
+    publisher = {Association for Computational Linguistics},
+    author = {Nguyen, Van Bach and Youssef, Paul and Seifert, Christin and Schlötterer, Jörg},
+    editor = {Al-Onaizan, Yaser and Bansal, Mohit and Chen, Yun-Nung},
+    month = nov,
+    year = {2024},
+    pages = {14809--14824},
+}
+
+@misc{upwork,
+  author       = {{Upwork Inc.}},
+  title        = {Upwork: The World’s Work Marketplace},
+  year         = {2023},
+  url          = {https://www.upwork.com/},
+  note         = {Accessed: 2023-06-22}
+}
