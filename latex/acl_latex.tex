@@ -80,6 +80,21 @@
   bottom=6pt
 }
 
+% Qualitative counterfactual example box (appendix).
+\newtcolorbox{examplebox}[1]{
+  colback=gray!4,
+  colframe=gray!50!black,
+  title=#1,
+  fonttitle=\bfseries,
+  arc=2mm,
+  boxrule=0.6pt,
+  left=6pt,
+  right=6pt,
+  top=6pt,
+  bottom=6pt,
+  breakable
+}
+
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
 %\setlength\titlebox{<dim>}
@@ -1532,7 +1547,191 @@ Q6 Demonstration & Overall, which rewrite would be a better demonstration to hel
     \label{fig:label_interface_2}
 \end{figure*}
 
-% \subsection{Qualitative Counterfactual Examples}
+\subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
+
+We provide five illustrative tuples drawn from the teacher evaluation set, spanning four of the five CLASSE criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the automated scoring-model judgment and the normalized character-level similarity to the original. The accompanying ratings table shows each of the three contributing evaluators' pairwise comparison answers on which rewrite better advances the criterion (\textbf{better-on-criterion}), which is more similar to the student writing (\textbf{more similar}), and which would be a more useful demonstration to share with the student (\textbf{better feedback}). Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here for clarity. Student writing is shown verbatim, including original spelling and punctuation.
+
+\begin{examplebox}{Example 1 --- Details criterion (target score 4, student baseline 3)}
+\textbf{Student writing} (judge score 2):
+
+\begin{quote}\itshape
+Civil service jobs are available for all people.\,\, These jobs have fair pay from the merit system.\,\, These jobs are filled by the top applicants.\,\, This process is time consuming, but he benefits to having a civil service job out ways the steps that need to be taken.
+\end{quote}
+
+\textbf{Rewrite A --- GM} (judge $3.0$, sim $0.50$):
+
+\begin{quote}\itshape
+Civil service jobs are available for all people, offering a wide range of positions from clerks to law enforcement. These jobs are filled by the top applicants through the merit system, which ensures fair pay and fair treatment for all employees. The merit system is set up to protect the employee and provide equal and fair pay. This process is time consuming, but the benefits of having a civil service job outweigh the steps that need to be taken.
+\end{quote}
+
+\textbf{Rewrite B --- ME} (judge $4.0$, sim $0.30$):
+
+\begin{quote}\itshape
+Civil service jobs offer opportunities to men and women at various levels of government, including city, county, state, and federal. The merit system is used to recruit the most qualified individuals for each position, ensuring fair pay, training, and treatment regardless of background. With a range of job types available, from administrative roles to law enforcement and skilled trades, civil service offers secure employment options for those willing to invest the time and effort required to secure a position.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Details} & More similar & Better feedback \\
+\midrule
+E1 & ME & GM & ME \\
+E2 & GM & GM & GM \\
+E3 & GM & GM & GM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E1):} ``Rewrite B offers more details.''
+\end{examplebox}
+
+\begin{examplebox}{Example 2 --- Wording criterion (target score 4, student baseline 2)}
+\textbf{Student writing} (judge score 1):
+
+\begin{quote}\itshape
+People have heard of diabetes but few understand how its comes, it means high levels of sugar in their blood, insulin which used to control the sugar also it cannot be moved to muscle, causes of diabetes comes from following fatigue, weightloss there are two types type1 can happen at any age, type2 normally happens in adult age, it also cause heart attacks, eye problems, and body sores
+\end{quote}
+
+\textbf{Rewrite A --- ME} (judge $4.0$, sim $0.27$):
+
+\begin{quote}\itshape
+Developing a substantial understanding of diabetes requires identifying its underlying causes and potential health consequences. Essentially, diabetes is a lifelong condition characterised by abnormally high blood sugar levels. Insulin, a hormone produced by the pancreas, plays a pivotal role in regulating blood sugar. Insulin dysfunction occurs when the pancreas doesn't produce enough insulin or when cells become resistant to insulin, impeding sugar entry into muscle, fat, and liver cells. Symptoms of diabetes include fatigue, vision impairments, weight loss, and excess thirst. Seeking medical attention is crucial if these symptoms are present. Diagnosing diabetes involves distinguishing between type 1, which can appear at any age and has a predicable progression, and type 2, typically affecting adults associated with obesity and managed through lifestyle modifications, including diet and exercise. If left unchecked, diabetes can lead to numerous health complications, including kidney problems, heart disease, and sores.
+\end{quote}
+
+\textbf{Rewrite B --- GM} (judge $3.0$, sim $0.35$):
+
+\begin{quote}\itshape
+Diabetes is a condition that affects many people, but few understand its causes. Essentially, diabetes is a condition where the body's blood sugar levels are too high. The body's natural mechanism for regulating blood sugar is insulin, which is produced by the pancreas. When the body's insulin levels are too low or the cells are resistant to insulin, it can lead to a buildup of sugar in the blood. This can lead to a range of symptoms, including fatigue, weight loss, and increased thirst. There are two types of diabetes, with Type 1 being more common in younger people and Type 2 being more common in adults. Both types can lead to serious health complications, including heart disease, vision problems, and other issues.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Wording} & More similar & Better feedback \\
+\midrule
+E1 & ME & GM & ME \\
+E2 & GM & GM & GM \\
+E3 & GM & GM & GM \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{examplebox}
+
+\begin{examplebox}{Example 3 --- Language criterion (target score 4, student baseline 1)}
+\textbf{Student writing} (judge score 1):
+
+\begin{quote}\itshape
+uv radiation is mostly unlikely persontaage base from the human at the times and we has used to they process of the human and others can be affective very quickly is so dander in to they whole world of tjhem
+\end{quote}
+
+\textbf{Rewrite A --- GM} (judge $3.0$, sim $0.24$):
+
+\begin{quote}\itshape
+The human body's exposure to ultraviolet radiation from the sun or artificial sources is a complex issue, with both positive and negative effects on human health. While moderate exposure to UV radiation is essential to produce vitamin D, which is crucial for bone health, excessive exposure can lead to skin damage, premature aging, and even skin cancer. The effects of UV radiation on human health are multifaceted and depend on various factors, including the intensity of the radiation, the duration of exposure, and the individual's skin type.
+\end{quote}
+
+\textbf{Rewrite B --- ME} (judge $4.0$, sim $0.23$):
+
+\begin{quote}\itshape
+Ultraviolet radiation is a ubiquitous and energetic phenomenon, impacting the globe in complex and multifaceted ways. Its effects on human health are multifaceted, with some researchers stressing its potential harm, such as increased risk of skin cancer, while others highlight its positive effects, including the generation of vitamin D, which prevents certain forms of cancer. Furthermore, the strength of UV radiation is influenced by various factors, including season, elevation, and atmospheric conditions, underscoring the need for continued research into its far-reaching implications.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Language} & More similar & Better feedback \\
+\midrule
+E1 & GM & Same & GM \\
+E2 & GM & Same & GM \\
+E3 & GM & GM   & GM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E2):} ``I chose rewrite A because the sentence structure and vocabulary are simpler; the student sample scored a 1, so rewrite B might be too complex an example.''
+\end{examplebox}
+
+\begin{examplebox}{Example 4 --- Details criterion (target score 4, student baseline 3)}
+\textbf{Student writing} (judge score 2):
+
+\begin{quote}\itshape
+Ecologists construct a pyramid of numbers based on the population sizes of organisms in each trophic level. Sometimes population sizes decrease at each higher trophic level. This is not always true. For example, one tree can be food for 50,000 insects. In this case, the pyramid would be inverted.
+
+Energy decreases at each succeeding trophic level. The total energy transfer from one trophic level to the next is only about ten percent because organisms fail to capture and eat all the food available at the trophic level below them. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste.
+\end{quote}
+
+\textbf{Rewrite A --- ME} (judge $4.0$, sim $0.34$):
+
+\begin{quote}\itshape
+Ecologists use ecological pyramids to model the distribution of matter and energy within an ecosystem. This type of pyramid shows how energy flows through an ecosystem. The initial source of energy for all ecological pyramids is energy from the sun, which decreases at each succeeding trophic level due to inefficient energy transfer. The total energy transfer from one trophic level to the next is only about ten percent. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste, with the energy lost at each successive trophic level entering the environment as heat. Ecologists also construct pyramids of numbers based on population sizes, which sometimes decrease at each higher trophic level, but can also be inverted, such as when one tree is food for 50,000 insects.
+\end{quote}
+
+\textbf{Rewrite B --- GM} (judge $2.0$, sim $0.75$):
+
+\begin{quote}\itshape
+Ecologists construct a pyramid of numbers based on the population sizes of organisms in each trophic level. Sometimes population sizes decrease at each higher trophic level. This is not always true. For example, one tree can be food for 50,000 insects. In this case, the pyramid would be inverted. Energy decreases at each succeeding trophic level. The total energy transfer from one trophic level to the next is only about ten percent because organisms fail to capture and eat all the food available at the trophic level below them. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste. When the organism is eaten, the energy that was used to build body tissue is available as energy to be used by the organism that consumed it. The energy lost at each successive trophic level enters the environment as heat.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Details} & More similar & Better feedback \\
+\midrule
+E1 & Same & Same & GM \\
+E2 & GM   & GM   & GM \\
+E3 & ME   & GM   & ME \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E1):} ``While both rewrites offer many details, Rewrite B is more organized.''
+\end{examplebox}
+
+\begin{examplebox}{Example 5 --- Organization criterion (target score 4, student baseline 3)}
+\textbf{Student writing} (judge score 2):
+
+\begin{quote}\itshape
+el nino's impact was devastating and hurt many people and animals, the industry has since recovered
+\end{quote}
+
+\textbf{Rewrite A --- GM} (judge $4.0$, sim $0.20$):
+
+\begin{quote}\itshape
+The El Nino phenomenon has had a devastating impact on various parts of the world, particularly coastal cities. It brings about severe weather conditions such as flooding, mudslides, and landslides. The effects of El Nino are not limited to humans; it also affects the marine life, causing millions of fish to die and thousands of bird varieties to starve to death. The fishing industry in Peru has been severely affected, but it has since recovered.
+\end{quote}
+
+\textbf{Rewrite B --- ME} (judge $4.0$, sim $0.13$):
+
+\begin{quote}\itshape
+El Nino, a Spanish term for ``the child Jesus,'' causes severe weather patterns, resulting in devastating effects on coastal cities, including flooding, mudslides, and landslides. This warm water phenomenon occurs in the southern part of the globe during Christmas and affects the marine ecosystem. The excessive rain reduces oxygen and nutrients in the water, leading to the mass death of fish and starvation of birds. Historically, El Nino events, such as the one in 1973, have severely impacted the fishing industry, causing a significant decline in fish catch. Although the industry has recovered, it has not reached its previous high point, indicating a lasting impact of this phenomenon.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Organization} & More similar & Better feedback \\
+\midrule
+E1 & ME & Same & ME \\
+E2 & GM & GM   & GM \\
+E3 & GM & GM   & GM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E1):} ``Rewrite A states that the fishing industry has recovered. This is not the case as the article clearly states that it is better, but has not reached levels of 1973.''
+
+\textit{Comment (E2):} ``B is cohesive but rewritten above the student's level. The transitions in A are more simplistic, but A would most likely make more sense to the student.''
+\end{examplebox}
 
 % A couple demonstrations
 
