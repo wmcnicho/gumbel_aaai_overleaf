@@ -1484,6 +1484,54 @@ Eval / save steps & 100 / 100 & 50 / 50 \\
 
 \paragraph{Selected DPO hyperparameters.} We selected the DPO learning rate via a small sweep on Llama-3 / DREsS with an SFT prior at LoRA rank $r{=}16$. Raising LR from $5\!\times\!10^{-6}$ (initial value) to $2\!\times\!10^{-5}$ produced a substantial gain in DPO reward accuracy across criteria: $+0.08$ on Content ($0.66\rightarrow0.75$), $+0.10$ on Organization ($0.68\rightarrow0.78$), and $+0.13$ on Language ($0.74\rightarrow0.87$). Subsequently increasing the SFT-prior LoRA rank from $16$ to $32$ (with $\alpha{=}32$) added an additional $\approx0.02$ reward accuracy on average. With the final LR $2\!\times\!10^{-5}$ / $r{=}32$ configuration, CLASSE DPO reaches $0.85$--$0.88$ reward accuracy across its five criteria.
 
+\subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
+
+\paragraph{Recruitment and demographics.} The five evaluators were recruited via Upwork \cite{upwork} with explicit screening for documented K--12 or post-secondary English teaching experience. All evaluators reported at least eight years of English teaching experience, with several reporting twenty-five or more years, spanning middle school, high school, and university settings in the United States. Each evaluator completed an IRB-approved consent process before participating; the task took approximately two hours and evaluators were compensated \$60.
+
+\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating method was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$, summarized in Table~\ref{tab:eval_questions}.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l p{0.62\linewidth}}
+\toprule
+\textbf{Question} & \textbf{Prompt shown to evaluator} \\
+\midrule
+\multicolumn{2}{l}{\emph{Per-rewrite (1--3 scale: None / Slight / Clear), asked for both A and B}} \\
+Q1 Improvement & How much does this rewrite improve the student writing on criterion $X$? \\
+Q2 Similarity  & How similar is this rewrite to the original student writing? \\
+Q3 Helpfulness & How useful would this rewrite be as feedback for the student on criterion $X$? \\
+\midrule
+\multicolumn{2}{l}{\emph{Comparison (A / B / Same)}} \\
+Q4 Criterion   & Which rewrite is better in terms of criterion $X$? \\
+Q5 Similarity  & Which rewrite is more similar to the original student writing? \\
+Q6 Demonstration & Overall, which rewrite would be a better demonstration to help the student improve on criterion $X$? \\
+\bottomrule
+\end{tabular}
+\caption{The six questions evaluators answered for each (passage, student summary, rewrite~A, rewrite~B) tuple. Per-rewrite items capture absolute judgments on each rewrite; comparison items capture pairwise preferences.}
+\label{tab:eval_questions}
+\end{table}
+
+\paragraph{Calibration material.} Evaluators were provided with a multi-section reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. The full instructional document is approximately twenty pages and is released alongside our code artifacts.
+
+\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}). \mh{Confirm which screenshot corresponds to which step; swap labels if reversed.}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{latex/figs/label_interface_1.png}
+    \caption{Teacher evaluation interface --- per-rewrite questions (Q1--Q3) for rewrites A and B.}
+    \label{fig:label_interface_1}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{latex/figs/label_interface_2.png}
+    \caption{Teacher evaluation interface --- pairwise comparison questions (Q4--Q6).}
+    \label{fig:label_interface_2}
+\end{figure*}
+
 % \subsection{Qualitative Counterfactual Examples}
 
 % A couple demonstrations
