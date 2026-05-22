@@ -1295,7 +1295,7 @@ This criterion measures how well the original aspects of the summary demonstrate
 
 \subsection{DREsS Dataset Details} \label{apx:dress}
 
-We further detail the DREsS dataset. Table~\ref{apx:dress_criteria} provides descriptions for each of the three grading criteria, and Table~\ref{apx:dress_rubric} details score definitions for each possible value on the 1--5 scale. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Both descriptions and rubric definitions are taken from the prompts used by our LLM-as-a-judge scoring model (Appendix~\ref{apx:scoring}); the source dataset \cite{yoo_dress_2025} provides only general guidance per criterion, which we operationalized into the rubric scale below.
+We further detail the DREsS dataset. Table~\ref{apx:dress_criteria} provides descriptions for each of the three grading criteria, and Table~\ref{apx:dress_rubric} details score definitions for each possible value on the 1--5 scale. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words (calculated by simple space separation). Both descriptions and rubric definitions are taken from the prompts used by our LLM-as-a-judge scoring model (Appendix~\ref{apx:scoring}); the source dataset \cite{yoo_dress_2025} provides only general guidance per criterion, which we operationalized into the rubric scale below.
 
 \begin{table*}[!h]
 \centering
@@ -1320,10 +1320,8 @@ This criterion measures the student's control of vocabulary and grammatical stru
 
 \begin{figure*}
     \centering
-    % TODO: replace with DREsS token statistics figure. See prompt in the
-    % \mh{} note below for how to generate one matching the CLASSE figure.
-    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_2.png}
-    \caption{\mh{Placeholder using CLASSE figure --- replace with DREsS token statistics.} Token count statistics for the essays and writing prompts in the DREsS dataset.}
+    \includegraphics[width=1\linewidth]{latex/figs/dress_token_statistics.png}
+    \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words. Essay length is computed over the $1{,}979$ non-null essays in $\text{DREsS}_{\text{New}}$; writing-prompt length is computed over all $2{,}279$ rows, with the $65$ unique prompts repeating across rows.}
     \label{fig:dress_token_counts}
 \end{figure*}
 
