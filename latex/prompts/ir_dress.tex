@@ -1,0 +1,87 @@
+\begin{figure*}
+\begin{promptbox}{Example 3: ``Language'' Identify-and-Replace (I\&R) Prompt --- DREsS}
+Your task is to write an essay for a given prompt.
+
+You will be given the rubric, the desired scores for each part of the rubric, a prompt, and a reference essay which received a different score.
+Use this information to write a short essay which would correspond to the given scores and while keeping your summary as close to the reference as possible.
+Your essay should be similar length to the provided reference text.
+
+\#\# Scoring Rubric
+
+**Language Score** (1--5):
+
+- 1: Very basic or incorrect language use; pervasive errors severely hinder understanding.
+
+- 2: Limited vocabulary and frequent errors in grammar, spelling, or punctuation that interfere with readability.
+
+- 3: Vocabulary is sufficient but limited or repetitive; noticeable errors in grammar or mechanics occasionally affect clarity.
+
+- 4: Uses a wide range of vocabulary with generally accurate usage; minor grammatical or mechanical errors do not affect clarity.
+
+- 5: The writing displays sophisticated control of a wide range of vocabulary and collocations. The essay follows grammar and usage rules throughout the essay. Spelling and punctuation are correct throughout the essay.
+
+\#\# Target Essay Prompt
+
+\{\{ prompt \}\}
+
+\#\# Reference Essay
+
+\{\{ gt\_reference \}\}
+
+\#\# Original Scores
+
+**Language Score:** \{\{ original\_language\_score \}\}
+
+\#\# Desired Scores
+
+**Language Score:** \{\{ language\_score \}\}
+
+Follow this step-by-step reasoning process to write your essay.
+
+STEP\_1: Identify phrases, words, sentences in the Reference essay leading to the Original score.
+
+STEP\_2: Propose minimal edits to those phrases, words, sentences so that the revised essay would receive the Desired score.
+
+STEP\_3: Produce the revised essay by applying the STEP\_2 edits to the Reference essay.
+
+Your goal: rewrite the Reference essay with minimal changes so it would receive the Desired score.
+
+IMPORTANT: The task is NOT complete until the FINAL\_JSON block is printed.
+
+You MUST:
+
+1) Output STEP\_1, STEP\_2, STEP\_3 reasoning.
+
+2) THEN output the FINAL\_JSON block.
+
+3) The FINAL\_JSON block must appear EXACTLY ONCE.
+
+4) The FINAL\_JSON block must be the LAST thing in your response.
+
+5) Do NOT stop after STEP\_3.
+
+6) Do NOT omit the FINAL\_JSON block.
+
+Inside the FINAL\_JSON block:
+
+- Output ONLY valid JSON.
+
+- The JSON must contain exactly one key: ``final\_essay''.
+
+- The value must be a single-line string.
+
+- Do not include newline characters inside the string.
+
+- Do not output any additional text after \texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}.
+
+SENTINELS (exact):
+
+\texttt{<{}<{}<FINAL\_JSON>{}>{}>}
+
+\{ ``final\_essay'': ``...'' \}
+
+\texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}
+\end{promptbox}
+\caption{Example Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion.}
+\label{fig:ir_prompt}
+\end{figure*}

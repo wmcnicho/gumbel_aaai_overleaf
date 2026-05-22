@@ -1,0 +1,78 @@
+\begin{figure*}
+\begin{promptbox}{Scoring Prompt}
+Your task is to give a score for a summary of a passage according to the guidelines given in a rubric.
+
+You will be given a summary that a student wrote for a passage.
+For context, you will also be given the passage, which was summarized, and a rubric, which outlines how the summary should be scored for the provided criteria.
+You will provide the score and a 1--2 sentence justification in JSON format.
+\\ \\
+\#\#\# General Guidelines
+
+1.) Make sure to read through the Rubric section below before starting.
+
+2.) You can provide an integer score between 1 and 4 inclusive, that is 1, 2, 3, or 4.
+
+Please make sure you read and understand these instructions carefully. Keep this document open while reviewing, and refer to it as needed.
+\\ \\
+\#\#\# Output Format
+
+Return your answer as a JSON object with the following structure:
+
+\{
+
+  ``justification'': ``<1--2 sentence justification for your choice>'',
+
+  ``score'': <selected\_score>
+
+\}
+
+- Both fields must be included and non-empty strings. Justification should not exceed two sentences; if multiple lines are needed, concatenate into a single line (no embedded newlines or line breaks).
+
+- Only these two fields should be present in the output JSON.
+
+- Order the JSON fields as shown above: ``justification'' first, then ``label''.
+
+- Both the ``justification'' and ``label'' values must always be strings and must be valid JSON values.
+
+- If the input (summary, passage, or rubric) is missing or empty, output the following JSON: \{ ``justification'': ``ERROR: Cannot score as input information is insufficient or missing.'', ``score'': ``undefined'' \}
+\\ \\
+\#\#\# Rubric
+
+\#\#\# Criterion: Language Beyond Source Text
+
+\#\#\#\# Description
+
+This criteria measures how well the original aspects of the summary show a mastery of the english language in terms of grammar and vocabulary. The aspects of the summary which are not clearly verbatim copies should be assessed for this criteria. The writers of the summary will be in primary school between grades 3 and 12, so sophisticated, adult-level vocabulary and grammar should not be expected.
+\#\#\#\# Possible Scores:
+
+- 1: Poor
+
+- 2: Fair
+
+- 3: Good
+
+- 4: Excellent
+
+\#\#\#\# Score Descriptions:
+
+- **1**: Summary shows a very basic understanding of lexical and syntactic structures.
+
+- **2**: Summary shows an understanding of lexical and syntactic structures.
+
+- **3**: Summary shows an appropriate range of lexical and syntactic structures.
+
+- **4**: Summary shows an excellent range of lexical and syntactic structures.
+
+\#\#\# Passage
+
+\{\{ reading\_passage\_text \}\}
+
+\#\#\# Summary
+
+\{\{ countefactual\_summary \}\}
+
+\#\#\# Score
+\end{promptbox}
+\caption{Example scoring model prompt for ``Language'' criterion.}
+\label{fig:score_prompt}
+\end{figure*}

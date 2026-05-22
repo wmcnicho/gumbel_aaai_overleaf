@@ -1,0 +1,56 @@
+\begin{figure*}
+\begin{promptbox}{Example 1: ``Language'' Counterfactual Instruction Prompt}
+Your task is to summarize a passage in a way which would receive a score following a set criteria.
+
+You will be given the rubric, the desired scores for each part of the rubric, a passage to summarize, and a reference summary which received a different score.
+Use this information to write a summary which would correspond to the given scores and while keeping your summary as close to the reference as possible.
+
+\#\#\# Rubric:
+
+\#\#\# Language Beyond Source Text
+
+**Scores:**
+
+- 1: Poor
+
+- 2: Fair
+
+- 3: Good
+
+- 4: Excellent
+
+**Score Descriptions:**
+
+- **1**: Summary shows a very basic understanding of lexical and syntactic structures.
+
+- **2**: Summary shows an understanding of lexical and syntactic structures.
+
+- **3**: Summary shows an appropriate range of lexical and syntactic structures.
+
+- **4**: Summary shows an excellent range of lexical and syntactic structures.
+
+\#\#\# Passage:
+
+\{\{ reading\_passage\_text \}\}
+
+\#\#\# Desired scores:
+
+**Language Beyond Source Text:** \{\{ language\_score \}\}
+
+\#\#\# Reference Summary:
+
+\{\{ original\_student\_summary \}\}
+
+End your response directly after giving the summary
+
+Do not provide explanation, justification, or notes before or after the summary.
+
+Do not preface with "Here is the summary..."
+
+Do not postface the summary with ``Note'':
+
+\#\#\# Summary:
+\end{promptbox}
+\caption{Example instruction prompt for ``Language'' criterion including reference.}
+\label{apx:prompt_ref}
+\end{figure*}

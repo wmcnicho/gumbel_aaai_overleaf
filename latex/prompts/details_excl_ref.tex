@@ -1,0 +1,54 @@
+\begin{figure*}
+\begin{promptbox}{Example 2: ``Details'' Counterfactual Instruction - Excluding Reference}
+Your task is to summarize a passage in a way which would receive a score following a set criteria.
+
+
+You will be given the rubric, the desired score, and a passage to summarize. Use this information to write a summary which would correspond to the given score.
+
+
+\#\#\# Rubric:
+
+\#\#\# Details
+
+**Scores:**
+
+- 1: Poor
+
+- 2: Fair
+
+- 3: Good
+
+- 4: Excellent
+
+**Score Descriptions:**
+
+- **1**: Statements are not related to the passage.
+
+- **2**: Some key information from the passage is included, but important ideas are missing.
+
+- **3**: Most key information from the passage is included, but some ideas may be irrelevant or inaccurate.
+
+- **4**: All key information in the passage is included without irrelevant ideas.
+
+
+\#\#\# Passage:
+
+\{\{ reading\_passage\_text \}\}
+
+\#\#\# Desired scores:
+
+**Details:** \{\{ details\_score \}\}
+
+End your response directly after giving the summary
+
+Do not provide explanation, justification, or notes before or after the summary.
+
+Do not preface with "Here is the summary..."
+
+Do not postface the summary with ``Note'':
+
+\#\#\# Summary:
+\end{promptbox}
+\caption{Example instruction prompt for ``Details'' criterion excluding reference.}
+\label{fig:exc_prompt}
+\end{figure*}
