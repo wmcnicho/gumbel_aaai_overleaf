@@ -1621,7 +1621,7 @@ E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
 \onecolumn
 \subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
 
-We provide five illustrative tuples drawn from the teacher evaluation set, spanning four of the five CLASSE criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the automated scoring-model judgment and the normalized character-level similarity to the original. The accompanying ratings table shows each of the three contributing evaluators' pairwise comparison answers on which rewrite better advances the criterion (\textbf{better-on-criterion}), which is more similar to the student writing (\textbf{more similar}), and which would be a more useful demonstration to share with the student (\textbf{better feedback}). Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here for clarity. Student writing is shown verbatim, including original spelling and punctuation.
+We provide eight illustrative tuples drawn from the teacher evaluation set, spanning all five CLASSE criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the automated scoring-model judgment and the normalized character-level similarity to the original. The accompanying ratings table shows each of the three contributing evaluators' pairwise comparison answers on which rewrite better advances the criterion (\textbf{better-on-criterion}), which is more similar to the student writing (\textbf{more similar}), and which would be a more useful demonstration to share with the student (\textbf{better feedback}). Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here for clarity. Student writing is shown verbatim, including original spelling and punctuation.
 
 \begin{examplebox}{Example 1 --- Details criterion (target score 4, student baseline 3)}
 \textbf{Student writing} (judge score 2):
@@ -1803,6 +1803,130 @@ E3 & GM & GM   & GM \\
 \textit{Comment (E1):} ``Rewrite A states that the fishing industry has recovered. This is not the case as the article clearly states that it is better, but has not reached levels of 1973.''
 
 \textit{Comment (E2):} ``B is cohesive but rewritten above the student's level. The transitions in A are more simplistic, but A would most likely make more sense to the student.''
+\end{examplebox}
+
+\begin{examplebox}{Example 6 --- Details criterion (target score 4, student baseline 2)}
+\textbf{Student writing} (judge score 2):
+
+\begin{quote}\itshape
+People are likely to die due to cancer. There are two types of cancer one is caused due to cancer and the other skin cells turning into cancel cells. Colored skin people are likely to get cancer as they are exposed to more sunlight. Using Sun block can prevent cancer. Cancer is malignant and can be prevented by staying out of sun during peak hours.
+\end{quote}
+
+\textbf{Rewrite A --- ME} (judge $4.0$, sim $0.28$):
+
+\begin{quote}\itshape
+Skin cancer is a significant health issue in California, with approximately 9,000 deaths expected this year. There are two main types: one caused by sun exposure and the other when skin cells become malignant. The risk of skin cancer is higher for individuals with fair skin, blue eyes, and those who frequently expose themselves to the sun. Early detection and treatment can improve the survival rate to 80\%. To prevent skin cancer, individuals should avoid sun exposure during peak hours, use sunscreen with a protective factor of at least 15, and wear protective clothing such as hats and long-sleeve shirts. Regular skin checks can also help identify skin cancer early on.
+\end{quote}
+
+\textbf{Rewrite B --- GM} (judge $3.0$, sim $0.34$):
+
+\begin{quote}\itshape
+Skin cancer is a serious health issue that affects thousands of people each year. There are two types of skin cancer, one type is caused by the sun and the other type is when skin cells are turned into cancer cells. The risk of getting skin cancer depends on several factors, including having light-colored skin, blue eyes, getting older, or being in the sun a lot. The survival rate for skin cancer is 80\% when found and treated early. Skin cancer can be prevented by staying out of the sun during the hottest part of the day, using sun block with a protective factor of at least 15, wearing hats and long-sleeve shirts, and looking at your skin each month to find any skin cancers early.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Details} & More similar & Better feedback \\
+\midrule
+E1 & GM & ME   & GM \\
+E2 & GM & GM   & GM \\
+E3 & GM & Same & GM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E1):} ``Rewrite A offers information that is different from the original writing. The original writing states that the survival rate for skin cancer is 80\% when found early. In Rewrite A states that early detection and treatment CAN increase the survival rate to 80\%. The wording is enough to confuse students.''
+\end{examplebox}
+
+\begin{examplebox}{Example 7 --- Wording criterion (target score 4, student baseline 2)}
+\textbf{Student writing} (judge score 2):
+
+\begin{quote}\itshape
+People can seriously hurt themselves or others with fireworks.
+
+One boy was recently hurt while watching someone set off a firecracker placed inside a plastic pencil. The pencil exploded and a piece of the plastic went into the boys eye.
+
+The boy does not know if he will ever see out of his left eye again, despite doctors' best efforts to fix his eye.
+
+Illegal fireworks like firecrackers explode and can easily hurt people. Legal fireworks include those that do not explode and are safer.
+
+Regardless what fireworks are being used, extreme care is essential. It is very important for adults to always be with their children when fireworks are being used. All types of fireworks can start fires or hurt people.
+\end{quote}
+
+\textbf{Rewrite A --- ME} (judge $4.0$, sim $0.28$):
+
+\begin{quote}\itshape
+Fireworks pose a significant risk to individuals, who may suffer severe injuries, including permanent vision loss, even in the hands of experienced users. A recent incident serves as a poignant reminder, where a boy was left with doubts about the future of his left eye after a plastic pencil exploded, sending a shard of plastic into his eye during a nearby firecracker detonation. Although doctors have committed to treating the boy's condition, medical outcomes are uncertain. Furthermore, the use of explosive fireworks like firecrackers increases the likelihood of harm, whereas safer, non-exploding alternatives are legal and less hazardous. Ultimately, maintaining vigilance and safety precautions are crucial when handling fireworks, and having adult supervision is essential, especially for children, to diminish the risks associated with these combustible devices.
+\end{quote}
+
+\textbf{Rewrite B --- GM} (judge $4.0$, sim $0.29$):
+
+\begin{quote}\itshape
+Fireworks pose a significant risk to individuals, whether they are handling them or simply in close proximity. A recent incident involving a firecracker placed inside a plastic container highlights the potential for serious injury. When a firecracker exploded, a piece of plastic flew into a boy's eye, causing severe damage that may be permanent. The dangers of fireworks are further exacerbated by the fact that many types are illegal, and even those that are legal can cause harm if not handled properly.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Wording} & More similar & Better feedback \\
+\midrule
+E1 & Same & Same & Same \\
+E2 & GM   & GM   & GM   \\
+E3 & GM   & Same & GM   \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E1):} ``Honestly, I feel as if the student deserved a 2.''
+
+\textit{Comment (E2):} ``Rewrite A is too different from the student's original writing.''
+\end{examplebox}
+
+\begin{examplebox}{Example 8 --- Main Idea criterion (target score 4, student baseline 1)}
+\textbf{Student writing} (judge score 2):
+
+\begin{quote}\itshape
+Most people in California are more environmentally conscious than in other places in the country. They also don't believe that the government is doing enough to stop this.
+\end{quote}
+
+\textbf{Rewrite A --- ME} (judge $4.0$, sim $0.19$):
+
+\begin{quote}\itshape
+California residents are particularly concerned about the state of the planet, linking the issue to global warming. They believe that this warming poses a threat to living things. Californians want the state to take responsibility for investigating the problem.
+
+Californians are deeply disturbed when it comes to the federal government's response to global warming. This year, they are more worried than ever, feeling the problem is getting worse. They want the state to take action immediately.
+
+Californians want the state to start working on the problem as soon as possible, rather than waiting for the federal government to act.
+\end{quote}
+
+\textbf{Rewrite B --- GM} (judge $4.0$, sim $0.24$):
+
+\begin{quote}\itshape
+Most Californians are very concerned about global warming. They believe that the earth is warming too much and that it will affect living things on the earth. A survey was taken in California to see how people felt about global warming. The results showed that most people in California are very concerned about global warming and want the state to work on the problem. They are not happy with the federal government's handling of the issue and want the state to start working on it immediately.
+\end{quote}
+
+\textbf{Evaluator comparison:}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+& Better on \textbf{Main Idea} & More similar & Better feedback \\
+\midrule
+E1 & ME & GM   & ME \\
+E2 & GM & GM   & GM \\
+E3 & GM & Same & GM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Comment (E1):} ``Rewrite A states the main idea and also provides details about the main idea. It is a much more thorough piece of writing. Rewrite B clearly states the main idea, but only provides basic details about the main idea. It seems that both meet the criteria outlined, but currently in education, students are expected (from 6th grade and beyond) to offer clear details after providing the main idea.''
+
+\textit{Comment (E2):} ``Rewrite A is repetitive. B captures the main idea more succinctly.''
 \end{examplebox}
 \twocolumn
 
