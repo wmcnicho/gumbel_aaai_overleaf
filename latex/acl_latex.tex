@@ -874,9 +874,76 @@ On fairness, bias, and accountability, both the generation and evaluation compon
 \appendix
 
 \section{Appendix}\label{sec:appendix}
+
+%% =====================================================================
+%% TEXT SECTIONS
+%% =====================================================================
+
 \subsection{Per-Criterion Results} \label{apx:tradeoffs}
 
 Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-criterion expansion of the aggregate similarity and validity numbers reported for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct in the main paper. For each (model, dataset) pair we show all five counterfactual generation methods. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones: $\beta$-Hindsight (BH) tends to maximize similarity, GM tends to maximize validity, and the prompting baselines occupy intermediate positions. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that for paraphrase-heavy criteria the in-context demonstration baseline can be competitive with logit-level control.
+
+\subsection{Instruction Prompts} \label{apx:prompts}
+
+We include the details of the instructions passed to the various open-weight models during counterfactual generation. The base counterfactual prompt is shown both including the reference summary (Figure~\ref{apx:prompt_ref}) and excluding it (Figure~\ref{fig:exc_prompt}) for two distinct criteria. The Identify-and-Replace (I\&R) prompt is shown in Figure~\ref{fig:ir_prompt}, illustrated on the DREsS ``Language'' criterion. Format is identical for other criteria with rubric details replaced.
+
+\subsection{Scoring Model} \label{apx:scoring}
+
+Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
+
+\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
+
+For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
+
+\subsection{Dataset Details} \label{apx:classe}
+
+We report detailed descriptions for each CLASSE criterion in Table~\ref{apx:criteria} and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation). We report detailed descriptions for each DREsS criterion in Table~\ref{apx:dress_criteria} and Table~\ref{apx:dress_rubric} details score definitions for each possible value. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.
+
+\subsection{Training Details} \label{apx:training}
+
+We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} and \texttt{Qwen3-4B-Instruct-2507}. The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. For both stages, we train a rank-$32$ LoRA adapter with dropout $0.05$ for all attention and MLP projections using an AdamW optimizer. For SFT, we use a constant learning rate of $5\!\times\!10^{-5}$ with weight decay $0.01$, and in DPO we use a cosine schedule at $2\!\times\!10^{-5}$ against the frozen SFT LoRA as the reference policy.
+
+\paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
+
+\paragraph{Selected DPO hyperparameters.} We selected the DPO learning rate via a small sweep on Llama-3 / DREsS with an SFT prior at LoRA rank $r{=}16$. Raising LR from $5\!\times\!10^{-6}$ (initial value) to $2\!\times\!10^{-5}$ produced a substantial gain in DPO reward accuracy across criteria: $+0.08$ on Content ($0.66\rightarrow0.75$), $+0.10$ on Organization ($0.68\rightarrow0.78$), and $+0.13$ on Language ($0.74\rightarrow0.87$). Subsequently increasing the SFT-prior LoRA rank from $16$ to $32$ (with $\alpha{=}32$) added an additional $\approx0.02$ reward accuracy on average. With the final LR $2\!\times\!10^{-5}$ / $r{=}32$ configuration, CLASSE DPO reaches $0.85$--$0.88$ reward accuracy across its five criteria.
+
+\subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
+
+\paragraph{Recruitment and demographics.} The five evaluators were recruited via Upwork \cite{upwork} with explicit screening for documented K--12 or post-secondary English teaching experience. All evaluators reported at least eight years of English teaching experience, with several reporting twenty-five or more years, spanning middle school, high school, and university settings in the United States. Each evaluator completed an IRB-approved consent process before participating; the task took approximately two hours and evaluators were compensated \$60.
+
+\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating method was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$, summarized in Table~\ref{tab:eval_questions}.
+
+\paragraph{Calibration material.} Evaluators were provided with a multi-section reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. The full instructional document is approximately twenty pages and is released alongside our code artifacts.
+
+\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}).
+
+\paragraph{Sample.} The headline analysis is computed over $150$ ratings from three contributing evaluators on $50$ stratified $(\text{passage}, \text{summary}, \text{rewrite~A}, \text{rewrite~B})$ tuples, balanced as $10$ tuples per CLASSE criterion and stratified across the original student score on the target criterion. The pair of rewrites for each tuple was sampled with one rewrite from GM and one from the Minimal-Edit baseline at matched automated validity (target score~$4$).
+
+\paragraph{Per-criterion preferences.} Table~\ref{tab:eval_per_criterion} reports the per-criterion GM win rate on the three pairwise questions (ties excluded). Aggregated across criteria, the headline pattern is that GM is preferred on similarity (63\% GM wins, $p\!=\!0.024$) and roughly tied on improvement and feedback. The criterion-level breakdown reveals that this aggregate hides substantial criterion-specific variation: GM is preferred on every dimension for the Language and Details criteria, while it loses on Main Idea and on the criterion-targeted comparison for Organization (Cohesion), where evaluators preferred the Minimal-Edit rewrites despite GM's clear similarity advantage on the same criterion (88\% GM win on the similarity comparison).
+
+\paragraph{Preferences scale with student score.} The student's original score on the target criterion (always less than the target of $4$) appears to modulate GM's similarity advantage. Table~\ref{tab:eval_per_ref} bins ratings by the student's reference score; the GM win rate on the ``more similar'' comparison rises sharply from $48\%$ at reference~$1$ to $92\%$ at reference~$3$ (binomial $p\!<\!10^{-3}$), and a Spearman rank correlation between the reference score and the GM-minus-ME Likert difference on the per-rewrite similarity item gives $\rho = 0.279$ ($p = 0.0004$, $n = 150$). The criterion preferences also drift in the same direction, with GM moving from a slight loss at reference~$1$ to a slight win at reference~$3$, though neither end is individually significant. This pattern is consistent with GM being most useful when the student writing is already close to the target rubric score, leaving room for minimal-edit-style improvement.
+
+\paragraph{Similarity preference predicts overall preference.} Conditioning on the same evaluator's response to the ``more similar'' comparison reveals a strong interaction between the similarity judgment and the other two pairwise picks. When the evaluator marks GM as more similar to the student writing, GM is preferred on improvement in $65\%$ of those cases and on feedback in $68\%$; when the evaluator marks Minimal-Edit as more similar, GM's win rate on improvement drops to $39\%$ and on feedback to $38\%$. The full $3\!\times\!3$ contingency table is significant for both the improvement comparison ($\chi^2(4) = 14.8$, $p = 5.2\!\times\!10^{-3}$) and the feedback comparison ($\chi^2(4) = 23.4$, $p = 1.1\!\times\!10^{-4}$). This is consistent with the main-text claim that evaluators who recognize the similarity advantage of GM also prefer it pedagogically.
+
+\paragraph{Inter-rater agreement.} Cohen's $\kappa$ on the pairwise comparisons across the three rater pairs (averaged) is $0.03$ for ``better on criterion,'' $0.16$ for ``more similar,'' and $-0.02$ for ``better feedback''; quadratic-weighted $\kappa$ on the per-rewrite Likert items is $0.15$--$0.27$. These values are at the lower end of typical human-evaluation reliability and reflect the difficulty of grading subtle differences between two rewrites that already share matched automated validity. Despite the low pairwise agreement on individual tuples, the per-rater marginal preferences (Table~\ref{tab:eval_per_rater}) are directionally consistent across the three evaluators, with all three favoring GM on similarity and clustering around chance for improvement and feedback. We therefore interpret the headline findings as aggregate preference patterns rather than reliable per-task judgments.
+
+%% =====================================================================
+%% QUALITATIVE EXAMPLES
+%% =====================================================================
+
+\onecolumn
+\subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
+
+\input{latex/examples/civil_service}
+
+\input{latex/examples/global_warming}
+
+\input{latex/examples/ecological_pyramids}
+\twocolumn
+
+%% =====================================================================
+%% NUMERICAL TABLES
+%% =====================================================================
 
 \begin{table*}[h]
 \centering
@@ -950,296 +1017,6 @@ Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-crit
 \label{tab:appendix_dress}
 \end{table*}
 
-
-\subsection{Instruction Prompts} \label{apx:prompts}
-
-We include the details of the instructions passed to the various open-weight models during counterfactual generation. The base counterfactual prompt is shown both including the reference summary (Figure~\ref{apx:prompt_ref}) and excluding it (Figure~\ref{fig:exc_prompt}) for two distinct criteria. The Identify-and-Replace (I\&R) prompt is shown in Figure~\ref{fig:ir_prompt}, illustrated on the DREsS ``Language'' criterion. Format is identical for other criteria with rubric details replaced.
-
-\begin{figure*}
-\begin{promptbox}{Example 1: ``Language'' Counterfactual Instruction Prompt}
-Your task is to summarize a passage in a way which would receive a score following a set criteria.
-
-You will be given the rubric, the desired scores for each part of the rubric, a passage to summarize, and a reference summary which received a different score.
-Use this information to write a summary which would correspond to the given scores and while keeping your summary as close to the reference as possible.
-
-\#\#\# Rubric:
-
-\#\#\# Language Beyond Source Text
-
-**Scores:**
-
-- 1: Poor  
-
-- 2: Fair  
-
-- 3: Good  
-
-- 4: Excellent  
-
-**Score Descriptions:**
-
-- **1**: Summary shows a very basic understanding of lexical and syntactic structures.  
-
-- **2**: Summary shows an understanding of lexical and syntactic structures.  
-
-- **3**: Summary shows an appropriate range of lexical and syntactic structures.  
-
-- **4**: Summary shows an excellent range of lexical and syntactic structures.  
-
-\#\#\# Passage:
-
-\{\{ reading\_passage\_text \}\}
-
-\#\#\# Desired scores:
-
-**Language Beyond Source Text:** \{\{ language\_score \}\}
-
-\#\#\# Reference Summary:
-
-\{\{ original\_student\_summary \}\}
-
-End your response directly after giving the summary
-
-Do not provide explanation, justification, or notes before or after the summary.
-
-Do not preface with "Here is the summary..."
-
-Do not postface the summary with ``Note'':
-
-\#\#\# Summary:
-\end{promptbox}
-\caption{Example instruction prompt for ``Language'' criterion including reference.}
-\label{apx:prompt_ref}
-\end{figure*}
-
-\begin{figure*}
-\begin{promptbox}{Example 2: ``Details'' Counterfactual Instruction - Excluding Reference}
-Your task is to summarize a passage in a way which would receive a score following a set criteria.
-
-
-You will be given the rubric, the desired score, and a passage to summarize. Use this information to write a summary which would correspond to the given score.
-
-
-\#\#\# Rubric:
-
-\#\#\# Details
-
-**Scores:**
-
-- 1: Poor  
-
-- 2: Fair  
-
-- 3: Good  
-
-- 4: Excellent  
-
-**Score Descriptions:**
-
-- **1**: Statements are not related to the passage.  
-
-- **2**: Some key information from the passage is included, but important ideas are missing. 
-
-- **3**: Most key information from the passage is included, but some ideas may be irrelevant or inaccurate.  
-
-- **4**: All key information in the passage is included without irrelevant ideas.  
-
-
-\#\#\# Passage:
-
-\{\{ reading\_passage\_text \}\}
-
-\#\#\# Desired scores:
-
-**Details:** \{\{ details\_score \}\}
-
-End your response directly after giving the summary
-
-Do not provide explanation, justification, or notes before or after the summary.
-
-Do not preface with "Here is the summary..."
-
-Do not postface the summary with ``Note'':
-
-\#\#\# Summary:
-\end{promptbox}
-\caption{Example instruction prompt for ``Details'' criterion excluding reference.}
-\label{fig:exc_prompt}
-\end{figure*}
-
-\begin{figure*}
-\begin{promptbox}{Example 3: ``Language'' Identify-and-Replace (I\&R) Prompt --- DREsS}
-Your task is to write an essay for a given prompt.
-
-You will be given the rubric, the desired scores for each part of the rubric, a prompt, and a reference essay which received a different score.
-Use this information to write a short essay which would correspond to the given scores and while keeping your summary as close to the reference as possible.
-Your essay should be similar length to the provided reference text.
-
-\#\# Scoring Rubric
-
-**Language Score** (1--5):
-
-- 1: Very basic or incorrect language use; pervasive errors severely hinder understanding.
-
-- 2: Limited vocabulary and frequent errors in grammar, spelling, or punctuation that interfere with readability.
-
-- 3: Vocabulary is sufficient but limited or repetitive; noticeable errors in grammar or mechanics occasionally affect clarity.
-
-- 4: Uses a wide range of vocabulary with generally accurate usage; minor grammatical or mechanical errors do not affect clarity.
-
-- 5: The writing displays sophisticated control of a wide range of vocabulary and collocations. The essay follows grammar and usage rules throughout the essay. Spelling and punctuation are correct throughout the essay.
-
-\#\# Target Essay Prompt
-
-\{\{ prompt \}\}
-
-\#\# Reference Essay
-
-\{\{ gt\_reference \}\}
-
-\#\# Original Scores
-
-**Language Score:** \{\{ original\_language\_score \}\}
-
-\#\# Desired Scores
-
-**Language Score:** \{\{ language\_score \}\}
-
-Follow this step-by-step reasoning process to write your essay.
-
-STEP\_1: Identify phrases, words, sentences in the Reference essay leading to the Original score.
-
-STEP\_2: Propose minimal edits to those phrases, words, sentences so that the revised essay would receive the Desired score.
-
-STEP\_3: Produce the revised essay by applying the STEP\_2 edits to the Reference essay.
-
-Your goal: rewrite the Reference essay with minimal changes so it would receive the Desired score.
-
-IMPORTANT: The task is NOT complete until the FINAL\_JSON block is printed.
-
-You MUST:
-
-1) Output STEP\_1, STEP\_2, STEP\_3 reasoning.
-
-2) THEN output the FINAL\_JSON block.
-
-3) The FINAL\_JSON block must appear EXACTLY ONCE.
-
-4) The FINAL\_JSON block must be the LAST thing in your response.
-
-5) Do NOT stop after STEP\_3.
-
-6) Do NOT omit the FINAL\_JSON block.
-
-Inside the FINAL\_JSON block:
-
-- Output ONLY valid JSON.
-
-- The JSON must contain exactly one key: ``final\_essay''.
-
-- The value must be a single-line string.
-
-- Do not include newline characters inside the string.
-
-- Do not output any additional text after \texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}.
-
-SENTINELS (exact):
-
-\texttt{<{}<{}<FINAL\_JSON>{}>{}>}
-
-\{ ``final\_essay'': ``...'' \}
-
-\texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}
-\end{promptbox}
-\caption{Example Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion.}
-\label{fig:ir_prompt}
-\end{figure*}
-
-\subsection{Scoring Model} \label{apx:scoring}
-
-\begin{figure*}
-\begin{promptbox}{Scoring Prompt}
-Your task is to give a score for a summary of a passage according to the guidelines given in a rubric.
-
-You will be given a summary that a student wrote for a passage.
-For context, you will also be given the passage, which was summarized, and a rubric, which outlines how the summary should be scored for the provided criteria.
-You will provide the score and a 1--2 sentence justification in JSON format.
-\\ \\
-\#\#\# General Guidelines
-
-1.) Make sure to read through the Rubric section below before starting.  
-
-2.) You can provide an integer score between 1 and 4 inclusive, that is 1, 2, 3, or 4.
-
-Please make sure you read and understand these instructions carefully. Keep this document open while reviewing, and refer to it as needed.
-\\ \\
-\#\#\# Output Format
-
-Return your answer as a JSON object with the following structure:
-
-\{
-  
-  ``justification'': ``<1--2 sentence justification for your choice>'',
-  
-  ``score'': <selected\_score>
-  
-\}
-
-- Both fields must be included and non-empty strings. Justification should not exceed two sentences; if multiple lines are needed, concatenate into a single line (no embedded newlines or line breaks).
-
-- Only these two fields should be present in the output JSON.
-
-- Order the JSON fields as shown above: ``justification'' first, then ``label''.
-
-- Both the ``justification'' and ``label'' values must always be strings and must be valid JSON values.
-
-- If the input (summary, passage, or rubric) is missing or empty, output the following JSON: \{ ``justification'': ``ERROR: Cannot score as input information is insufficient or missing.'', ``score'': ``undefined'' \}
-\\ \\
-\#\#\# Rubric
-
-\#\#\# Criterion: Language Beyond Source Text
-
-\#\#\#\# Description
-
-This criteria measures how well the original aspects of the summary show a mastery of the english language in terms of grammar and vocabulary. The aspects of the summary which are not clearly verbatim copies should be assessed for this criteria. The writers of the summary will be in primary school between grades 3 and 12, so sophisticated, adult-level vocabulary and grammar should not be expected.
-\#\#\#\# Possible Scores:
-
-- 1: Poor  
-
-- 2: Fair  
-
-- 3: Good  
-
-- 4: Excellent  
-
-\#\#\#\# Score Descriptions:
-
-- **1**: Summary shows a very basic understanding of lexical and syntactic structures.  
-
-- **2**: Summary shows an understanding of lexical and syntactic structures.  
-
-- **3**: Summary shows an appropriate range of lexical and syntactic structures.  
-
-- **4**: Summary shows an excellent range of lexical and syntactic structures.  
-
-\#\#\# Passage
-
-\{\{ reading\_passage\_text \}\}
-
-\#\#\# Summary
-
-\{\{ countefactual\_summary \}\}
-
-\#\#\# Score
-\end{promptbox}
-\caption{Example scoring model prompt for ``Language'' criterion.}
-\label{fig:score_prompt}
-\end{figure*}
-
-Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
-
-\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
-
 \begin{table*}[h]
 \centering
 \small
@@ -1284,12 +1061,105 @@ Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
 \label{apx:scoring_dress}
 \end{table*}
 
-For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l ccc}
+\toprule
+\textbf{Criterion} & Better-on-criterion & More similar & Better feedback \\
+\midrule
+Main Idea     & 33\% & 47\% & 44\% \\
+Details       & 61\% & 58\% & 62\% \\
+Organization\textsuperscript{*}  & 24\% & 88\% & 24\% \\
+Wording       & 58\% & 50\% & 60\% \\
+Language      & 70\% & 73\% & 71\% \\
+\midrule
+\textbf{All}  & 49\% & 63\% & 52\% \\
+\bottomrule
+\end{tabular}
+\caption{Per-criterion GM win rate on the three pairwise comparisons against the Minimal-Edit baseline (ties excluded). Each criterion has $30$ ratings ($10$ tuples $\times$ $3$ evaluators).\protect\\
+\textsuperscript{*}Labeled as ``Cohesion'' in the underlying dataset; we use the paper's terminology.}
+\label{tab:eval_per_criterion}
+\end{table}
 
-\subsection{Dataset Details} \label{apx:classe}
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{c c ccc}
+\toprule
+\textbf{Ref.\ score} & $n$ & Better-on-criterion & More similar & Better feedback \\
+\midrule
+1 & 60 & 49\% & 48\% & 51\% \\
+2 & 45 & 47\% & 50\% & 49\% \\
+3 & 45 & 51\% & \textbf{92\%} ($p\!<\!10^{-3}$) & 58\% \\
+\bottomrule
+\end{tabular}
+\caption{GM win rate (ties excluded) broken down by the student's original score on the target criterion. Bolded cell indicates $p\!<\!0.001$ on a two-sided binomial test against chance.}
+\label{tab:eval_per_ref}
+\end{table}
 
-We report detailed descriptions for each CLASSE criterion in Table~\ref{apx:criteria} and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation). We report detailed descriptions for each DREsS criterion in Table~\ref{apx:dress_criteria} and Table~\ref{apx:dress_rubric} details score definitions for each possible value. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l cccccc}
+\toprule
+& \multicolumn{3}{c}{\textbf{GM win \%}} & \multicolumn{3}{c}{\textbf{GM/ME/Tie}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+\textbf{Evaluator} & Imp & Sim & Fb & Imp & Sim & Fb \\
+\midrule
+E1 (Amy)    & 49\% & 50\% & 54\% & 20/21/9 & 7/7/36 & 22/19/9 \\
+E2 (Julia)  & 52\% & 63\% & 55\% & 23/21/6 & 27/16/7 & 26/21/3 \\
+E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
+\midrule
+\textbf{All}        & 49\% & 63\% & 52\% & 66/69/15 & 50/29/71 & 72/66/12 \\
+\bottomrule
+\end{tabular}
+\caption{Per-evaluator marginal preferences for the three pairwise comparisons (improvement / similarity / feedback). Win rates exclude ties.}
+\label{tab:eval_per_rater}
+\end{table}
 
+%% =====================================================================
+%% ALGORITHM
+%% =====================================================================
+
+\input{latex/algo_v2}
+
+%% =====================================================================
+%% ANNOTATION FIGURES
+%% =====================================================================
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{latex/figs/label_interface_1.png}
+    \caption{Teacher evaluation interface --- per-rewrite questions (Q1--Q3) for rewrites A and B.}
+    \label{fig:label_interface_1}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{latex/figs/label_interface_2.png}
+    \caption{Teacher evaluation interface --- pairwise comparison questions (Q4--Q6).}
+    \label{fig:label_interface_2}
+\end{figure*}
+
+%% =====================================================================
+%% PROMPT BLOCKS
+%% =====================================================================
+
+\input{latex/prompts/language_ref}
+
+\input{latex/prompts/details_excl_ref}
+
+\input{latex/prompts/ir_dress}
+
+\input{latex/prompts/scoring}
+
+%% =====================================================================
+%% CRITERION TABLES
+%% =====================================================================
 
 \begin{table*}[!h]
 \centering
@@ -1317,13 +1187,6 @@ This criterion measures how well the original aspects of the summary demonstrate
 \caption{Summary Evaluation Criteria Descriptions}
 \label{apx:criteria}
 \end{table*}
-
-\begin{figure*}
-    \centering
-    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_2.png}
-    \caption{Token count statistics for the summaries and passages in the CLASSE dataset. Summaries are approximately 68 words in length and passages are approximately 297 words.}
-    \label{fig:token_counts}
-\end{figure*}
 
 \begin{table*}[h]
 \centering
@@ -1388,13 +1251,6 @@ This criterion measures the student's control of vocabulary and grammatical stru
 \label{apx:dress_criteria}
 \end{table*}
 
-\begin{figure*}
-    \centering
-    \includegraphics[width=1\linewidth]{latex/figs/dress_token_statistics.png}
-    \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.}
-    \label{fig:dress_token_counts}
-\end{figure*}
-
 \begin{table*}[h]
 \centering
 \renewcommand{\arraystretch}{1.4}
@@ -1428,313 +1284,22 @@ This criterion measures the student's control of vocabulary and grammatical stru
 \label{apx:dress_rubric}
 \end{table*}
 
-\subsection{Training Details} \label{apx:training}
+%% =====================================================================
+%% TOKEN COUNT FIGURES
+%% =====================================================================
 
-We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} and \texttt{Qwen3-4B-Instruct-2507}. The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. For both stages, we train a rank-$32$ LoRA adapter with dropout $0.05$ for all attention and MLP projections using an AdamW optimizer. For SFT, we use a constant learning rate of $5\!\times\!10^{-5}$ with weight decay $0.01$, and in DPO we use a cosine schedule at $2\!\times\!10^{-5}$ against the frozen SFT LoRA as the reference policy.
-
-% \begin{table}[h]
-% \centering
-% \small
-% \setlength{\tabcolsep}{4pt}
-% \renewcommand{\arraystretch}{1.15}
-% \begin{tabular}{l l}
-% \toprule
-% \textbf{Setting} & \textbf{Value} \\
-% \midrule
-% Base models & \texttt{Llama-3.1-8B-Instruct}, \\
-%             & \texttt{Qwen3-4B-Instruct-2507} \\
-% Precision & bf16 \\
-% Optimizer & \texttt{paged\_adamw\_8bit} \\
-% Grad.\ checkpointing & enabled \\
-% Max grad norm & 1.0 \\
-% Per-device batch size & 2 ($\times$ 4 grad accumulation $=$ 8) \\
-% Seed & 42 \\
-% LoRA rank $r$ & 32 ($\alpha\!=\!r$, dropout 0.05) \\
-% LoRA targets & q/k/v/o\_proj, gate/up/down\_proj \\
-% LoRA bias / task type & none / \texttt{CAUSAL\_LM} \\
-% Checkpoint selection & lowest \texttt{eval\_loss} (top-1 kept) \\
-% \bottomrule
-% \end{tabular}
-% \caption{Shared infrastructure and LoRA configuration used across SFT and DPO stages.}
-% \label{apx:training_shared}
-% \end{table}
-
-% \begin{table}[h]
-% \centering
-% \small
-% \setlength{\tabcolsep}{4pt}
-% \renewcommand{\arraystretch}{1.15}
-% \begin{tabular}{l c c}
-% \toprule
-% \textbf{Setting} & \textbf{SFT} & \textbf{DPO} \\
-% \midrule
-% Learning rate & $5\!\times\!10^{-5}$ & $2\!\times\!10^{-5}$ \\
-% LR schedule & constant & cosine \\
-% Weight decay & 0.01 & --- \\
-% DPO $\beta$ (KL) & --- & 0.1 \\
-% Reference model & --- & frozen SFT LoRA \\
-% \midrule
-% \multicolumn{3}{l}{\emph{CLASSE}} \\
-% Max steps & 1000 & 1000 \\
-% Warmup steps & 100 & 100 \\
-% Eval / save steps & 200 / 200 & 200 / 200 \\
-% \midrule
-% \multicolumn{3}{l}{\emph{DREsS}} \\
-% Max steps & 400 & 400 \\
-% Warmup steps & 50 & 50 \\
-% Eval / save steps & 100 / 100 & 50 / 50 \\
-% \bottomrule
-% \end{tabular}
-% \caption{Stage-specific hyperparameters and dataset-specific training cadence.}
-% \label{apx:training_stage}
-% \end{table}
-
-\paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
-
-\paragraph{Selected DPO hyperparameters.} We selected the DPO learning rate via a small sweep on Llama-3 / DREsS with an SFT prior at LoRA rank $r{=}16$. Raising LR from $5\!\times\!10^{-6}$ (initial value) to $2\!\times\!10^{-5}$ produced a substantial gain in DPO reward accuracy across criteria: $+0.08$ on Content ($0.66\rightarrow0.75$), $+0.10$ on Organization ($0.68\rightarrow0.78$), and $+0.13$ on Language ($0.74\rightarrow0.87$). Subsequently increasing the SFT-prior LoRA rank from $16$ to $32$ (with $\alpha{=}32$) added an additional $\approx0.02$ reward accuracy on average. With the final LR $2\!\times\!10^{-5}$ / $r{=}32$ configuration, CLASSE DPO reaches $0.85$--$0.88$ reward accuracy across its five criteria.
-
-\subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
-
-\paragraph{Recruitment and demographics.} The five evaluators were recruited via Upwork \cite{upwork} with explicit screening for documented K--12 or post-secondary English teaching experience. All evaluators reported at least eight years of English teaching experience, with several reporting twenty-five or more years, spanning middle school, high school, and university settings in the United States. Each evaluator completed an IRB-approved consent process before participating; the task took approximately two hours and evaluators were compensated \$60.
-
-\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating method was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$, summarized in Table~\ref{tab:eval_questions}.
-
-
-\paragraph{Calibration material.} Evaluators were provided with a multi-section reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. The full instructional document is approximately twenty pages and is released alongside our code artifacts.
-
-\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}).
-
-\begin{figure*}[h]
+\begin{figure*}
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/label_interface_1.png}
-    \caption{Teacher evaluation interface --- per-rewrite questions (Q1--Q3) for rewrites A and B.}
-    \label{fig:label_interface_1}
+    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_2.png}
+    \caption{Token count statistics for the summaries and passages in the CLASSE dataset. Summaries are approximately 68 words in length and passages are approximately 297 words.}
+    \label{fig:token_counts}
 \end{figure*}
 
-\begin{figure*}[h]
+\begin{figure*}
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/label_interface_2.png}
-    \caption{Teacher evaluation interface --- pairwise comparison questions (Q4--Q6).}
-    \label{fig:label_interface_2}
+    \includegraphics[width=1\linewidth]{latex/figs/dress_token_statistics.png}
+    \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.}
+    \label{fig:dress_token_counts}
 \end{figure*}
-
-\paragraph{Sample.} The headline analysis is computed over $150$ ratings from three contributing evaluators on $50$ stratified $(\text{passage}, \text{summary}, \text{rewrite~A}, \text{rewrite~B})$ tuples, balanced as $10$ tuples per CLASSE criterion and stratified across the original student score on the target criterion. The pair of rewrites for each tuple was sampled with one rewrite from GM and one from the Minimal-Edit baseline at matched automated validity (target score~$4$).
-
-\paragraph{Per-criterion preferences.} Table~\ref{tab:eval_per_criterion} reports the per-criterion GM win rate on the three pairwise questions (ties excluded). Aggregated across criteria, the headline pattern is that GM is preferred on similarity (63\% GM wins, $p\!=\!0.024$) and roughly tied on improvement and feedback. The criterion-level breakdown reveals that this aggregate hides substantial criterion-specific variation: GM is preferred on every dimension for the Language and Details criteria, while it loses on Main Idea and on the criterion-targeted comparison for Organization (Cohesion), where evaluators preferred the Minimal-Edit rewrites despite GM's clear similarity advantage on the same criterion (88\% GM win on the similarity comparison).
-
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{l ccc}
-\toprule
-\textbf{Criterion} & Better-on-criterion & More similar & Better feedback \\
-\midrule
-Main Idea     & 33\% & 47\% & 44\% \\
-Details       & 61\% & 58\% & 62\% \\
-Organization\textsuperscript{*}  & 24\% & 88\% & 24\% \\
-Wording       & 58\% & 50\% & 60\% \\
-Language      & 70\% & 73\% & 71\% \\
-\midrule
-\textbf{All}  & 49\% & 63\% & 52\% \\
-\bottomrule
-\end{tabular}
-\caption{Per-criterion GM win rate on the three pairwise comparisons against the Minimal-Edit baseline (ties excluded). Each criterion has $30$ ratings ($10$ tuples $\times$ $3$ evaluators).\protect\\
-\textsuperscript{*}Labeled as ``Cohesion'' in the underlying dataset; we use the paper's terminology.}
-\label{tab:eval_per_criterion}
-\end{table}
-
-\paragraph{Preferences scale with student score.} The student's original score on the target criterion (always less than the target of $4$) appears to modulate GM's similarity advantage. Table~\ref{tab:eval_per_ref} bins ratings by the student's reference score; the GM win rate on the ``more similar'' comparison rises sharply from $48\%$ at reference~$1$ to $92\%$ at reference~$3$ (binomial $p\!<\!10^{-3}$), and a Spearman rank correlation between the reference score and the GM-minus-ME Likert difference on the per-rewrite similarity item gives $\rho = 0.279$ ($p = 0.0004$, $n = 150$). The criterion preferences also drift in the same direction, with GM moving from a slight loss at reference~$1$ to a slight win at reference~$3$, though neither end is individually significant. This pattern is consistent with GM being most useful when the student writing is already close to the target rubric score, leaving room for minimal-edit-style improvement.
-
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{c c ccc}
-\toprule
-\textbf{Ref.\ score} & $n$ & Better-on-criterion & More similar & Better feedback \\
-\midrule
-1 & 60 & 49\% & 48\% & 51\% \\
-2 & 45 & 47\% & 50\% & 49\% \\
-3 & 45 & 51\% & \textbf{92\%} ($p\!<\!10^{-3}$) & 58\% \\
-\bottomrule
-\end{tabular}
-\caption{GM win rate (ties excluded) broken down by the student's original score on the target criterion. Bolded cell indicates $p\!<\!0.001$ on a two-sided binomial test against chance.}
-\label{tab:eval_per_ref}
-\end{table}
-
-\paragraph{Similarity preference predicts overall preference.} Conditioning on the same evaluator's response to the ``more similar'' comparison reveals a strong interaction between the similarity judgment and the other two pairwise picks. When the evaluator marks GM as more similar to the student writing, GM is preferred on improvement in $65\%$ of those cases and on feedback in $68\%$; when the evaluator marks Minimal-Edit as more similar, GM's win rate on improvement drops to $39\%$ and on feedback to $38\%$. The full $3\!\times\!3$ contingency table is significant for both the improvement comparison ($\chi^2(4) = 14.8$, $p = 5.2\!\times\!10^{-3}$) and the feedback comparison ($\chi^2(4) = 23.4$, $p = 1.1\!\times\!10^{-4}$). This is consistent with the main-text claim that evaluators who recognize the similarity advantage of GM also prefer it pedagogically.
-
-\paragraph{Inter-rater agreement.} Cohen's $\kappa$ on the pairwise comparisons across the three rater pairs (averaged) is $0.03$ for ``better on criterion,'' $0.16$ for ``more similar,'' and $-0.02$ for ``better feedback''; quadratic-weighted $\kappa$ on the per-rewrite Likert items is $0.15$--$0.27$. These values are at the lower end of typical human-evaluation reliability and reflect the difficulty of grading subtle differences between two rewrites that already share matched automated validity. Despite the low pairwise agreement on individual tuples, the per-rater marginal preferences (Table~\ref{tab:eval_per_rater}) are directionally consistent across the three evaluators, with all three favoring GM on similarity and clustering around chance for improvement and feedback. We therefore interpret the headline findings as aggregate preference patterns rather than reliable per-task judgments.
-
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{l cccccc}
-\toprule
-& \multicolumn{3}{c}{\textbf{GM win \%}} & \multicolumn{3}{c}{\textbf{GM/ME/Tie}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7}
-\textbf{Evaluator} & Imp & Sim & Fb & Imp & Sim & Fb \\
-\midrule
-E1 (Amy)    & 49\% & 50\% & 54\% & 20/21/9 & 7/7/36 & 22/19/9 \\
-E2 (Julia)  & 52\% & 63\% & 55\% & 23/21/6 & 27/16/7 & 26/21/3 \\
-E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
-\midrule
-\textbf{All}        & 49\% & 63\% & 52\% & 66/69/15 & 50/29/71 & 72/66/12 \\
-\bottomrule
-\end{tabular}
-\caption{Per-evaluator marginal preferences for the three pairwise comparisons (improvement / similarity / feedback). Win rates exclude ties.}
-\label{tab:eval_per_rater}
-\end{table}
-
-\onecolumn
-\subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
-
-\begin{examplebox}{Example 1 --- Civil Service}
-\textbf{Student writing} (Score 3):
-
-\begin{quote}\itshape
-Civil service jobs are available for all people.\,\, These jobs have fair pay from the merit system.\,\, These jobs are filled by the top applicants.\,\, This process is time consuming, but he benefits to having a civil service job out ways the steps that need to be taken.
-\end{quote}
-
-\textbf{GM rewrite} (sim $0.50$):
-
-\begin{quote}\itshape
-Civil service jobs are available for all people, offering a wide range of positions from clerks to law enforcement. These jobs are filled by the top applicants through the merit system, which ensures fair pay and fair treatment for all employees. The merit system is set up to protect the employee and provide equal and fair pay. This process is time consuming, but the benefits of having a civil service job outweigh the steps that need to be taken.
-\end{quote}
-
-\textbf{ME rewrite} (sim $0.30$):
-
-\begin{quote}\itshape
-Civil service jobs offer opportunities to men and women at various levels of government, including city, county, state, and federal. The merit system is used to recruit the most qualified individuals for each position, ensuring fair pay, training, and treatment regardless of background. With a range of job types available, from administrative roles to law enforcement and skilled trades, civil service offers secure employment options for those willing to invest the time and effort required to secure a position.
-\end{quote}
-\end{examplebox}
-
-\begin{examplebox}{Example 2 --- Global Warming}
-\textbf{Student writing} (Score 1):
-
-\begin{quote}\itshape
-Most people in California are more environmentally conscious than in other places in the country. They also don't believe that the government is doing enough to stop this.
-\end{quote}
-
-\textbf{GM rewrite} (sim $0.24$):
-
-\begin{quote}\itshape
-Most Californians are very concerned about global warming. They believe that the earth is warming too much and that it will affect living things on the earth. A survey was taken in California to see how people felt about global warming. The results showed that most people in California are very concerned about global warming and want the state to work on the problem. They are not happy with the federal government's handling of the issue and want the state to start working on it immediately.
-\end{quote}
-
-\textbf{ME rewrite} (sim $0.19$):
-
-\begin{quote}\itshape
-California residents are particularly concerned about the state of the planet, linking the issue to global warming. They believe that this warming poses a threat to living things. Californians want the state to take responsibility for investigating the problem.
-
-Californians are deeply disturbed when it comes to the federal government's response to global warming. This year, they are more worried than ever, feeling the problem is getting worse. They want the state to take action immediately.
-
-Californians want the state to start working on the problem as soon as possible, rather than waiting for the federal government to act.
-\end{quote}
-\end{examplebox}
-
-\begin{examplebox}{Example 3 --- Ecological Pyramids}
-\textbf{Student writing} (Score 3):
-
-\begin{quote}\itshape
-Ecologists construct a pyramid of numbers based on the population sizes of organisms in each trophic level. Sometimes population sizes decrease at each higher trophic level. This is not always true. For example, one tree can be food for 50,000 insects. In this case, the pyramid would be inverted.
-
-Energy decreases at each succeeding trophic level. The total energy transfer from one trophic level to the next is only about ten percent because organisms fail to capture and eat all the food available at the trophic level below them. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste.
-\end{quote}
-
-\textbf{GM rewrite} (sim $0.75$):
-
-\begin{quote}\itshape
-Ecologists construct a pyramid of numbers based on the population sizes of organisms in each trophic level. Sometimes population sizes decrease at each higher trophic level. This is not always true. For example, one tree can be food for 50,000 insects. In this case, the pyramid would be inverted. Energy decreases at each succeeding trophic level. The total energy transfer from one trophic level to the next is only about ten percent because organisms fail to capture and eat all the food available at the trophic level below them. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste. When the organism is eaten, the energy that was used to build body tissue is available as energy to be used by the organism that consumed it. The energy lost at each successive trophic level enters the environment as heat.
-\end{quote}
-
-\textbf{ME rewrite} (sim $0.34$):
-
-\begin{quote}\itshape
-Ecologists use ecological pyramids to model the distribution of matter and energy within an ecosystem. This type of pyramid shows how energy flows through an ecosystem. The initial source of energy for all ecological pyramids is energy from the sun, which decreases at each succeeding trophic level due to inefficient energy transfer. The total energy transfer from one trophic level to the next is only about ten percent. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste, with the energy lost at each successive trophic level entering the environment as heat. Ecologists also construct pyramids of numbers based on population sizes, which sometimes decrease at each higher trophic level, but can also be inverted, such as when one tree is food for 50,000 insects.
-\end{quote}
-\end{examplebox}
-\twocolumn
-
-% A couple demonstrations
-
-% \subsection{Expanded $\beta$-Hindsight pseudoscope}
-% \input{latex/algo_v1}
-\input{latex/algo_v2}
-
-% \begin{table*}[!h]
-% \centering
-% \small
-% \begin{tabular}{llcccccc}
-% \toprule
-% \textbf{Method} & \textbf{Metric} & \textbf{Main Idea} & \textbf{Details} & \textbf{Cohesion} & \textbf{Objective} & \textbf{Wording} & \textbf{Language} \\
-% \midrule
-% \multicolumn{8}{c}{\textbf{Base}} \\
-% \midrule
-% Ours & Similarity & \textbf{0.547} & \textbf{0.596} & \textbf{0.599} & \textbf{0.649} & \textbf{0.591} & \textbf{0.559} \\
-% Baseline (Llama3.1) & Similarity & 0.311 & 0.318 & 0.298 & 0.333 & 0.340 & 0.316 \\
-% Baseline (Llama4) & Similarity & 0.327 & 0.320 & 0.314 & 0.362 & 0.380 & 0.375 \\
-% \cmidrule{1-8}
-% Ours & Validity & 0.238 & \underline{0.648} & \textbf{0.584} & 0.477 & \textbf{0.697} & \textbf{0.727} \\
-% Baseline (Llama3.1) & Validity & \textbf{0.331} & 0.397 & 0.371 & 0.318 & 0.330 & 0.406 \\
-% Baseline (Llama4) & Validity & 0.303 & \textbf{0.709} & 0.528 & \textbf{0.539} & 0.741 & 0.593 \\
-% \midrule
-% \multicolumn{8}{c}{\textbf{SFT}} \\
-% \midrule
-% Ours & Similarity & \textbf{0.730} & \textbf{0.900} & \textbf{0.924} & \textbf{0.867} & \textbf{0.861} & \textbf{0.885} \\
-% Baseline & Similarity & 0.303 & 0.456 & 0.380 & 0.364 & 0.342 & 0.388 \\
-% \cmidrule{1-8}
-% Ours & Validity & 0.062 & \textbf{0.466} & 0.621 & \textbf{0.456} & \textbf{0.469} & \textbf{0.559} \\
-% Baseline & Validity & \textbf{0.288} & 0.099 & \textbf{0.654} & 0.115 & 0.098 & 0.184 \\
-% \midrule
-% \multicolumn{8}{c}{\textbf{DPO}} \\
-% \midrule
-% Ours & Similarity & \textbf{0.504} & \textbf{0.486} & \textbf{0.542} & \textbf{0.534} & \textbf{0.527} & \textbf{0.543} \\
-% Baseline & Similarity & 0.329 & 0.284 & 0.325 & 0.286 & 0.311 & 0.363 \\
-% \cmidrule{1-8}
-% Ours & Validity & 0.522 & \textbf{0.829} & \textbf{0.800} & 0.826 & \textbf{0.705} & \textbf{0.804} \\
-% Baseline & Validity & \textbf{0.763} & 0.748 & 0.653 & \textbf{0.840} & 0.624 & 0.574 \\
-% \bottomrule
-% \end{tabular}
-% \end{table*}
-
-% \begin{table}
-% \centering
-% \small
-% \begin{tabular}{llccc}
-% \toprule
-% \textbf{Setting} & \textbf{Metric} 
-% & \textbf{w/ Foresight} 
-% & \multicolumn{2}{c}{\textbf{w/o Foresight}} \\
-%  &  
-% & $\beta=0.1$ 
-% & $\beta=0.1$ 
-% & $\beta=1.0$ \\
-% \midrule
-% \multicolumn{5}{c}{\textbf{Base (Main Idea)}} \\
-% \midrule
-% Ours & Validity $\uparrow$     & 0.238 & 0.295 & 0.356 \\
-% Ours & Similarity $\downarrow$ & 0.453 & $0.764^*$ & $0.653^*$ \\
-% \midrule
-% \multicolumn{5}{c}{\textbf{SFT (Main Idea)}} \\
-% \midrule
-% Ours & Validity $\uparrow$     & 0.062 & 0.220 & 0.269 \\
-% Ours & Similarity $\downarrow$ & 0.270 & $0.743^*$ & $0.610^*$ \\
-% \midrule
-% \multicolumn{5}{c}{\textbf{DPO (Main Idea)}} \\
-% \midrule
-% Ours & Validity $\uparrow$     & 0.522 & 0.xxx & 0.715 \\
-% Ours & Similarity $\downarrow$ & 0.496 & 0.xxx & 0.757 \\
-% \bottomrule
-% \end{tabular}
-% \caption{Ablation study on foresight strength for the \textit{Main Idea} criterion, comparing Gumbel noise replay with foresight ($\beta=0.1$) and without foresight ($\beta=0.1, 1.0$).}
-% \end{table}
-
-
-% In all cases, we set $\beta=0.1$, which we empirically tuned via linear search on a subset of our dataset. We observe across all settings that our method produces counterfactual outputs that are significantly similar to the original factual student response. The observed similarity trend holds across all training setups, indicating that our approach is robust to model weight interventions. Interestingly, we see that in the \textbf{SFT} setting, the model generates outputs that are very similar to the factual compared to other settings. We suspect that the increased similarity in SFT arises because, during supervised fine-tuning, the model weights are directly updated to produce outputs similar to the factual summaries it is later instructed to adhere to, resulting in a stronger recovered control signal. 
-
-% In terms of validity, we see that while our approach generally produces counterfactual outputs with higher validity across criteria, with the notable exception of the \textbf{Main Idea} criterion. The \textbf{Main Idea} criterion evaluates the presence of a clear topic sentence at the beginning of the summary. We hypothesize that lower performance on this metric arises from the quantity of character insertions or deletions required to alter the factual output for this criterion. Since the Gumbel noise signal is applied at a fixed position independent of any desired structural change, we suspect that a misalignment occurs between the relative position of the noise in the factual and counterfactual outputs, which may adversely affect the resulting output. This analysis suggests that an alternative algorithm, which more intelligently aligns the recovered factual token noise with the expected token position in the counterfactual, could result in a more general system robust to a wider variety of output changes.
 
 \end{document}
