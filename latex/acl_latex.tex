@@ -418,7 +418,7 @@ We compare our approach to three other LLM-based counterfactual text generation 
     \item \textbf{Gumbel Machine (GM)}, our proposed approach, which leverages recovered Gumbel noise and preference alignment to create similar, rubric-aligned counterfactuals.
     \item \textbf{Minimal-Edit (ME)} Following \citep{gat_faithful_2023}, we include in the prompt instructions for the LLM to minimally edit the reference as a zero-shot approach.
     \item \textbf{In-Context Learning In-Context Learning (ICL)}. Following \citep{li_prompting_2024},  we include in-context demonstrations of each score level in the prompt.
-    \item \textbf{Identify-and-Replace (I\&R)}. Following \citep{nguyen_llms_2024}, we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions can be thought of as demonstrating ``Chain-of-Thought (CoT)'' for the task to the LLM. \mh{TODO add CoT prompt to appendix}
+    \item \textbf{Identify-and-Replace (I\&R)}. Following \citep{nguyen_llms_2024}, we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions can be thought of as demonstrating ``Chain-of-Thought (CoT)'' for the task to the LLM. The full I\&R prompt is shown in Figure~\ref{fig:ir_prompt}.
 \end{itemize}
 
 % \begin{itemize}
@@ -962,7 +962,7 @@ In Figure~\ref{fig:breakdown_criterion}, we report tradeoff curves for each indi
 
 \subsection{Instruction Prompts} \label{apx:prompts}
 
-We include the details of the instructions passed to the various Llama-family models during counterfactual generation. An example is provided both including reference summary~\ref{apx:prompt_ref} and excluding the reference~\ref{fig:exc_prompt} for two distinct criteria. Format is identical for other criteria with relevant details replaced.
+We include the details of the instructions passed to the various open-weight models during counterfactual generation. The base counterfactual prompt is shown both including the reference summary (Figure~\ref{apx:prompt_ref}) and excluding it (Figure~\ref{fig:exc_prompt}) for two distinct criteria. The Identify-and-Replace (I\&R) prompt is shown in Figure~\ref{fig:ir_prompt}, illustrated on the DREsS ``Language'' criterion. Format is identical for other criteria with rubric details replaced.
 
 \begin{figure*}
 \begin{promptbox}{Example 1: ``Language'' Counterfactual Instruction Prompt}
@@ -1074,6 +1074,66 @@ Do not postface the summary with ``Note'':
 \end{promptbox}
 \caption{Example instruction prompt for ``Details'' criterion excluding reference.}
 \label{fig:exc_prompt}
+\end{figure*}
+
+\begin{figure*}
+\begin{promptbox}{Example 3: ``Language'' Identify-and-Replace (I\&R) Prompt --- DREsS}
+Your task is to write an essay for a given prompt.
+
+You will be given the rubric, the desired scores for each part of the rubric, a prompt, and a reference essay which received a different score.
+Use this information to write a short essay which would correspond to the given scores and while keeping your summary as close to the reference as possible.
+Your essay should be 1 paragraph and approximately 200 words.
+
+\#\# Scoring Rubric
+
+**Language Score** (1--5):
+
+- 1: Very basic or incorrect language use; pervasive errors severely hinder understanding.
+
+- 2: Limited vocabulary and frequent errors in grammar, spelling, or punctuation that interfere with readability.
+
+- 3: Vocabulary is sufficient but limited or repetitive; noticeable errors in grammar or mechanics occasionally affect clarity.
+
+- 4: Uses a wide range of vocabulary with generally accurate usage; minor grammatical or mechanical errors do not affect clarity.
+
+- 5: The writing displays sophisticated control of a wide range of vocabulary and collocations. The essay follows grammar and usage rules throughout the essay. Spelling and punctuation are correct throughout the essay.
+
+\#\# Examples:
+
+\textit{[Five demonstrations are included in the actual prompt, one at each rubric score level $(1, 2, 3, 4, 5)$, each formatted as:}
+
+\hspace{1em}\texttt{Prompt: <writing prompt>}
+
+\hspace{1em}\texttt{Desired scores: **Language Score:** <X>}
+
+\hspace{1em}\texttt{Essay: <example essay achieving score X>}
+
+\textit{Demonstration content is elided here for brevity; full demonstrations are available in our code release.]}
+
+\#\# Target Essay Prompt
+
+\{\{ prompt \}\}
+
+\#\# Desired Scores
+
+**Language Score:** \{\{ language\_score \}\}
+
+\#\# Reference Essay
+
+\{\{ gt\_reference \}\}
+
+End your response directly after giving the Essay.
+
+Do not provide explanation, justification, or notes before or after the summary.
+
+Do not preface with ``Here is the essay...''
+
+Do not postface the summary with ``Note:''
+
+\#\# Essay:
+\end{promptbox}
+\caption{Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion. The prompt includes the rubric with score-level descriptions, five in-context demonstrations (one per rubric score, elided here for brevity), the writing prompt, the desired target score, and the reference essay. Other DREsS criteria share this structure with the rubric block and demonstrations swapped. The CLASSE I\&R prompt follows the same structure adapted to the 1--4 CLASSE scale.}
+\label{fig:ir_prompt}
 \end{figure*}
 
 \subsection{Scoring Model} \label{apx:scoring}
