@@ -824,99 +824,6 @@ We evaluate our approach on a dataset of student-written summaries and demonstra
 % Then outline future work, space permitting
 Our work outlines future directions that include: evaluating this approach across other domains and generation tasks, assessing the pedagogical effectiveness of generated counterfactuals relative to conventional writing feedback, and further investigation into the necessary and sufficient conditions for recovering noise that is effective for control.
 
-\begin{table*}[t]
-\centering
-\begin{tabular}{l | cc | cc | cc | cc | cc}
-\toprule
-& \multicolumn{2}{c|}{\textbf{Main Idea}}
-& \multicolumn{2}{c|}{\textbf{Details}}
-& \multicolumn{2}{c|}{\textbf{Organization}}
-& \multicolumn{2}{c|}{\textbf{Wording}}
-& \multicolumn{2}{c}{\textbf{Language}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11}
-\textbf{Method}
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$)
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$)
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$)
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$)
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$) \\
-\midrule
-Zero
-    & 0.271 & 0.315
-    & 0.365 & 0.317
-    & 0.332 & 0.301
-    & 0.344 & 0.342
-    & 0.395 & 0.310 \\
-ICL
-    & 0.281 & 0.288
-    & \underline{0.588} & 0.308
-    & \textbf{0.563} & 0.305
-    & 0.114 & 0.320
-    & \underline{0.403} & 0.320 \\
-Cot
-    & \underline{0.478} & \underline{0.398}
-    & 0.388 & \underline{0.393}
-    & 0.270 & \textbf{0.443}
-    & \underline{0.330} & \textbf{0.455}
-    & 0.329 & \textbf{0.435} \\
-$\beta$-H (ours)
-    & 0.233 & \textbf{0.547}
-    & \underline{0.428} & \textbf{0.556}
-    & \underline{0.328} & \underline{0.392}
-    & 0.321 & \underline{0.418}
-    & \textbf{0.467} & \underline{0.463} \\
-GM (ours)
-    & \textbf{0.511} & \underline{0.511}
-    & \textbf{0.845} & 0.334
-    & \underline{0.686} & \underline{0.392}
-    & \textbf{0.517} & \underline{0.418}
-    & \underline{0.554} & \underline{0.463} \\
-\bottomrule
-\end{tabular}
-\caption{Per-criterion breakdown of Validity and Similarity scores on \textbf{CLASSE}.}
-\label{tab:appendix_classe}
-\end{table*}
-
-\begin{table*}[t]
-\centering
-\begin{tabular}{l | cc | cc | cc}
-\toprule
-& \multicolumn{2}{c|}{\textbf{Content}}
-& \multicolumn{2}{c|}{\textbf{Organization}}
-& \multicolumn{2}{c}{\textbf{Language}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
-\textbf{Method}
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$)
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$)
-& Val.\ ($\uparrow$) & Sim.\ ($\uparrow$) \\
-\midrule
-Minimal-Edit
-    & 0.209 & \underline{0.318}
-    & 0.040 & 0.303
-    & 0.151 & 0.314 \\
-ICL
-    & \underline{0.365} & 0.294
-    & \underline{0.281} & 0.299
-    & \underline{0.316} & \underline{0.321} \\
-Identify-and-Replace
-    & \textbf{0.493} & 0.294
-    & \textbf{0.413} & \textbf{0.334}
-    & \textbf{0.247} & \textbf{0.341} \\
-$\beta$-Hindsight (ours)
-    & 0.147 & \textbf{0.488}
-    & 0.052 & \underline{0.371}
-    & 0.178 & \underline{0.429} \\
-$\beta$-Hindsight (aligned)
-    & -- & --
-    & -- & --
-    & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{Per-criterion breakdown of Validity and Similarity scores on \textbf{DRESS}.}
-\label{tab:appendix_dress}
-\end{table*}
-
-\clearpage
 
 \section*{Limitations}
 % \mh{TODO}
@@ -950,6 +857,80 @@ On fairness, bias, and accountability, both the generation and evaluation compon
 
 \section{Appendix}\label{sec:appendix}
 \subsection{Per-Criterion Tradeoff} \label{apx:tradeoffs}
+
+Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-criterion expansion of the aggregate similarity and validity numbers reported for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct in the main paper. For each (model, dataset) pair we show all five counterfactual generation methods. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones: $\beta$-Hindsight (BH) tends to maximize similarity, GM tends to maximize validity, and the prompting baselines occupy intermediate positions. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that for paraphrase-heavy criteria the in-context demonstration baseline can be competitive with logit-level control.
+
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{ll  cc  cc  cc  cc  cc}
+\toprule
+& & \multicolumn{2}{c}{\textbf{Main Idea}}
+& \multicolumn{2}{c}{\textbf{Details}}
+& \multicolumn{2}{c}{\textbf{Organization}}
+& \multicolumn{2}{c}{\textbf{Wording}}
+& \multicolumn{2}{c}{\textbf{Language}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-12}
+\multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}}
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
+\midrule
+\multirow{5}{*}{Llama}
+  & ME       & 0.305 & 0.165 & 0.315 & 0.224 & 0.299 & 0.265 & 0.341 & 0.154 & 0.310 & 0.107 \\
+  & ICL      & 0.288 & 0.272 & 0.308 & 0.381 & 0.305 & 0.516 & 0.320 & 0.182 & 0.320 & 0.282 \\
+  & I\&R     & 0.528 & 0.117 & 0.440 & 0.096 & 0.529 & 0.112 & 0.498 & 0.092 & 0.494 & 0.099 \\
+  & BH       & $\textbf{0.546}$ & 0.171 & $\textbf{0.557}$ & 0.145 & $\textbf{0.554}$ & 0.165 & $\textbf{0.596}$ & 0.152 & $\textbf{0.548}$ & 0.206 \\
+  & GM (Ours) & 0.364 & $\textbf{0.820}$ & 0.334 & $\textbf{0.780}$ & 0.387 & $\textbf{0.769}$ & 0.412 & $\textbf{0.666}$ & 0.458 & $\textbf{0.306}$ \\
+\midrule
+\multirow{5}{*}{Qwen}
+  & ME       & 0.648 & 0.163 & 0.667 & 0.247 & 0.579 & 0.239 & 0.558 & 0.281 & 0.432 & 0.230 \\
+  & ICL      & 0.349 & 0.190 & 0.347 & 0.248 & 0.359 & 0.156 & $\textbf{0.620}$ & 0.217 & 0.326 & 0.137 \\
+  & I\&R     & 0.524 & 0.282 & 0.403 & 0.540 & 0.474 & 0.328 & 0.388 & $\textbf{0.385}$ & 0.450 & 0.286 \\
+  & BH       & $\textbf{0.693}$ & 0.140 & $\textbf{0.702}$ & 0.236 & 0.619 & 0.244 & 0.585 & 0.252 & 0.468 & 0.235 \\
+  & GM (Ours) & 0.506 & $\textbf{0.729}$ & 0.455 & $\textbf{0.761}$ & $\textbf{0.624}$ & $\textbf{0.483}$ & 0.615 & 0.312 & $\textbf{0.677}$ & $\textbf{0.544}$ \\
+\bottomrule
+\end{tabular}
+\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{CLASSE} dataset for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct, across all five counterfactual generation methods. Best result per column within each model block in \textbf{bold}.}
+\label{tab:appendix_classe}
+\end{table*}
+
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ll  cc  cc  cc}
+\toprule
+& & \multicolumn{2}{c}{\textbf{Content}}
+& \multicolumn{2}{c}{\textbf{Language}}
+& \multicolumn{2}{c}{\textbf{Organization}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+\multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}}
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
+  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
+\midrule
+\multirow{5}{*}{Llama}
+  & ME       & 0.312 & 0.323 & 0.307 & 0.143 & 0.295 & 0.097 \\
+  & ICL      & 0.357 & 0.327 & 0.320 & 0.239 & 0.312 & 0.227 \\
+  & I\&R     & 0.296 & $\textbf{0.489}$ & 0.322 & 0.116 & 0.307 & 0.370 \\
+  & BH       & 0.448 & 0.220 & 0.405 & 0.136 & $\textbf{0.353}$ & 0.087 \\
+  & GM (Ours) & $\textbf{0.637}$ & 0.307 & $\textbf{0.498}$ & $\textbf{0.371}$ & 0.344 & $\textbf{0.507}$ \\
+\midrule
+\multirow{5}{*}{Qwen}
+  & ME       & 0.298 & 0.266 & 0.305 & 0.195 & 0.287 & 0.128 \\
+  & ICL      & 0.301 & 0.235 & 0.388 & 0.104 & 0.324 & 0.100 \\
+  & I\&R     & 0.248 & $\textbf{0.718}$ & 0.337 & $\textbf{0.312}$ & 0.351 & $\textbf{0.582}$ \\
+  & BH       & 0.299 & 0.297 & 0.308 & 0.166 & 0.294 & 0.159 \\
+  & GM (Ours) & $\textbf{0.511}$ & 0.414 & $\textbf{0.604}$ & 0.200 & $\textbf{0.707}$ & 0.248 \\
+\bottomrule
+\end{tabular}
+\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{DREsS} dataset for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct, across all five counterfactual generation methods. Best result per column within each model block in \textbf{bold}.}
+\label{tab:appendix_dress}
+\end{table*}
 
 \begin{figure*}[!h]
     \centering
