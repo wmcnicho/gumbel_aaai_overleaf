@@ -1621,7 +1621,7 @@ E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
 \onecolumn
 \subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
 
-We provide five illustrative tuples drawn from the teacher evaluation set, covering three of the five CLASSE criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the automated scoring-model judgment and the normalized character-level similarity to the original. Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here and place the GM rewrite first in every example. Where free-text comments from the three evaluators refer to a specific rewrite, we substitute the model name in brackets for the blinded ``Rewrite A''/``Rewrite B'' label. Student writing is shown verbatim, including original spelling and punctuation.
+We provide five illustrative tuples drawn from the teacher evaluation set, covering three of the five CLASSE criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the normalized character-level similarity to the original student writing, which is the quantity we are most interested in: a higher value indicates the rewrite preserves more of the student's text. Both rewrites achieve comparable automated rubric scores (omitted here for focus); the contrast across the five examples is in the similarity gap between GM and ME. Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here and place the GM rewrite first in every example. Student writing is shown verbatim, including original spelling and punctuation.
 
 \begin{examplebox}{Example 1 --- Details criterion (target score 4, student baseline 3)}
 \textbf{Student writing} (judge score 2):
@@ -1630,19 +1630,17 @@ We provide five illustrative tuples drawn from the teacher evaluation set, cover
 Civil service jobs are available for all people.\,\, These jobs have fair pay from the merit system.\,\, These jobs are filled by the top applicants.\,\, This process is time consuming, but he benefits to having a civil service job out ways the steps that need to be taken.
 \end{quote}
 
-\textbf{GM rewrite} (judge $3.0$, sim $0.50$):
+\textbf{GM rewrite} (sim $0.50$):
 
 \begin{quote}\itshape
 Civil service jobs are available for all people, offering a wide range of positions from clerks to law enforcement. These jobs are filled by the top applicants through the merit system, which ensures fair pay and fair treatment for all employees. The merit system is set up to protect the employee and provide equal and fair pay. This process is time consuming, but the benefits of having a civil service job outweigh the steps that need to be taken.
 \end{quote}
 
-\textbf{ME rewrite} (judge $4.0$, sim $0.30$):
+\textbf{ME rewrite} (sim $0.30$):
 
 \begin{quote}\itshape
 Civil service jobs offer opportunities to men and women at various levels of government, including city, county, state, and federal. The merit system is used to recruit the most qualified individuals for each position, ensuring fair pay, training, and treatment regardless of background. With a range of job types available, from administrative roles to law enforcement and skilled trades, civil service offers secure employment options for those willing to invest the time and effort required to secure a position.
 \end{quote}
-
-\textit{Comment (E1):} ``[The ME rewrite] offers more details.''
 \end{examplebox}
 
 \begin{examplebox}{Example 2 --- Wording criterion (target score 4, student baseline 2)}
@@ -1652,13 +1650,13 @@ Civil service jobs offer opportunities to men and women at various levels of gov
 People have heard of diabetes but few understand how its comes, it means high levels of sugar in their blood, insulin which used to control the sugar also it cannot be moved to muscle, causes of diabetes comes from following fatigue, weightloss there are two types type1 can happen at any age, type2 normally happens in adult age, it also cause heart attacks, eye problems, and body sores
 \end{quote}
 
-\textbf{GM rewrite} (judge $3.0$, sim $0.35$):
+\textbf{GM rewrite} (sim $0.35$):
 
 \begin{quote}\itshape
 Diabetes is a condition that affects many people, but few understand its causes. Essentially, diabetes is a condition where the body's blood sugar levels are too high. The body's natural mechanism for regulating blood sugar is insulin, which is produced by the pancreas. When the body's insulin levels are too low or the cells are resistant to insulin, it can lead to a buildup of sugar in the blood. This can lead to a range of symptoms, including fatigue, weight loss, and increased thirst. There are two types of diabetes, with Type 1 being more common in younger people and Type 2 being more common in adults. Both types can lead to serious health complications, including heart disease, vision problems, and other issues.
 \end{quote}
 
-\textbf{ME rewrite} (judge $4.0$, sim $0.27$):
+\textbf{ME rewrite} (sim $0.27$):
 
 \begin{quote}\itshape
 Developing a substantial understanding of diabetes requires identifying its underlying causes and potential health consequences. Essentially, diabetes is a lifelong condition characterised by abnormally high blood sugar levels. Insulin, a hormone produced by the pancreas, plays a pivotal role in regulating blood sugar. Insulin dysfunction occurs when the pancreas doesn't produce enough insulin or when cells become resistant to insulin, impeding sugar entry into muscle, fat, and liver cells. Symptoms of diabetes include fatigue, vision impairments, weight loss, and excess thirst. Seeking medical attention is crucial if these symptoms are present. Diagnosing diabetes involves distinguishing between type 1, which can appear at any age and has a predicable progression, and type 2, typically affecting adults associated with obesity and managed through lifestyle modifications, including diet and exercise. If left unchecked, diabetes can lead to numerous health complications, including kidney problems, heart disease, and sores.
@@ -1674,19 +1672,17 @@ Ecologists construct a pyramid of numbers based on the population sizes of organ
 Energy decreases at each succeeding trophic level. The total energy transfer from one trophic level to the next is only about ten percent because organisms fail to capture and eat all the food available at the trophic level below them. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste.
 \end{quote}
 
-\textbf{GM rewrite} (judge $2.0$, sim $0.75$):
+\textbf{GM rewrite} (sim $0.75$):
 
 \begin{quote}\itshape
 Ecologists construct a pyramid of numbers based on the population sizes of organisms in each trophic level. Sometimes population sizes decrease at each higher trophic level. This is not always true. For example, one tree can be food for 50,000 insects. In this case, the pyramid would be inverted. Energy decreases at each succeeding trophic level. The total energy transfer from one trophic level to the next is only about ten percent because organisms fail to capture and eat all the food available at the trophic level below them. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste. When the organism is eaten, the energy that was used to build body tissue is available as energy to be used by the organism that consumed it. The energy lost at each successive trophic level enters the environment as heat.
 \end{quote}
 
-\textbf{ME rewrite} (judge $4.0$, sim $0.34$):
+\textbf{ME rewrite} (sim $0.34$):
 
 \begin{quote}\itshape
 Ecologists use ecological pyramids to model the distribution of matter and energy within an ecosystem. This type of pyramid shows how energy flows through an ecosystem. The initial source of energy for all ecological pyramids is energy from the sun, which decreases at each succeeding trophic level due to inefficient energy transfer. The total energy transfer from one trophic level to the next is only about ten percent. When an organism consumes food, it uses some of the energy in the food for metabolism, some for building body tissues, and some is given off as waste, with the energy lost at each successive trophic level entering the environment as heat. Ecologists also construct pyramids of numbers based on population sizes, which sometimes decrease at each higher trophic level, but can also be inverted, such as when one tree is food for 50,000 insects.
 \end{quote}
-
-\textit{Comment (E1):} ``While both rewrites offer many details, [the GM rewrite] is more organized.''
 \end{examplebox}
 
 \begin{examplebox}{Example 4 --- Details criterion (target score 4, student baseline 2)}
@@ -1696,19 +1692,17 @@ Ecologists use ecological pyramids to model the distribution of matter and energ
 People are likely to die due to cancer. There are two types of cancer one is caused due to cancer and the other skin cells turning into cancel cells. Colored skin people are likely to get cancer as they are exposed to more sunlight. Using Sun block can prevent cancer. Cancer is malignant and can be prevented by staying out of sun during peak hours.
 \end{quote}
 
-\textbf{GM rewrite} (judge $3.0$, sim $0.34$):
+\textbf{GM rewrite} (sim $0.34$):
 
 \begin{quote}\itshape
 Skin cancer is a serious health issue that affects thousands of people each year. There are two types of skin cancer, one type is caused by the sun and the other type is when skin cells are turned into cancer cells. The risk of getting skin cancer depends on several factors, including having light-colored skin, blue eyes, getting older, or being in the sun a lot. The survival rate for skin cancer is 80\% when found and treated early. Skin cancer can be prevented by staying out of the sun during the hottest part of the day, using sun block with a protective factor of at least 15, wearing hats and long-sleeve shirts, and looking at your skin each month to find any skin cancers early.
 \end{quote}
 
-\textbf{ME rewrite} (judge $4.0$, sim $0.28$):
+\textbf{ME rewrite} (sim $0.28$):
 
 \begin{quote}\itshape
 Skin cancer is a significant health issue in California, with approximately 9,000 deaths expected this year. There are two main types: one caused by sun exposure and the other when skin cells become malignant. The risk of skin cancer is higher for individuals with fair skin, blue eyes, and those who frequently expose themselves to the sun. Early detection and treatment can improve the survival rate to 80\%. To prevent skin cancer, individuals should avoid sun exposure during peak hours, use sunscreen with a protective factor of at least 15, and wear protective clothing such as hats and long-sleeve shirts. Regular skin checks can also help identify skin cancer early on.
 \end{quote}
-
-\textit{Comment (E1):} ``[The ME rewrite] offers information that is different from the original writing. The original writing states that the survival rate for skin cancer is 80\% when found early. [The ME rewrite] states that early detection and treatment CAN increase the survival rate to 80\%. The wording is enough to confuse students.''
 \end{examplebox}
 
 \begin{examplebox}{Example 5 --- Main Idea criterion (target score 4, student baseline 1)}
@@ -1718,13 +1712,13 @@ Skin cancer is a significant health issue in California, with approximately 9,00
 Most people in California are more environmentally conscious than in other places in the country. They also don't believe that the government is doing enough to stop this.
 \end{quote}
 
-\textbf{GM rewrite} (judge $4.0$, sim $0.24$):
+\textbf{GM rewrite} (sim $0.24$):
 
 \begin{quote}\itshape
 Most Californians are very concerned about global warming. They believe that the earth is warming too much and that it will affect living things on the earth. A survey was taken in California to see how people felt about global warming. The results showed that most people in California are very concerned about global warming and want the state to work on the problem. They are not happy with the federal government's handling of the issue and want the state to start working on it immediately.
 \end{quote}
 
-\textbf{ME rewrite} (judge $4.0$, sim $0.19$):
+\textbf{ME rewrite} (sim $0.19$):
 
 \begin{quote}\itshape
 California residents are particularly concerned about the state of the planet, linking the issue to global warming. They believe that this warming poses a threat to living things. Californians want the state to take responsibility for investigating the problem.
@@ -1733,10 +1727,6 @@ Californians are deeply disturbed when it comes to the federal government's resp
 
 Californians want the state to start working on the problem as soon as possible, rather than waiting for the federal government to act.
 \end{quote}
-
-\textit{Comment (E1):} ``[The ME rewrite] states the main idea and also provides details about the main idea. It is a much more thorough piece of writing. [The GM rewrite] clearly states the main idea, but only provides basic details about the main idea. It seems that both meet the criteria outlined, but currently in education, students are expected (from 6th grade and beyond) to offer clear details after providing the main idea.''
-
-\textit{Comment (E2):} ``[The ME rewrite] is repetitive. [The GM rewrite] captures the main idea more succinctly.''
 \end{examplebox}
 \twocolumn
 
