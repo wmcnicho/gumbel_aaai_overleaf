@@ -1531,7 +1531,7 @@ Q6 Demonstration & Overall, which rewrite would be a better demonstration to hel
 
 \paragraph{Calibration material.} Evaluators were provided with a multi-section reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. The full instructional document is approximately twenty pages and is released alongside our code artifacts.
 
-\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}). \mh{Confirm which screenshot corresponds to which step; swap labels if reversed.}
+\paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}).
 
 \begin{figure*}[h]
     \centering
@@ -1546,6 +1546,76 @@ Q6 Demonstration & Overall, which rewrite would be a better demonstration to hel
     \caption{Teacher evaluation interface --- pairwise comparison questions (Q4--Q6).}
     \label{fig:label_interface_2}
 \end{figure*}
+
+\paragraph{Sample.} The headline analysis is computed over $150$ ratings from three contributing evaluators on $50$ stratified $(\text{passage}, \text{summary}, \text{rewrite~A}, \text{rewrite~B})$ tuples, balanced as $10$ tuples per CLASSE criterion and stratified across the original student score on the target criterion. The pair of rewrites for each tuple was sampled with one rewrite from GM and one from the Minimal-Edit baseline at matched automated validity (target score~$4$).
+
+\paragraph{Per-criterion preferences.} Table~\ref{tab:eval_per_criterion} reports the per-criterion GM win rate on the three pairwise questions (ties excluded). Aggregated across criteria, the headline pattern is that GM is preferred on similarity (63\% GM wins, $p\!=\!0.024$) and roughly tied on improvement and feedback. The criterion-level breakdown reveals that this aggregate hides substantial criterion-specific variation: GM is preferred on every dimension for the Language and Details criteria, while it loses on Main Idea and on the criterion-targeted comparison for Organization (Cohesion), where evaluators preferred the Minimal-Edit rewrites despite GM's clear similarity advantage on the same criterion (88\% GM win on the similarity comparison).
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l ccc}
+\toprule
+\textbf{Criterion} & Better-on-criterion & More similar & Better feedback \\
+\midrule
+Main Idea     & 33\% & 47\% & 44\% \\
+Details       & 61\% & 58\% & 62\% \\
+Organization\textsuperscript{*}  & 24\% & 88\% & 24\% \\
+Wording       & 58\% & 50\% & 60\% \\
+Language      & 70\% & 73\% & 71\% \\
+\midrule
+\textbf{All}  & 49\% & 63\% & 52\% \\
+\bottomrule
+\end{tabular}
+\caption{Per-criterion GM win rate on the three pairwise comparisons against the Minimal-Edit baseline (ties excluded). Each criterion has $30$ ratings ($10$ tuples $\times$ $3$ evaluators).\protect\\
+\textsuperscript{*}Labeled as ``Cohesion'' in the underlying dataset; we use the paper's terminology.}
+\label{tab:eval_per_criterion}
+\end{table}
+
+\paragraph{Preferences scale with student score.} The student's original score on the target criterion (always less than the target of $4$) appears to modulate GM's similarity advantage. Table~\ref{tab:eval_per_ref} bins ratings by the student's reference score; the GM win rate on the ``more similar'' comparison rises sharply from $48\%$ at reference~$1$ to $92\%$ at reference~$3$ (binomial $p\!<\!10^{-3}$), and a Spearman rank correlation between the reference score and the GM-minus-ME Likert difference on the per-rewrite similarity item gives $\rho = 0.279$ ($p = 0.0004$, $n = 150$). The criterion preferences also drift in the same direction, with GM moving from a slight loss at reference~$1$ to a slight win at reference~$3$, though neither end is individually significant. This pattern is consistent with GM being most useful when the student writing is already close to the target rubric score, leaving room for minimal-edit-style improvement.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{c c ccc}
+\toprule
+\textbf{Ref.\ score} & $n$ & Better-on-criterion & More similar & Better feedback \\
+\midrule
+1 & 60 & 49\% & 48\% & 51\% \\
+2 & 45 & 47\% & 50\% & 49\% \\
+3 & 45 & 51\% & \textbf{92\%} ($p\!<\!10^{-3}$) & 58\% \\
+\bottomrule
+\end{tabular}
+\caption{GM win rate (ties excluded) broken down by the student's original score on the target criterion. Bolded cell indicates $p\!<\!0.001$ on a two-sided binomial test against chance.}
+\label{tab:eval_per_ref}
+\end{table}
+
+\paragraph{Similarity preference predicts overall preference.} Conditioning on the same evaluator's response to the ``more similar'' comparison reveals a strong interaction between the similarity judgment and the other two pairwise picks. When the evaluator marks GM as more similar to the student writing, GM is preferred on improvement in $65\%$ of those cases and on feedback in $68\%$; when the evaluator marks Minimal-Edit as more similar, GM's win rate on improvement drops to $39\%$ and on feedback to $38\%$. The full $3\!\times\!3$ contingency table is significant for both the improvement comparison ($\chi^2(4) = 14.8$, $p = 5.2\!\times\!10^{-3}$) and the feedback comparison ($\chi^2(4) = 23.4$, $p = 1.1\!\times\!10^{-4}$). This is consistent with the main-text claim that evaluators who recognize the similarity advantage of GM also prefer it pedagogically.
+
+\paragraph{Inter-rater agreement.} Cohen's $\kappa$ on the pairwise comparisons across the three rater pairs (averaged) is $0.03$ for ``better on criterion,'' $0.16$ for ``more similar,'' and $-0.02$ for ``better feedback''; quadratic-weighted $\kappa$ on the per-rewrite Likert items is $0.15$--$0.27$. These values are at the lower end of typical human-evaluation reliability and reflect the difficulty of grading subtle differences between two rewrites that already share matched automated validity. Despite the low pairwise agreement on individual tuples, the per-rater marginal preferences (Table~\ref{tab:eval_per_rater}) are directionally consistent across the three evaluators, with all three favoring GM on similarity and clustering around chance for improvement and feedback. We therefore interpret the headline findings as aggregate preference patterns rather than reliable per-task judgments.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l cccccc}
+\toprule
+& \multicolumn{3}{c}{\textbf{GM win \%}} & \multicolumn{3}{c}{\textbf{GM/ME/Tie}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+\textbf{Evaluator} & Imp & Sim & Fb & Imp & Sim & Fb \\
+\midrule
+E1 (Amy)    & 49\% & 50\% & 54\% & 20/21/9 & 7/7/36 & 22/19/9 \\
+E2 (Julia)  & 52\% & 63\% & 55\% & 23/21/6 & 27/16/7 & 26/21/3 \\
+E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
+\midrule
+\textbf{All}        & 49\% & 63\% & 52\% & 66/69/15 & 50/29/71 & 72/66/12 \\
+\bottomrule
+\end{tabular}
+\caption{Per-evaluator marginal preferences for the three pairwise comparisons (improvement / similarity / feedback). Win rates exclude ties.}
+\label{tab:eval_per_rater}
+\end{table}
 
 \subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
 
