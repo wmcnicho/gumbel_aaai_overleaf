@@ -428,11 +428,13 @@ We compare our approach to three other LLM-based counterfactual text generation 
 
 \begin{table*}[ht]
 \centering
+\small
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{l  cc  cc}
 \toprule
 & \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-\multirow{-2}{*}{\textbf{Method}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
+\multirow{-2}{*}{\textbf{Method}} & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
 \midrule
 ME %Minimal-Edit
     & $0.314\std{0.016}$ & $0.183\std{0.062}$
@@ -468,7 +470,7 @@ GM (Ours)
 \end{tabular}
 \caption{Results comparing Gumbel Machine to existing methods. Best result per column in \textbf{bold}, second-best \underline{underlined}. We observe that GM provides noticeable improvements in validity for both datasets without sacrificing validity, resulting in counterfactuals that respect rubric changes while maintaining similarity to the reference work. }
 \label{tab:llama_results}
-\end{table*}
+\end{table}
 
 \subsubsection{Language Models}
 We evaluate across a range of LLMs spanning two open-weight families and two closed-weight tiers. We deliberately select Anthropic models rather than OpenAI alternatives as closed-weight baselines to mitigate bias observed documented when an LLM evaluator and a generator share a model family \cite{panickssery2024llmevaluators}.
