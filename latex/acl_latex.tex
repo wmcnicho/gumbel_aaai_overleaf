@@ -368,7 +368,7 @@ In this section, we detail our experiments to evaluate the effectiveness of our 
 We evaluate our approach on two datasets of scored student writing samples, covering both reading passage summarization and open-ended student writing from a variety of proficiency levels. For reading passage summarization, we use the Common Lit Augmented Student Summary Evaluation (\textbf{CLASSE}) dataset, a corpus of student-authored summaries to short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries from 101 unique passages authored by students in grades 3-12. Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring on this criterion in preliminary experiments.~\ref{apx:classe}}.
 
 For open-ended writing, we use the Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}) dataset,  a corpus of student-authored responses to writing prompts \cite{yoo_dress_2025}. We specifically use the $\text{DREsS}_{\text{New}}$ which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an
-English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:classe}\mh{TODO add DRESS details to apx}.
+English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:dress}.
 
 % Could include here details about filtering/cleaning if needed.
 \subsection{Scoring Model}
@@ -1161,7 +1161,7 @@ Figure~\ref{fig:score_prompt} shows the instructions passed to \texttt{GPT4.1} a
 
 We explored an alternative BERT-based scoring method trained on the CLASSE dataset following \cite{fernandez_automated_2022}. We found the QWK of the scoring model on a held-out set was $0.495$ compared to the $0.53$ observed in the LLM-Judge system.
 
-\subsection{Dataset Details} \label{apx:classe}
+\subsection{CLASSE Dataset Details} \label{apx:classe}
 
 We further detail the CLASSE dataset. Table~\ref{apx:criteria} provides detailed descriptions for each criterion and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation).
 
@@ -1241,6 +1241,73 @@ This criterion measures how well the original aspects of the summary demonstrate
 \end{tabular}
 \caption{Detailed definitions and rubrics for each criterion in the CLASSE dataset}
 \label{apx:rubric}
+\end{table*}
+
+\subsection{DREsS Dataset Details} \label{apx:dress}
+
+We further detail the DREsS dataset. Table~\ref{apx:dress_criteria} provides descriptions for each of the three grading criteria, and Table~\ref{apx:dress_rubric} details score definitions for each possible value on the 1--5 scale. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Both descriptions and rubric definitions are taken from the prompts used by our LLM-as-a-judge scoring model (Appendix~\ref{apx:scoring}); the source dataset \cite{yoo_dress_2025} provides only general guidance per criterion, which we operationalized into the rubric scale below.
+
+\begin{table*}[!h]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{3.5cm}|p{10cm}|}
+\hline
+\textbf{Criterion} & \textbf{Description} \\
+\hline
+Content &
+This criterion measures how well the essay develops and supports its argument with relevant reasoning and examples. An ideal essay presents well-developed ideas that clearly and thoroughly support the argument. \\
+\hline
+Organization &
+This criterion measures how clearly and logically the essay is structured. An ideal essay has a clear, easy-to-follow argument with effective transitions and coherence devices throughout. \\
+\hline
+Language &
+This criterion measures the student's control of vocabulary and grammatical structures in the essay. An ideal essay demonstrates a wide, accurate range of vocabulary and consistently correct grammar, spelling, and punctuation. \\
+\hline
+\end{tabular}
+\caption{Essay Evaluation Criteria Descriptions for the DREsS dataset.}
+\label{apx:dress_criteria}
+\end{table*}
+
+\begin{figure*}
+    \centering
+    % TODO: replace with DREsS token statistics figure. See prompt in the
+    % \mh{} note below for how to generate one matching the CLASSE figure.
+    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_2.png}
+    \caption{\mh{Placeholder using CLASSE figure --- replace with DREsS token statistics.} Token count statistics for the essays and writing prompts in the DREsS dataset.}
+    \label{fig:dress_token_counts}
+\end{figure*}
+
+\begin{table*}[h]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{3.5cm}|p{2.4cm}|p{8.1cm}|}
+\hline
+\textbf{Criterion} & \textbf{Score} & \textbf{Descriptor} \\
+\hline
+\multirow{5}{=}{Content}
+& 1 (Very Poor) & Paragraph lacks relevance to the argument; little to no supporting reasoning or examples. \\
+& 2 (Poor) & Minimal development; ideas unclear or loosely related to argument; weak or vague examples. \\
+& 3 (Fair) & Addresses the argument but has limited or uneven development; general reasons with insufficient examples. \\
+& 4 (Good) & Relevant and mostly well-developed; clear reasons and some effective examples. \\
+& 5 (Excellent) & Well-developed and relevant; strong reasons and examples that clearly support the argument. \\
+\hline
+\multirow{5}{=}{Organization}
+& 1 (Very Poor) & No clear structure; disjointed or random ideas; very difficult to follow. \\
+& 2 (Poor) & Difficult to follow; poorly sequenced; limited or ineffective transitions; unclear focus. \\
+& 3 (Fair) & Apparent but inconsistent organization; loosely connected ideas; unclear focus or transitions. \\
+& 4 (Good) & Clear and logical structure; effective transitions and coherence devices; minor lapses in flow or focus. \\
+& 5 (Excellent) & Very effectively structured; easy to follow ideas and argument building; effective coherence devices throughout. \\
+\hline
+\multirow{5}{=}{Language}
+& 1 (Very Poor) & Very basic or incorrect language; pervasive errors severely hinder understanding. \\
+& 2 (Poor) & Limited vocabulary; frequent grammar, spelling, or punctuation errors affecting readability. \\
+& 3 (Fair) & Sufficient but limited vocabulary; noticeable errors occasionally affect clarity. \\
+& 4 (Good) & Wide range of vocabulary with generally accurate usage; minor errors do not affect clarity. \\
+& 5 (Excellent) & Sophisticated control of wide vocabulary and collocations; correct grammar, spelling, and punctuation throughout. \\
+\hline
+\end{tabular}
+\caption{Detailed definitions and rubrics for each criterion in the DREsS dataset.}
+\label{apx:dress_rubric}
 \end{table*}
 
 % \subsection{Training Details}
