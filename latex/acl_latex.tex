@@ -874,7 +874,7 @@ On fairness, bias, and accountability, both the generation and evaluation compon
 \appendix
 
 \section{Appendix}\label{sec:appendix}
-\subsection{Per-Criterion Tradeoff} \label{apx:tradeoffs}
+\subsection{Per-Criterion Results} \label{apx:tradeoffs}
 
 Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-criterion expansion of the aggregate similarity and validity numbers reported for Llama-3.1-8B-Instruct and Qwen3-4B-Instruct in the main paper. For each (model, dataset) pair we show all five counterfactual generation methods. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones: $\beta$-Hindsight (BH) tends to maximize similarity, GM tends to maximize validity, and the prompting baselines occupy intermediate positions. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that for paraphrase-heavy criteria the in-context demonstration baseline can be competitive with logit-level control.
 
@@ -901,14 +901,14 @@ Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-crit
   & ME       & 0.305 & 0.165 & 0.315 & 0.224 & 0.299 & 0.265 & 0.341 & 0.154 & 0.310 & 0.107 \\
   & ICL      & 0.288 & 0.272 & 0.308 & 0.381 & 0.305 & 0.516 & 0.320 & 0.182 & 0.320 & 0.282 \\
   & I\&R     & 0.528 & 0.117 & 0.440 & 0.096 & 0.529 & 0.112 & 0.498 & 0.092 & 0.494 & 0.099 \\
-  & BH       & $\textbf{0.546}$ & 0.171 & $\textbf{0.557}$ & 0.145 & $\textbf{0.554}$ & 0.165 & $\textbf{0.596}$ & 0.152 & $\textbf{0.548}$ & 0.206 \\
+  % & BH       & $\textbf{0.546}$ & 0.171 & $\textbf{0.557}$ & 0.145 & $\textbf{0.554}$ & 0.165 & $\textbf{0.596}$ & 0.152 & $\textbf{0.548}$ & 0.206 \\
   & GM (Ours) & 0.364 & $\textbf{0.820}$ & 0.334 & $\textbf{0.780}$ & 0.387 & $\textbf{0.769}$ & 0.412 & $\textbf{0.666}$ & 0.458 & $\textbf{0.306}$ \\
 \midrule
 \multirow{5}{*}{Qwen}
   & ME       & 0.648 & 0.163 & 0.667 & 0.247 & 0.579 & 0.239 & 0.558 & 0.281 & 0.432 & 0.230 \\
   & ICL      & 0.349 & 0.190 & 0.347 & 0.248 & 0.359 & 0.156 & $\textbf{0.620}$ & 0.217 & 0.326 & 0.137 \\
   & I\&R     & 0.524 & 0.282 & 0.403 & 0.540 & 0.474 & 0.328 & 0.388 & $\textbf{0.385}$ & 0.450 & 0.286 \\
-  & BH       & $\textbf{0.693}$ & 0.140 & $\textbf{0.702}$ & 0.236 & 0.619 & 0.244 & 0.585 & 0.252 & 0.468 & 0.235 \\
+  % & BH       & $\textbf{0.693}$ & 0.140 & $\textbf{0.702}$ & 0.236 & 0.619 & 0.244 & 0.585 & 0.252 & 0.468 & 0.235 \\
   & GM (Ours) & 0.506 & $\textbf{0.729}$ & 0.455 & $\textbf{0.761}$ & $\textbf{0.624}$ & $\textbf{0.483}$ & 0.615 & 0.312 & $\textbf{0.677}$ & $\textbf{0.544}$ \\
 \bottomrule
 \end{tabular}
@@ -935,14 +935,14 @@ Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress} provide a per-crit
   & ME       & 0.312 & 0.323 & 0.307 & 0.143 & 0.295 & 0.097 \\
   & ICL      & 0.357 & 0.327 & 0.320 & 0.239 & 0.312 & 0.227 \\
   & I\&R     & 0.296 & $\textbf{0.489}$ & 0.322 & 0.116 & 0.307 & 0.370 \\
-  & BH       & 0.448 & 0.220 & 0.405 & 0.136 & $\textbf{0.353}$ & 0.087 \\
+  % & BH       & 0.448 & 0.220 & 0.405 & 0.136 & $\textbf{0.353}$ & 0.087 \\
   & GM (Ours) & $\textbf{0.637}$ & 0.307 & $\textbf{0.498}$ & $\textbf{0.371}$ & 0.344 & $\textbf{0.507}$ \\
 \midrule
 \multirow{5}{*}{Qwen}
   & ME       & 0.298 & 0.266 & 0.305 & 0.195 & 0.287 & 0.128 \\
   & ICL      & 0.301 & 0.235 & 0.388 & 0.104 & 0.324 & 0.100 \\
   & I\&R     & 0.248 & $\textbf{0.718}$ & 0.337 & $\textbf{0.312}$ & 0.351 & $\textbf{0.582}$ \\
-  & BH       & 0.299 & 0.297 & 0.308 & 0.166 & 0.294 & 0.159 \\
+  % & BH       & 0.299 & 0.297 & 0.308 & 0.166 & 0.294 & 0.159 \\
   & GM (Ours) & $\textbf{0.511}$ & 0.414 & $\textbf{0.604}$ & 0.200 & $\textbf{0.707}$ & 0.248 \\
 \bottomrule
 \end{tabular}
@@ -1151,7 +1151,7 @@ SENTINELS (exact):
 
 \texttt{<{}<{}<END\_FINAL\_JSON>{}>{}>}
 \end{promptbox}
-\caption{Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion. The model is prompted with the rubric, the writing prompt, the reference essay, the reference's original score, and the desired target score, and is instructed to follow a three-step chain-of-thought (identify spans, propose minimal edits, produce the revised essay). The final essay is emitted as JSON inside explicit sentinels, which we parse from the response. Other DREsS criteria share this structure with the rubric block replaced; the CLASSE I\&R prompt follows the same structure adapted to the 1--4 CLASSE scale.}
+\caption{Example Identify-and-Replace (I\&R) prompt for the DREsS ``Language'' criterion.}
 \label{fig:ir_prompt}
 \end{figure*}
 
@@ -1238,9 +1238,7 @@ This criteria measures how well the original aspects of the summary show a maste
 
 Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
 
-\paragraph{Scoring Model Comparison} Our final LLM-as-a-judge is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. To motivate this choice, we report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively.
-
-Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion. The gap is most pronounced on DREsS, where the two prompting-only GPT baselines collapse to mean QWK in the $0.23$--$0.25$ range while fine-tuning recovers performance to a level comparable to the CLASSE result. The fine-tuned BERT model is competitive on CLASSE (mean $0.551$, only $\approx0.07$ below the fine-tuned LLM) but does not match it on either dataset.
+\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
 
 \begin{table*}[h]
 \centering
@@ -1286,15 +1284,12 @@ Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
 \label{apx:scoring_dress}
 \end{table*}
 
-\paragraph{BERT setup} Following \cite{fernandez_automated_2022}, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. We use learning rate $5\!\times\!10^{-4}$, batch size $8$, and train for $10$ epochs. We retain the checkpoint with the lowest validation MSE: epoch~9 for CLASSE (mean QWK $0.551$) and epoch~4 for DREsS (mean QWK $0.502$). We note that the validation-MSE-optimal checkpoint is not always the QWK-optimal checkpoint --- peak mean QWK on the validation set is reached around epoch~6 for both datasets ($0.564$ for CLASSE and $0.534$ for DREsS), and both runs show signs of overfitting by epochs $8$--$9$. The values reported in Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} correspond to the saved checkpoint, since this is the checkpoint that would be used in practice; alternative selection criteria such as best validation QWK would yield modestly stronger BERT numbers, particularly on DREsS.
+For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
 
-\paragraph{GPT setup} For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference. The per-criterion fine-tuned model identifiers used in our reported numbers are released alongside our code artifacts.
+\subsection{Dataset Details} \label{apx:classe}
 
-\subsection{CLASSE Dataset Details} \label{apx:classe}
+We report detailed descriptions for each CLASSE criterion in Table~\ref{apx:criteria} and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation). We report detailed descriptions for each DREsS criterion in Table~\ref{apx:dress_criteria} and Table~\ref{apx:dress_rubric} details score definitions for each possible value. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.
 
-We further detail the CLASSE dataset. Table~\ref{apx:criteria} provides detailed descriptions for each criterion and Table~\ref{apx:rubric} details score definitions for each possible value. Figure~\ref{fig:token_counts} provides a breakdown of the summary and passage lengths in the dataset. Summaries are approximately 68 words in length and passages are approximately 297 words (calculated by simple space separation).
-
-In preliminary experiments, we found that \texttt{GPT4.1} performed very poorly in properly identifying the ``Voice'' criterion from our evaluation. Compared to a held-out set, the QWK agreement was $0.196$, substantially lower than other criteria. In order to have a reliably reported estimate of validity, we excluded this criterion.
 
 \begin{table*}[!h]
 \centering
@@ -1372,10 +1367,6 @@ This criterion measures how well the original aspects of the summary demonstrate
 \label{apx:rubric}
 \end{table*}
 
-\subsection{DREsS Dataset Details} \label{apx:dress}
-
-We further detail the DREsS dataset. Table~\ref{apx:dress_criteria} provides descriptions for each of the three grading criteria, and Table~\ref{apx:dress_rubric} details score definitions for each possible value on the 1--5 scale. Figure~\ref{fig:dress_token_counts} provides a breakdown of the essay and writing-prompt lengths in the dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words (calculated by simple space separation). Both descriptions and rubric definitions are taken from the prompts used by our LLM-as-a-judge scoring model (Appendix~\ref{apx:scoring}); the source dataset \cite{yoo_dress_2025} provides only general guidance per criterion, which we operationalized into the rubric scale below.
-
 \begin{table*}[!h]
 \centering
 \renewcommand{\arraystretch}{1.4}
@@ -1400,7 +1391,7 @@ This criterion measures the student's control of vocabulary and grammatical stru
 \begin{figure*}
     \centering
     \includegraphics[width=1\linewidth]{latex/figs/dress_token_statistics.png}
-    \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words. Essay length is computed over the $1{,}979$ non-null essays in $\text{DREsS}_{\text{New}}$; writing-prompt length is computed over all $2{,}279$ rows, with the $65$ unique prompts repeating across rows.}
+    \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.}
     \label{fig:dress_token_counts}
 \end{figure*}
 
@@ -1439,68 +1430,64 @@ This criterion measures the student's control of vocabulary and grammatical stru
 
 \subsection{Training Details} \label{apx:training}
 
-We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} (primary) and \texttt{Qwen3-4B-Instruct-2507} (secondary). The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. Both stages share the infrastructure and LoRA configuration shown in Table~\ref{apx:training_shared} and differ only in the stage-specific hyperparameters and dataset-specific cadence shown in Table~\ref{apx:training_stage}.
+We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} and \texttt{Qwen3-4B-Instruct-2507}. The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. For both stages, we train a rank-$32$ LoRA adapter with dropout $0.05$ for all attention and MLP projections using an AdamW optimizer. For SFT, we use a constant learning rate of $5\!\times\!10^{-5}$ with weight decay $0.01$, and in DPO we use a cosine schedule at $2\!\times\!10^{-5}$ against the frozen SFT LoRA as the reference policy.
 
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l l}
-\toprule
-\textbf{Setting} & \textbf{Value} \\
-\midrule
-Base models & \texttt{Llama-3.1-8B-Instruct}, \\
-            & \texttt{Qwen3-4B-Instruct-2507} \\
-Precision & bf16 \\
-Optimizer & \texttt{paged\_adamw\_8bit} \\
-Grad.\ checkpointing & enabled \\
-Max grad norm & 1.0 \\
-Per-device batch size & 2 ($\times$ 4 grad accumulation $=$ 8) \\
-Seed & 42 \\
-LoRA rank $r$ & 32 ($\alpha\!=\!r$, dropout 0.05) \\
-LoRA targets & q/k/v/o\_proj, gate/up/down\_proj \\
-LoRA bias / task type & none / \texttt{CAUSAL\_LM} \\
-Checkpoint selection & lowest \texttt{eval\_loss} (top-1 kept) \\
-\bottomrule
-\end{tabular}
-\caption{Shared infrastructure and LoRA configuration used across SFT and DPO stages.}
-\label{apx:training_shared}
-\end{table}
+% \begin{table}[h]
+% \centering
+% \small
+% \setlength{\tabcolsep}{4pt}
+% \renewcommand{\arraystretch}{1.15}
+% \begin{tabular}{l l}
+% \toprule
+% \textbf{Setting} & \textbf{Value} \\
+% \midrule
+% Base models & \texttt{Llama-3.1-8B-Instruct}, \\
+%             & \texttt{Qwen3-4B-Instruct-2507} \\
+% Precision & bf16 \\
+% Optimizer & \texttt{paged\_adamw\_8bit} \\
+% Grad.\ checkpointing & enabled \\
+% Max grad norm & 1.0 \\
+% Per-device batch size & 2 ($\times$ 4 grad accumulation $=$ 8) \\
+% Seed & 42 \\
+% LoRA rank $r$ & 32 ($\alpha\!=\!r$, dropout 0.05) \\
+% LoRA targets & q/k/v/o\_proj, gate/up/down\_proj \\
+% LoRA bias / task type & none / \texttt{CAUSAL\_LM} \\
+% Checkpoint selection & lowest \texttt{eval\_loss} (top-1 kept) \\
+% \bottomrule
+% \end{tabular}
+% \caption{Shared infrastructure and LoRA configuration used across SFT and DPO stages.}
+% \label{apx:training_shared}
+% \end{table}
 
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{l c c}
-\toprule
-\textbf{Setting} & \textbf{SFT} & \textbf{DPO} \\
-\midrule
-Learning rate & $5\!\times\!10^{-5}$ & $2\!\times\!10^{-5}$ \\
-LR schedule & constant & cosine \\
-Weight decay & 0.01 & --- \\
-DPO $\beta$ (KL) & --- & 0.1 \\
-Reference model & --- & frozen SFT LoRA \\
-\midrule
-\multicolumn{3}{l}{\emph{CLASSE}} \\
-Max steps & 1000 & 1000 \\
-Warmup steps & 100 & 100 \\
-Eval / save steps & 200 / 200 & 200 / 200 \\
-\midrule
-\multicolumn{3}{l}{\emph{DREsS}} \\
-Max steps & 400 & 400 \\
-Warmup steps & 50 & 50 \\
-Eval / save steps & 100 / 100 & 50 / 50 \\
-\bottomrule
-\end{tabular}
-\caption{Stage-specific hyperparameters and dataset-specific training cadence.}
-\label{apx:training_stage}
-\end{table}
-
-\paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
-
-\paragraph{Selected DPO hyperparameters.} We selected the DPO learning rate via a small sweep on Llama-3 / DREsS with an SFT prior at LoRA rank $r{=}16$. Raising LR from $5\!\times\!10^{-6}$ (initial value) to $2\!\times\!10^{-5}$ produced a substantial gain in DPO reward accuracy across criteria: $+0.08$ on Content ($0.66\rightarrow0.75$), $+0.10$ on Organization ($0.68\rightarrow0.78$), and $+0.13$ on Language ($0.74\rightarrow0.87$). Subsequently increasing the SFT-prior LoRA rank from $16$ to $32$ (with $\alpha{=}32$) added an additional $\approx0.02$ reward accuracy on average. With the final LR $2\!\times\!10^{-5}$ / $r{=}32$ configuration, CLASSE DPO reaches $0.85$--$0.88$ reward accuracy across its five criteria.
+% \begin{table}[h]
+% \centering
+% \small
+% \setlength{\tabcolsep}{4pt}
+% \renewcommand{\arraystretch}{1.15}
+% \begin{tabular}{l c c}
+% \toprule
+% \textbf{Setting} & \textbf{SFT} & \textbf{DPO} \\
+% \midrule
+% Learning rate & $5\!\times\!10^{-5}$ & $2\!\times\!10^{-5}$ \\
+% LR schedule & constant & cosine \\
+% Weight decay & 0.01 & --- \\
+% DPO $\beta$ (KL) & --- & 0.1 \\
+% Reference model & --- & frozen SFT LoRA \\
+% \midrule
+% \multicolumn{3}{l}{\emph{CLASSE}} \\
+% Max steps & 1000 & 1000 \\
+% Warmup steps & 100 & 100 \\
+% Eval / save steps & 200 / 200 & 200 / 200 \\
+% \midrule
+% \multicolumn{3}{l}{\emph{DREsS}} \\
+% Max steps & 400 & 400 \\
+% Warmup steps & 50 & 50 \\
+% Eval / save steps & 100 / 100 & 50 / 50 \\
+% \bottomrule
+% \end{tabular}
+% \caption{Stage-specific hyperparameters and dataset-specific training cadence.}
+% \label{apx:training_stage}
+% \end{table}
 
 \subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
 
@@ -1508,29 +1495,6 @@ Eval / save steps & 100 / 100 & 50 / 50 \\
 
 \paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating method was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$, summarized in Table~\ref{tab:eval_questions}.
 
-\begin{table}[h]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{l p{0.62\linewidth}}
-\toprule
-\textbf{Question} & \textbf{Prompt shown to evaluator} \\
-\midrule
-\multicolumn{2}{l}{\emph{Per-rewrite (1--3 scale: None / Slight / Clear), asked for both A and B}} \\
-Q1 Improvement & How much does this rewrite improve the student writing on criterion $X$? \\
-Q2 Similarity  & How similar is this rewrite to the original student writing? \\
-Q3 Helpfulness & How useful would this rewrite be as feedback for the student on criterion $X$? \\
-\midrule
-\multicolumn{2}{l}{\emph{Comparison (A / B / Same)}} \\
-Q4 Criterion   & Which rewrite is better in terms of criterion $X$? \\
-Q5 Similarity  & Which rewrite is more similar to the original student writing? \\
-Q6 Demonstration & Overall, which rewrite would be a better demonstration to help the student improve on criterion $X$? \\
-\bottomrule
-\end{tabular}
-\caption{The six questions evaluators answered for each (passage, student summary, rewrite~A, rewrite~B) tuple. Per-rewrite items capture absolute judgments on each rewrite; comparison items capture pairwise preferences.}
-\label{tab:eval_questions}
-\end{table}
 
 \paragraph{Calibration material.} Evaluators were provided with a multi-section reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. The full instructional document is approximately twenty pages and is released alongside our code artifacts.
 
@@ -1623,9 +1587,7 @@ E3 (Nicole) & 46\% & 73\% & 48\% & 23/27/0 & 16/6/28 & 24/26/0 \\
 \onecolumn
 \subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
 
-We provide three illustrative tuples drawn from the teacher evaluation set, spanning the CLASSE Details and Main Idea criteria. Each example shows the original student writing along with two AI rewrites: one from Gumbel Machine (GM) and one from the Minimal-Edit (ME) baseline, both targeting the maximum score of $4$ on the focal criterion. Alongside each rewrite we report the normalized character-level similarity to the original student writing, which is the quantity we are most interested in: a higher value indicates the rewrite preserves more of the student's text. Both rewrites achieve comparable automated rubric scores (omitted here for focus); the contrast across the three examples is in the similarity gap between GM and ME. Rewrites were shown to evaluators in randomized A/B order with the generating method blinded; we have unblinded the methods here and place the GM rewrite first in every example. Student writing is shown verbatim, including original spelling and punctuation.
-
-\begin{examplebox}{Example 1 --- Details criterion}
+\begin{examplebox}{Example 1 --- Civil Service}
 \textbf{Student writing} (Score 3):
 
 \begin{quote}\itshape
@@ -1645,7 +1607,7 @@ Civil service jobs offer opportunities to men and women at various levels of gov
 \end{quote}
 \end{examplebox}
 
-\begin{examplebox}{Example 2 --- Main Idea criterion}
+\begin{examplebox}{Example 2 --- Global Warming}
 \textbf{Student writing} (Score 1):
 
 \begin{quote}\itshape
@@ -1669,7 +1631,7 @@ Californians want the state to start working on the problem as soon as possible,
 \end{quote}
 \end{examplebox}
 
-\begin{examplebox}{Example 3 --- Details criterion}
+\begin{examplebox}{Example 3 --- Ecological Pyramids}
 \textbf{Student writing} (Score 3):
 
 \begin{quote}\itshape
