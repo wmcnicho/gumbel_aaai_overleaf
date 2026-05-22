@@ -368,11 +368,11 @@ In this section, we detail our experiments to evaluate the effectiveness of our 
 We evaluate our approach on two datasets of scored student writing samples, covering both reading passage summarization and open-ended student writing from a variety of proficiency levels. For reading passage summarization, we use the Common Lit Augmented Student Summary Evaluation (\textbf{CLASSE}) dataset, a corpus of student-authored summaries to short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries from 101 unique passages authored by students in grades 3-12. Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring on this criterion in preliminary experiments.~\ref{apx:classe}}.
 
 For open-ended writing, we use the Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}) dataset,  a corpus of student-authored responses to writing prompts \cite{yoo_dress_2025}. We specifically use the $\text{DREsS}_{\text{New}}$ which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an
-English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:dress}.
+English as a foreign language (EFL) writing course. English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. We further detail the scoring definitions for each criterion, token statistics, and sample scoring rubrics in Appendix~\ref{apx:classe}\mh{TODO add DRESS details to apx}.
 
 % Could include here details about filtering/cleaning if needed.
 \subsection{Scoring Model}
-We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. In preliminary experiments, we observed that this scoring model approach performed better than a fine-tuned BERT encoder model \cite{devlin_bert_2019}, or directly prompting the larger \texttt{GPT-4.1} model. We evaluate each scoring model on a held-out validation set of student work. We report the average Quadratic Weighted Kappa (QWK) agreement across criteria between this LLM score and human score for each dataset as 0.6242 and 0.6012, respectively for CLASSE and DREsS. An overall inter-rater agreement of 0.642 is reported for the CLASSE dataset, while DREsS is scored by a single annotator. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt and further details in Appendix~\ref{apx:scoring}.\mh{to appendix add dress and training details, BERT scoring details as well} 
+We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. In preliminary experiments, we observed that this scoring model approach performed better than a fine-tuned BERT encoder model \cite{devlin_bert_2019}, or directly prompting the larger \texttt{GPT-4.1} model. We evaluate each scoring model on a held-out validation set of student work. \al{what's the train/val split?} The average Quadratic Weighted Kappa (QWK) agreement across criteria between this LLM score and human score for each dataset as 0.6242 and 0.6012, respectively for CLASSE and DREsS. In comparison, the inter-rater agreement between human scorers is 0.642 for CLASSE, while DREsS is scored by a single annotator. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt, per-criterion QWK breakdowns for all candidate scoring models, and BERT-baseline setup details in Appendix~\ref{apx:scoring}. 
 
 \subsection{Metrics}
 We measure two competing properties of the generated counterfactuals, i) similarity to a factual example and ii) task validity, following existing work on counterfactual generation \cite{wang-etal-2024-survey}. 
@@ -472,7 +472,7 @@ GM (Ours)
 \end{tabular}
 \caption{Results comparing Gumbel Machine to existing methods. Best result per column in \textbf{bold}, second-best \underline{underlined}. We observe that GM provides noticeable improvements in validity for both datasets without sacrificing validity, resulting in counterfactuals that respect rubric changes while maintaining similarity to the reference work. }
 \label{tab:llama_results}
-\end{table}
+\end{table*}
 
 \subsubsection{Language Models}
 We evaluate across a range of LLMs spanning two open-weight families and two closed-weight tiers. We deliberately select Anthropic models rather than OpenAI alternatives as closed-weight baselines to mitigate bias observed documented when an LLM evaluator and a generator share a model family \cite{panickssery2024llmevaluators}.
@@ -1157,9 +1157,59 @@ This criteria measures how well the original aspects of the summary show a maste
 \label{fig:score_prompt}
 \end{figure*}
 
-Figure~\ref{fig:score_prompt} shows the instructions passed to \texttt{GPT4.1} as a scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness and instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
+Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
 
-We explored an alternative BERT-based scoring method trained on the CLASSE dataset following \cite{fernandez_automated_2022}. We found the QWK of the scoring model on a held-out set was $0.495$ compared to the $0.53$ observed in the LLM-Judge system.
+\paragraph{Scoring Model Comparison} Our final LLM-as-a-judge is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. To motivate this choice, we report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively.
+
+Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion. The gap is most pronounced on DREsS, where the two prompting-only GPT baselines collapse to mean QWK in the $0.23$--$0.25$ range while fine-tuning recovers performance to a level comparable to the CLASSE result. The fine-tuned BERT model is competitive on CLASSE (mean $0.551$, only $\approx0.07$ below the fine-tuned LLM) but does not match it on either dataset.
+
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{l  c  ccc}
+\toprule
+& \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
+\cmidrule(lr){2-2} \cmidrule(lr){3-5}
+\textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
+\midrule
+Main Idea     & 0.566 & 0.632 & 0.590 & \textbf{0.683} \\
+Details       & 0.616 & 0.473 & 0.476 & \textbf{0.690} \\
+Organization  & 0.607 & 0.495 & 0.393 & \textbf{0.628} \\
+Wording       & 0.542 & 0.463 & 0.366 & \textbf{0.522} \\
+Language      & 0.423 & 0.543 & 0.497 & \textbf{0.598} \\
+\midrule
+\textbf{Mean} & 0.551 & 0.521 & 0.464 & \textbf{0.624} \\
+\bottomrule
+\end{tabular}
+\caption{Per-criterion QWK agreement between scoring models and human raters on the CLASSE held-out validation set. The fine-tuned \texttt{GPT-4.1-mini} (column~4) is the LLM-as-a-judge used throughout the paper. Best per row in \textbf{bold}.}
+\label{apx:scoring_classe}
+\end{table*}
+
+\begin{table*}[h]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{l  c  ccc}
+\toprule
+& \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
+\cmidrule(lr){2-2} \cmidrule(lr){3-5}
+\textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
+\midrule
+Content      & 0.540 & 0.211 & 0.289 & \textbf{0.652} \\
+Organization & 0.490 & 0.278 & 0.213 & \textbf{0.598} \\
+Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
+\midrule
+\textbf{Mean} & 0.502 & 0.232 & 0.251 & \textbf{0.601} \\
+\bottomrule
+\end{tabular}
+\caption{Per-criterion QWK agreement between scoring models and human raters on the DREsS held-out validation set. The fine-tuned \texttt{GPT-4.1-mini} (column~4) is the LLM-as-a-judge used throughout the paper. Best per row in \textbf{bold}.}
+\label{apx:scoring_dress}
+\end{table*}
+
+\paragraph{BERT setup} Following \cite{fernandez_automated_2022}, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. We use learning rate $5\!\times\!10^{-4}$, batch size $8$, and train for $10$ epochs. We retain the checkpoint with the lowest validation MSE: epoch~9 for CLASSE (mean QWK $0.551$) and epoch~4 for DREsS (mean QWK $0.502$). We note that the validation-MSE-optimal checkpoint is not always the QWK-optimal checkpoint --- peak mean QWK on the validation set is reached around epoch~6 for both datasets ($0.564$ for CLASSE and $0.534$ for DREsS), and both runs show signs of overfitting by epochs $8$--$9$. The values reported in Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} correspond to the saved checkpoint, since this is the checkpoint that would be used in practice; alternative selection criteria such as best validation QWK would yield modestly stronger BERT numbers, particularly on DREsS.
+
+\paragraph{GPT setup} For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference. The per-criterion fine-tuned model identifiers used in our reported numbers are released alongside our code artifacts.
 
 \subsection{CLASSE Dataset Details} \label{apx:classe}
 
