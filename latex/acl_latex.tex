@@ -370,7 +370,7 @@ English as a foreign language (EFL) writing course. English education experts ev
 
 % Could include here details about filtering/cleaning if needed.
 \subsection{Scoring Model}
-We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. In preliminary experiments, we observed that this scoring model approach performed better than a fine-tuned BERT encoder model \cite{devlin_bert_2019}, or direct scoring prompting of a larger \texttt{GPT-4.1} model. We evaluate each scoring model on a held-out validation set of student work. We report the average Quadratic Weighted Kappa (QWK) agreement across criteria between this LLM score and human score for each dataset as 0.6242 and 0.6012, respectively for CLASSE and DREsS. An overall inter-rater agreement of 0.642 is reported for the CLASSE dataset, while DREsS is scored by a single annotator. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt and further details in Appendix~\ref{apx:scoring}.\mh{TODO add dress and training details, BERT details as well} 
+We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. In preliminary experiments, we observed that this scoring model approach performed better than a fine-tuned BERT encoder model \cite{devlin_bert_2019}, or direct scoring prompting of a larger \texttt{GPT-4.1} model. We evaluate each scoring model on a held-out validation set of student work. We report the average Quadratic Weighted Kappa (QWK) agreement across criteria between this LLM score and human score for each dataset as 0.6242 and 0.6012, respectively for CLASSE and DREsS. An overall inter-rater agreement of 0.642 is reported for the CLASSE dataset, while DREsS is scored by a single annotator. While slightly below the human upper-bound, the scoring models' proximity to this ceiling demonstrates sufficient capabilities to serve as a scalable proxy for manual evaluation. We provide our scoring prompt and further details in Appendix~\ref{apx:scoring}.\mh{to appendix add dress and training details, BERT scoring details as well} 
 
 \subsection{Metrics}
 We measure two competing properties of the generated counterfactuals, i) similarity to a factual example and ii) task validity, following existing work on counterfactual generation \cite{wang-etal-2024-survey}. 
@@ -414,9 +414,9 @@ We compare our approach to three other LLM-based counterfactual text generation 
 
 \begin{itemize}
     \item \textbf{Gumbel Machine (GM)}, our proposed approach, which leverages recovered Gumbel noise and preference alignment to create similar, rubric-aligned counterfactuals.
-    \item \textbf{Minimal-Edit (ME)} Following Gat et al. [1], we include in the prompt instructions for the LLM to minimally edit the reference as a zero-shot approach.
-    \item \textbf{In-Context Learning In-Context Learning (ICL)}. Following Li et al. [2],  we include in-context demonstrations of each score level in the prompt.
-    \item \textbf{Identify-and-Replace (I\&R)}. Following Youssef et al. [3], we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions can be thought of as demonstrating ``Chain-of-Thought (CoT)’’ for the task to the LLM. \mh{TODO add CoT prompt to appendix}
+    \item \textbf{Minimal-Edit (ME)} Following \citep{gat_faithful_2023}, we include in the prompt instructions for the LLM to minimally edit the reference as a zero-shot approach.
+    \item \textbf{In-Context Learning In-Context Learning (ICL)}. Following \citep{li_prompting_2024},  we include in-context demonstrations of each score level in the prompt.
+    \item \textbf{Identify-and-Replace (I\&R)}. Following \citep{nguyen_llms_2024}, we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions can be thought of as demonstrating ``Chain-of-Thought (CoT)'' for the task to the LLM. \mh{TODO add CoT prompt to appendix}
 \end{itemize}
 
 % \begin{itemize}
@@ -426,26 +426,7 @@ We compare our approach to three other LLM-based counterfactual text generation 
 % \item \textbf{Nucleus Sampling}: A standard top-$p$ sampling procedure applied during decoding \cite{holtzman_curious_2020}. For hyperparameters, we use $T=0.6$ and $p=0.9$.
 % \end{itemize}
 
-\subsubsection{Language Models}
-We evaluate across a range of LLMs spanning two open-weight families (Llama, Qwen) and two closed-weight tiers from a single provider (Anthropic's Haiku and Sonnet). This selection lets us assess whether the components of GM transfer across open-weight backbones and how a fully prompting-based approach with a stronger, proprietary model compares to our alignment-and-decoding pipeline. The two open-weight models support all components of GM ($\beta$-Hindsight decoding, SFT, DPO), while the closed-weight models are restricted to prompting-based baselines since they expose neither logits nor tunable weights.
-% All models are prompted using the same counterfactual generation template shown in Appendix \textbf{TODO}.
-
-\textbf{Llama-3} We use \texttt{LLaMA-3.1-8B-Instruct}, trained with instruction tuning and preference optimization \cite{grattafiori2024llama3herdmodels}. This model serves as our primary open-weight backbone due to its strong instruction-following behavior and wide adoption.
-
-\textbf{Qwen-3} We use \texttt{Qwen3-4B-Instruct} \cite{yang2025qwen3technicalreport}, a 4B-parameter instruction-tuned model from the Qwen3 family. Qwen-3 provides a contrasting open-weight backbone to Llama from a different training pipeline and model family, allowing us to assess the cross-family generality of GM.
-
-\textbf{Haiku} We use Claude Haiku 4.5 \cite{anthropic2025haiku45}, a lightweight, low-latency closed-weight model from Anthropic. Haiku serves as a closed-weight prompting baseline at a comparable capability tier to our open-weight backbones.
-
-\textbf{Sonnet} We use Claude Sonnet 4.6 \cite{anthropic2025sonnet46}, a more capable closed-weight model from Anthropic that serves as a strong prompting-only ceiling. We deliberately select Anthropic models rather than OpenAI alternatives as closed-weight baselines because our LLM-as-a-judge validity scorer is itself a fine-tuned \texttt{GPT-4.1-mini} model; using GPT-family generators would risk the self-preference bias documented when an evaluator and a generator share a model family \cite{panickssery2024llmevaluators}, confounding the validity comparison.
-
-% \textbf{Llama-3 Aligned} To align a model to reliably follow task instructions, we train \texttt{LLaMA-3.1-8B-Instruct} using Low-Rank Adaptation (LoRA) \cite{hu2021loralowrankadaptationlarge}. For each evaluation criterion, we train a separate LoRA adapter using supervision derived from rubric-aligned feedback, detailed in Section~\ref{train-setup}. These adapters are applied at inference time on top of the base model. 
-% This setup enables us to assess how explicit alignment toward rubric-following behavior interacts with controllability mechanisms such as $\beta$-Hindsight, while keeping the underlying language model fixed.
-
-% \textbf{Llama-4} We also experiment with \texttt{LLaMA-4-Scout-17B-16E-Instruct}, a 109B parameter LLM with substantially stronger instruction-following capabilities
-% %a Mixture-of-Experts (MoE) model with 109B total parameters and sparse expert activation 
-% \cite{meta2024llama4}. 
-
-\begin{table}[h!t]
+\begin{table*}[ht]
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
@@ -490,6 +471,25 @@ GM (Ours)
 \caption{Results comparing Gumbel Machine to existing methods. Best result per column in \textbf{bold}, second-best \underline{underlined}. We observe that GM provides noticeable improvements in validity for both datasets without sacrificing validity, resulting in counterfactuals that respect rubric changes while maintaining similarity to the reference work. }
 \label{tab:llama_results}
 \end{table}
+
+\subsubsection{Language Models}
+We evaluate across a range of LLMs spanning two open-weight families and two closed-weight tiers. We deliberately select Anthropic models rather than OpenAI alternatives as closed-weight baselines to mitigate bias observed documented when an LLM evaluator and a generator share a model family \cite{panickssery2024llmevaluators}.
+% All models are prompted using the same counterfactual generation template shown in Appendix \textbf{TODO}.
+
+\textbf{Llama-3} We use \texttt{LLaMA-3.1-8B-Instruct} as our primary open-weight model due to its strong instruction-following behavior and wide community adoption \cite{grattafiori2024llama3herdmodels}.
+
+\textbf{Qwen-3} We use \texttt{Qwen3-4B-Instruct} \cite{yang2025qwen3technicalreport}, as a contrasting open-weight model from a different training pipeline to assess the cross-family generality of GM.
+
+\textbf{Haiku} We use \texttt{Claude Haiku 4.5} \cite{anthropic2025haiku45}, a lightweight closed-weight model from Anthropic. Haiku serves as a closed-weight prompting baseline at a comparable capability tier to our open-weight backbones.
+
+\textbf{Sonnet} We use \texttt{Claude Sonnet 4.6} \cite{anthropic2025sonnet46}, a more capable closed-weight model from Anthropic that serves as a strong prompting-only performance ceiling. 
+
+% \textbf{Llama-3 Aligned} To align a model to reliably follow task instructions, we train \texttt{LLaMA-3.1-8B-Instruct} using Low-Rank Adaptation (LoRA) \cite{hu2021loralowrankadaptationlarge}. For each evaluation criterion, we train a separate LoRA adapter using supervision derived from rubric-aligned feedback, detailed in Section~\ref{train-setup}. These adapters are applied at inference time on top of the base model. 
+% This setup enables us to assess how explicit alignment toward rubric-following behavior interacts with controllability mechanisms such as $\beta$-Hindsight, while keeping the underlying language model fixed.
+
+% \textbf{Llama-4} We also experiment with \texttt{LLaMA-4-Scout-17B-16E-Instruct}, a 109B parameter LLM with substantially stronger instruction-following capabilities
+% %a Mixture-of-Experts (MoE) model with 109B total parameters and sparse expert activation 
+% \cite{meta2024llama4}. 
 
 \subsubsection{Data Sampling Strategy}
 
@@ -588,7 +588,7 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
   %   & $\textbf{0.607} \pm 0.098$ & $0.287 \pm 0.112$ \\
 \bottomrule
 \end{tabular}
-\caption{Gumbel Machine (GM) sweep on Llama and Qwen open-weight backbones vs.\ Haiku and Sonnet closed-weight prompting baselines. Closed-weight models support neither $\beta$-Hindsight sampling (no logit access) nor preference alignment (no tunable weights). Best result per column in \textbf{bold}, second-best \underline{underlined}.}
+\caption{ Comparing counterfactual LLM approaches across different closed and open-weight models. We observe GM translates across open-weight models and has comparable performance to larger closed-weight models.}
 \label{tab:gm_vs_closed}
 \end{table*}
 
@@ -615,76 +615,128 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
 % \label{tab:ablation_alignment}
 % \end{table*}
 
-\begin{table*}[h!t]
+% \begin{table*}[h!t]
+% \centering
+% \setlength{\tabcolsep}{5pt}
+% \begin{tabular}{ccc | cc | cc}
+% \toprule
+% & & & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+% \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+% \multirow{-2}{*}{\textbf{$\beta$-H}} & \multirow{-2}{*}{\textbf{SFT}} & \multirow{-2}{*}{\textbf{DPO}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
+% \midrule
+% $-$ & $-$ & $-$
+%     & $0.314\std{0.016}$ & $0.183\std{0.062}$
+%     & $0.305\std{0.009}$ & $0.188\std{0.119}$ \\
+% $-$ & \checkmark & $-$
+%     & $0.382\std{0.045}$ & $0.151\std{0.130}$
+%     & $0.290\std{0.021}$ & $0.102\std{0.049}$ \\
+% $-$ & \checkmark & \checkmark
+%     & $0.324\std{0.031}$ & $\textbf{0.688}\std{0.109}$
+%     & $0.224\std{0.021}$ & $\textbf{0.608}\std{0.182}$ \\
+% \midrule
+% \checkmark & $-$ & $-$
+%     & $0.560\std{0.020}$ & $0.168\std{0.024}$
+%     & $0.402\std{0.048}$ & $0.148\std{0.067}$ \\
+% \checkmark & \checkmark & $-$
+%     & $\textbf{0.795}\std{0.036}$ & $-0.026\std{0.073}$
+%     & $\textbf{0.733}\std{0.053}$ & $-0.005\std{0.062}$ \\
+% \checkmark & \checkmark & \checkmark
+%     & $0.391\std{0.047}$ & $0.668\std{0.210}$
+%     & $0.477\std{0.137}$ & $0.404\std{0.084}$ \\
+% \bottomrule
+% \end{tabular}
+% \caption{Alignment ablation on Llama at $\beta{=}0.10$. Checkmarks indicate which components are active. SFT alone maximizes similarity but collapses validity; DPO recovers validity at the cost of some similarity. The full GM configuration combines all three. Best result per column in \textbf{bold}.}
+% \label{tab:ablation_alignment}
+% \end{table*}
+
+\begin{table}[h!t]
 \centering
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{ll  cc  cc}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{ccc | cc | cc}
 \toprule
-& & \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
-\cmidrule(lr){3-4} \cmidrule(lr){5-6}
-\multirow{-2}{*}{\textbf{Logit Control}} & \multirow{-2}{*}{\textbf{Training}} & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ & $\text{Similarity}^\uparrow$ & $\text{Validity}^\uparrow$ \\
+& & & \multicolumn{2}{c|}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+\cmidrule(lr){4-5} \cmidrule(lr){6-7}
+\multirow{-2}{*}{\textbf{$\beta$-H}} & \multirow{-2}{*}{\textbf{SFT}} & \multirow{-2}{*}{\textbf{DPO}} & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
 \midrule
-\multirow{3}{*}{None}
-  & Base
-    & $0.314\std{0.016}$ & $0.183\std{0.062}$
-    & $0.305\std{0.009}$ & $0.188\std{0.119}$ \\
-  & $+$SFT
-    & $0.382\std{0.045}$ & $0.151\std{0.130}$
-    & $0.290\std{0.021}$ & $0.102\std{0.049}$ \\
-  & $+$DPO
-    & $0.324\std{0.031}$ & $\textbf{0.688}\std{0.109}$
-    & $0.224\std{0.021}$ & $\textbf{0.608}\std{0.182}$ \\
+$-$ & $-$ & $-$
+    & $0.314$ & $0.183$
+    & $0.305$ & $0.188$ \\
+$-$ & \checkmark & $-$
+    & $0.382$ & $0.151$
+    & $0.290$ & $0.102$ \\
+$-$ & \checkmark & \checkmark
+    & $0.324$ & $\textbf{0.688}$
+    & $0.224$ & $\textbf{0.608}$ \\
 \midrule
-\multirow{3}{*}{Gumbel}
-  & Base
-    & $0.560\std{0.020}$ & $0.168\std{0.024}$
-    & $0.402\std{0.048}$ & $0.148\std{0.067}$ \\
-  & $+$SFT
-    & $\textbf{0.795}\std{0.036}$ & $-0.026\std{0.073}$
-    & $\textbf{0.733}\std{0.053}$ & $-0.005\std{0.062}$ \\
-  & $+$SFT $+$DPO \emph{(GM)}
-    & $0.391\std{0.047}$ & $\textbf{0.668}\std{0.210}$
-    & $0.477\std{0.137}$ & $0.404\std{0.084}$ \\
+\checkmark & $-$ & $-$
+    & $\underline{0.560}$ & $0.168$
+    & $0.402$ & $0.148$ \\
+\checkmark & \checkmark & $-$
+    & $\textbf{0.795}$ & $-0.026$
+    & $\textbf{0.733}$ & $-0.005$ \\
+\checkmark & \checkmark & \checkmark
+    & $0.391$ & $\underline{0.668}$
+    & $\underline{0.477}$ & $\underline{0.404}$ \\
 \bottomrule
 \end{tabular}
-\caption{Alignment ablation on Llama at $\beta{=}0.10$. Each row adds a stage of the GM pipeline on top of $\beta$-Hindsight decoding: SFT alone collapses validity (rubric-adherence is lost while similarity to the reference is maximized), while adding DPO recovers validity at the cost of some similarity. Best result per column in \textbf{bold}.}
+\caption{Ablation study on the components of GM. We observe that SFT alone drastically improves similarity at the cost of validity and that DPO is necessary to realize counterfactual results that balance both axes.}
 \label{tab:ablation_alignment}
-\end{table*}
+\end{table}
 
 \subsection{Counterfactual Approach Comparisons}
 
-In Table~\ref{tab:llama_results}, we report the results of our experiments comparing Gumbel Machine to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively. For the CLASSE dataset, we observe that our approach noticeably improves validity on both datasets while providing higher similarity scores. While the I\&R approach shows a higher similarity score compared to GM the validity is lowest compared to other approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference work but are not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and closer to the reference work. On the DresS, dataset we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This result suggests the GM is an effective counterfactual approach for both shorter summarization tasks and longer open-ended writing, but produces more rubric-aligned counterfactuals when the writing samples are more homogeneous.
+In Table~\ref{tab:llama_results}, we report the results of our experiments comparing GM to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively. For the CLASSE dataset, we observe that our approach noticeably improves validity on both datasets while providing higher similarity scores. While the I\&R approach shows a higher similarity score compared to GM the validity is lowest compared to other approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference work but are not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and closer to the reference work. On the DresS, dataset we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This result suggests the GM is an effective counterfactual approach for both shorter summarization tasks and longer open-ended writing, but produces more rubric-aligned counterfactuals when the writing samples are more homogeneous.
 
 
 \begin{figure}
         \centering
-        \includegraphics[width=1\linewidth]{paper_tradeoff_v3.png}
+        \includegraphics[width=1\linewidth]{latex/figs/paper_tradeoff_v4.png}
         \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias approach. Gumbel Machine provides a tunable tradeoff between competing metrics occupying a different region of Pareto front.}
         \label{fig:pareto-front}
 \end{figure}
 
 \subsection{Gumbel Noise: A Flexible Control Signal}
 
-In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the Gumbel Machine. In these experiments, we vary the control signals across a range of values and run the CLASSE validation set on Gumbel Machine and a baseline. As a comparative baseline, we run Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For Gumbel Machine, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.01, 0.1, 0.5, 1.0\}$. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 0.1, 1.0, 5.0, 10.0\}$. Higher values of $\alpha$ induce stronger similarity to reference tokens. We derive both ranges in smaller-scale experiments where we observe that values outside these ranges result in minimal change in performance. \mh{TODO update to final values}
+In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signals across a range of values and run the CLASSE validation set on GM and a baseline. As a comparative baseline, we run Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$. Higher values of $\alpha$ induce stronger similarity to reference tokens. We derive both ranges in smaller-scale experiments where we observe that values outside these ranges result in minimal change in performance.
 
-Comparing the two approaches, we observe that for Gumbel Machine, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that Gumbel Machine tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
+Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
 
-\subsection{Additional Language Models}
+\subsection{Proprietary Model Comparisons}
 
-In Table~\ref{tab:gm_vs_closed} we report on experiments comparing our method to prompting-based baselines on closed-weight models and run Gumbel Machine with an additional open-weight backbone, Qwen. On CLASSE, Gumbel Machine with $g{=}0.10$ achieves the strongest result against the closed-weight ceiling: Llama-based GM strictly dominates Sonnet's strongest validity baseline (ICL) on both metrics, raising validity from $0.604$ to $0.668$ while also gaining $+0.032$ similarity, and Qwen-based GM at the same $g$ strictly dominates Sonnet's strongest similarity baseline (Identify-and-Replace) along both axes, raising validity by $+0.132$ and similarity by $+0.021$. The lower-$g$ Qwen settings tell a complementary story: at $g{=}0.01$, GM matches Sonnet ICL's validity ($0.602$ vs.\ $0.604$) while improving similarity by $+0.171$, demonstrating that GM does not simply trade one metric for the other but expands the achievable Pareto front. On DREsS, the closed-weight ceiling on validity (Sonnet ICL at $0.484$) is not matched by any GM configuration; instead, GM occupies a different region of the trade-off curve, with Llama-based GM at $g{=}0.05$ producing counterfactuals with comparable validity to Haiku's Identify-and-Replace ($0.404$ vs.\ $0.441$) while improving similarity by $+0.093$, and Qwen-based GM pushing similarity above any baseline at the cost of validity. Together, these results indicate that the components of GM transfer across open-weight model families and yield counterfactuals that are competitive with, and on CLASSE strictly preferable to, a much larger closed-weight model relying on prompting alone.
+In Table~\ref{tab:gm_vs_closed} we report our experiments comparing our approach to prompting-based baselines on closed-weight models and run GM with an additional open-weight backbone, Qwen-3. For both open-weight models we run our method with the same $\beta$ values of $0.1$ and $0.05$ for CLASSE and DREsS respectively. On CLASSE, Llama-3-based GM outperforms the strongest Sonnet-based validity baseline (ICL) on both metrics, and Qwen-3-based GM at the same outperforms Sonnet's strongest similarity baseline (Identify-and-Replace) across both metrics. On DREsS, we observe that GM improves on similarity compared to large closed-weight baselines, but does not reach the same levels of validity on some settings.  This result suggests that, for longer open-ended writing tasks, the capacity of a larger model is required to maintain validity over longer time horizons beyond what is possible with training for smaller models. Combining our approach with a larger open-weight model may result in a configuration which strictly improves on the performance of a closed-weight system, but doing so requires extensive computational resources that we leave as future work. Overall, these results indicate that the components of GM transfer across open-weight model families and yield counterfactuals that are competitive with, and on CLASSE strictly preferable to, a much larger closed-weight model.
 
 \subsection{Teacher Evaluation}
 
-We conduct a human evaluation study to evaluate the effectiveness of the generated counterfactual student work. We employ $k=5$ evaluators via Upwork (cite) all of whom have experience teaching English at a mixture of middle school, high school, and university level. We focus our evaluation on student summaries from the CLASSE dataset, as the student work is shorter in length and easier to evaluate at scale then the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of the student work and ask them to evaluate each rewrite and compare them on three dimensions: improvement, similarity, and overall pedagogical utility. We select 10 writing samples across each of the 5 criteria and stratify the sampling across the original student score on each criterion to ensure a balance between quality of student samples. We generated counterfactual rewrites set to the maximum score of 4 for the evaluated criterion, sampling from GM and ME baseline. When the criterion rewrite is target value of 4, both methods display a similar automated score (3.64/4 and 3.68/4) respectively. The ordering of the rewrites is randomized and source generation approach is not disclosed to prevent bias.
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{l c c c c c c c}
+\toprule
+& \multicolumn{3}{c}{Per-side Likert (1--3)} & \multicolumn{3}{c}{Pairwise} & Conditional on sim=GM \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-8}
+Dimension & GM & ME & Wilcoxon $p$ & GM/ME/Tie & GM win\% & Binomial $p$ & GM win\% (GM/ME/Tie) \\
+\midrule
+Improvement       & 2.58 & 2.67 & 0.22 & 66/69/15 & 49\% & 0.86 & 65\% (31/17/2) \\
+\textbf{Similarity} & \textbf{1.81} & 1.71 & 0.09 & \textbf{50/29/71} & \textbf{63\%} & \textbf{0.02} & --- \\
+Helpfulness       & 2.42 & 2.47 & 0.58 & 72/66/12 & 52\% & 0.67 & \textbf{68\%} (34/16/0) \\
+\bottomrule
+\end{tabular}
+\caption{Human evaluation results across \textbf{3} evaluators comparing GM to a baseline with similar validity. We observe that teachers rate GM counterfactuals higher similarity ratings both in a pairwise and on standalone evaluation and in those cases find generated feedback more helpful. Bold indicates $p<0.05$. \mh{todo update results when all 5 come in}}
+\label{tab:human_eval}
+\end{table*}
 
-We report the results of this evaluation in Table TODO. \mh{Then we analyze the final results here. Key points: similarity is noticeably higher for GM. Consistently see improvements. GM rated as helpful. Maybe more insights on slices TBD once all results come in}
+We conduct an IRB-approved human evaluation study to evaluate the effectiveness of the generated counterfactual student work. We employ $k=5$ evaluators via Upwork, all of whom have experience teaching English in the United States at a mixture of middle school, high school, and university level \cite{upwork}. The task took evaluators roughly 2 hours, and we paid them \$60 each, which is significantly higher than the minimum wage. All evaluators gave consent before participating. We provide the consent form, instructions, and a screenshot of the interface in Appendix~\ref{sec:apdx-human-eval}.
+
+We focus our evaluation on student summaries from the CLASSE dataset, as the student work is shorter in length and easier to evaluate at scale than the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of the student work and ask them to evaluate each rewrite and compare them on three dimensions: improvement, similarity, and overall pedagogical utility. We select 10 writing samples across each of the 5 criteria and stratify the sampling across the original student score on each criterion to ensure a balance between the quality of student samples. We generate rewrites set to the maximum score of 4 for the evaluated criterion, sampling from the GM and ME baseline. When the criterion rewrite is the target value of 4, both methods display a similar automated score of $3.64/4$ and $3.68/4$ respectively. This sampling ensures a comparison between methods with comparable validity but distinctly different rewrites. The ordering of the rewrites is randomized and source generation approach is not disclosed to prevent bias.
+
+We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 63\% of contested cases $p=0.024$, and a significantly higher aggregate similarity rating. We find no significant difference between the methods in terms of improvement and utility. However, we observe that in the cases where the evaluator judges the GM rewrite as more similar, they also prefer GM on overall helpfulness in 68\% of contested cases with a $\chi^2(4)=23.4$ and $p=0.000105$. In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. These results suggest that, while the two methods are similar in terms of overall improvement and utility, GM produces counterfactual work that is noticeably more similar, and, in these cases, preferred by teachers for pedagogical use. We report further details and results on our teacher evaluation in Appendix\mh{TODO}.
 
 \subsection{Ablation Studies}\label{sec:foresight}
 % \subsection{Foresight Enhances Hindsight Control}
 
-In order to understand the interaction of the various components of GM, we conduct ablation studies and compare the results controlling the training, logit pertubation, and prompting approach.
+In order to understand the importance and interaction of the various components of GM, we conduct ablation studies on the training configuration, logit perturbation, and prompting approach.
 
-In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and Gumbel noise control components of GM, running each configuration on Llama at $g{=}0.10$. We observe a clear division of labor between the three components. With $\beta$-Hindsight decoding alone---no task-specific training---the model achieves moderate similarity ($0.560$ on CLASSE, $0.402$ on DREsS) but low validity ($0.168$ and $0.148$), reflecting that recovered Gumbel noise can steer the sampling trajectory toward the reference but cannot, on its own, induce rubric-adherent rewrites. Adding SFT inverts this picture: similarity jumps dramatically to $0.795$ on CLASSE and $0.733$ on DREsS, while validity collapses to near zero ($-0.026$ and $-0.005$). This collapse indicates that SFT alone teaches the model to reproduce the reference rather than to perform the counterfactual task---it maximizes mimicry of the conditioning context but loses the signal for moving the rubric score to a target value. Adding DPO on top recovers validity to $0.668$ on CLASSE and $0.395$ on DREsS, at the cost of some similarity. This pattern indicates that the preference-pair signal in DPO, which contrasts target-score generations against alternative-score generations, is the component primarily responsible for counterfactual task alignment, while $\beta$-Hindsight remains essential for the similarity control that prompting alone cannot provide. All three components are therefore necessary: the decoder for tunable similarity, SFT for fluent rubric-conditioned outputs, and DPO for the counterfactual-task validity that SFT alone fails to produce.
+In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and logit control components of GM, running each configuration on Llama-3. We observe a distinctive trend in introducing each of the approach components. With $\beta$-Hindsight decoding alone and no training, we observe improved similarity at margnially lower validity. This result suggests that recovered Gumbel noise can steer the sampling trajectory toward the reference but does not induce rubric-adherent counterfactuals. Training the model with naive SFT on student writing amplifies the control influence of the model, resulting in a large jump in similarity while validity collapses to near zero. This collapse suggests an increased model sensitivity to the Gumbel noise control, and could be explained that the model has a strong preference to vocabularly and word sequences that are frequent in the trained student writing samples. Notably, adding DPO after SFT recovers validity  at the cost similarity, restoring and greatly improving the model's task capability. This pattern indicates that the preference-pair signal in DPO, which contrasts target-score generations against alternative-score generations, is the component primarily responsible for counterfactual task alignment, while $\beta$-Hindsight remains essential for the similarity control that prompting alone cannot provide. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference.
 
 In Table~\ref{tab:foresight_ablation}, we report results of an ablation study where we compare how inclusion and exclusion of the reference summary in the prompt influence the effectiveness of $\beta$-Hindsight control. In this ablation, we include/exclude the reference both during noise recovery and replay, set $\beta=1.0$, and run hindsight sampling on the base Llama-3 setting. We see an average counterfactual similarity score of $0.331$ when excluding the reference, which is similar to uncontrolled nucleus sampling with reference hinting. However, when including the reference at recovery, the generated counterfactual summary is much more similar to the reference. These results suggest a nuanced interaction between the replayed Gumbel noise and the conditioning context, highlighting the importance of reference inclusion for effective $\beta$-Hindsight control. One possible explanation is that, when the reference tokens are highly certain (logit value of the reference token significantly exceeds that of other ones), the recovered noise is not strong enough to significantly alter the LLM's overall output trajectory, and only provides small adjustments at a given timestep. On the contrary, when the reference tokens are less certain, the recovered noise encodes nuanced information, resulting in a volatile control signal with conflicting objectives that can significantly alter the output trajectory. We leave further investigation into the mechanics of effective controllable Gumbel noise recovery as an interesting direction for future work.
 % only encodes the likelihood of a simple instruction-following process with high precision
