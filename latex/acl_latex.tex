@@ -1358,11 +1358,70 @@ This criterion measures the student's control of vocabulary and grammatical stru
 \label{apx:dress_rubric}
 \end{table*}
 
-% \subsection{Training Details}
+\subsection{Training Details} \label{apx:training}
 
-% Hyperparameter configurations and details, tradeoff curves?
+We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} (primary) and \texttt{Qwen3-4B-Instruct-2507} (secondary). The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. Both stages share the infrastructure and LoRA configuration shown in Table~\ref{apx:training_shared} and differ only in the stage-specific hyperparameters and dataset-specific cadence shown in Table~\ref{apx:training_stage}.
 
-\
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l}
+\toprule
+\textbf{Setting} & \textbf{Value} \\
+\midrule
+Base models & \texttt{Llama-3.1-8B-Instruct}, \\
+            & \texttt{Qwen3-4B-Instruct-2507} \\
+Precision & bf16 \\
+Optimizer & \texttt{paged\_adamw\_8bit} \\
+Grad.\ checkpointing & enabled \\
+Max grad norm & 1.0 \\
+Per-device batch size & 2 ($\times$ 4 grad accumulation $=$ 8) \\
+Seed & 42 \\
+LoRA rank $r$ & 32 ($\alpha\!=\!r$, dropout 0.05) \\
+LoRA targets & q/k/v/o\_proj, gate/up/down\_proj \\
+LoRA bias / task type & none / \texttt{CAUSAL\_LM} \\
+Checkpoint selection & lowest \texttt{eval\_loss} (top-1 kept) \\
+\bottomrule
+\end{tabular}
+\caption{Shared infrastructure and LoRA configuration used across SFT and DPO stages.}
+\label{apx:training_shared}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l c c}
+\toprule
+\textbf{Setting} & \textbf{SFT} & \textbf{DPO} \\
+\midrule
+Learning rate & $5\!\times\!10^{-5}$ & $2\!\times\!10^{-5}$ \\
+LR schedule & constant & cosine \\
+Weight decay & 0.01 & --- \\
+DPO $\beta$ (KL) & --- & 0.1 \\
+Reference model & --- & frozen SFT LoRA \\
+\midrule
+\multicolumn{3}{l}{\emph{CLASSE}} \\
+Max steps & 1000 & 1000 \\
+Warmup steps & 100 & 100 \\
+Eval / save steps & 200 / 200 & 200 / 200 \\
+\midrule
+\multicolumn{3}{l}{\emph{DREsS}} \\
+Max steps & 400 & 400 \\
+Warmup steps & 50 & 50 \\
+Eval / save steps & 100 / 100 & 50 / 50 \\
+\bottomrule
+\end{tabular}
+\caption{Stage-specific hyperparameters and dataset-specific training cadence.}
+\label{apx:training_stage}
+\end{table}
+
+\paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
+
+\paragraph{Selected DPO hyperparameters.} We selected the DPO learning rate via a small sweep on Llama-3 / DREsS with an SFT prior at LoRA rank $r{=}16$. Raising LR from $5\!\times\!10^{-6}$ (initial value) to $2\!\times\!10^{-5}$ produced a substantial gain in DPO reward accuracy across criteria: $+0.08$ on Content ($0.66\rightarrow0.75$), $+0.10$ on Organization ($0.68\rightarrow0.78$), and $+0.13$ on Language ($0.74\rightarrow0.87$). Subsequently increasing the SFT-prior LoRA rank from $16$ to $32$ (with $\alpha{=}32$) added an additional $\approx0.02$ reward accuracy on average. With the final LR $2\!\times\!10^{-5}$ / $r{=}32$ configuration, CLASSE DPO reaches $0.85$--$0.88$ reward accuracy across its five criteria.
 
 % \subsection{Qualitative Counterfactual Examples}
 
