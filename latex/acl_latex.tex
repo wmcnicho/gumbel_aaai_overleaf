@@ -53,6 +53,7 @@
 
 \usepackage[most]{tcolorbox}
 \usepackage{multirow}
+\usepackage{subcaption}
 
 \newtcolorbox{promptbox}[1]{
   colback=gray!10,
@@ -896,17 +897,14 @@ Our work outlines future directions that include: evaluating this approach acros
 
 
 \section*{Limitations}
-% \mh{TODO}
-% 1. Dataset
-% 2. Difficulty in comparisons to CFG
-% 3. More controlled generation settings
-% 4. Limited models
-% 5. Limited understanding
-While our results suggest that recovered Gumbel noise can serve as a practical similarity control signal for counterfactual student writing, there are limitations that constrain the interpretation and generalizability of our findings. Our experiments rely on a single dataset (CLASSE) consisting of student-written summaries of short passages scored with a fixed rubric, and the observed trade-offs between validity and similarity may not transfer to writing tasks with different discourse structures, genres, or longer contexts. 
 
-Our approach also assumes access to carefully engineered prompts that specify the rubric, request adherence to a reference, and clearly define the target score change. As shown in our ablation study, reference conditioning is a key enabling condition for effective control, which suggests some sensitivity to prompt variation that does not preserve this structure. In addition, we train separate alignment adapters per rubric criterion, which improves controllability in our experiments but may not scale cleanly to richer, multi-criterion feedback without more advanced multitask or compositional alignment strategies.
+\paragraph{Modeling assumption.} Our recovery-and-replay procedure assumes that the data-generating process for student writing can be approximated by the autoregressive Gumbel-Max structural causal model (SCM) induced by the proxy LLM: each token is treated as the argmax of (logits + exogenous Gumbel noise), and counterfactuals are produced by intervening on the prompt while replaying the recovered noise. As prior work has noted, the Gumbel-Max SCM is one of several monotonic parameterizations of categorical sampling and is a modeling choice rather than a discovered structure \citep{oberst2019counterfactual, ravfogel2025gumbel}. Real student writing also involves planning, revision, and non-local edits, so the strict autoregressive assumption is at best an approximation. Our results should therefore be read as counterfactuals \emph{under the proxy autoregressive SCM}, rather than as causal counterfactuals over the true student-writing process. Two practical implications follow. First, proxy fidelity to the conditional distribution of \emph{student} writing---given a passage and a rubric---is a prerequisite for the recovered noise to be informative: a generic pre-trained LLM is optimized for well-written summaries and assigns low likelihood to student-authored ones (which often contain rubric-relevant errors), so the noise it implies is residual-like rather than meaningful. This is part of why alignment on student data is not just task-specific engineering but a step toward making the proxy SCM identifiable in the educational domain. Second, sensitivity analyses of the recovery procedure to proxy choice and alignment level remain important future work.
 
-Finally, our evaluation relies on automated proxies for both validity and similarity. We use an LLM-as-a-judge to score counterfactuals rather than expert human evaluation, which enables scalability but may introduce systematic biases and may not fully capture pedagogical usefulness \mh{TODO fix}. Similarly, we measure similarity using normalized character-level Levenshtein distance. Although this is common practice in related literature, the measure is sensitive to surface edits and not semantics-aware. 
+\paragraph{Datasets and backbones.} Our experiments span two datasets---CLASSE (student summaries of short passages scored on five rubric criteria) and DREsS (argumentative essays scored on three)---and four backbone models (Llama-3.1-8B, Qwen3-4B, Claude Haiku 4.5, Claude Sonnet 4.6). Both datasets consist of short-form student writing, so the observed validity--similarity trade-offs may not transfer to longer-form writing, multi-document tasks, or genres with substantially different discourse structure.
+
+\paragraph{Prompt sensitivity and per-criterion alignment.} Our approach assumes access to carefully engineered prompts that specify the rubric, request adherence to a reference, and clearly define the target score change. As shown in our ablation study, reference conditioning is a key enabling condition for effective control, which suggests some sensitivity to prompt variation that does not preserve this structure. In addition, we train separate alignment adapters per rubric criterion, which improves controllability in our experiments but may not scale cleanly to richer, multi-criterion feedback without more advanced multitask or compositional alignment strategies.
+
+\paragraph{Evaluation proxies.} Our primary validity measurements rely on a fine-tuned GPT-4.1-mini judge, complemented by a smaller-scale human evaluation with three teacher-raters (Table~\ref{tab:human_eval}). The automated judge enables scalability but may introduce systematic biases and may not fully capture pedagogical usefulness. Similarity is measured using normalized character-level Levenshtein distance, which is common in related literature but is sensitive to surface edits and not semantics-aware.
 
 \section*{Ethical Considerations}
 Counterfactual student writing, even when intended as illustrative feedback, risks being perceived as an “ideal rewrite” rather than a pedagogical example, which could unintentionally discourage student agency or mask the student’s original voice. If deployed without appropriate framing, such systems may encourage over-reliance on AI-generated revisions, shifting learning from skill development toward imitation. These risks underscore the importance of positioning counterfactuals as illustrative demonstrations rather than authoritative corrections in classroom environments.
@@ -933,77 +931,86 @@ On fairness, bias, and accountability, both the generation and evaluation compon
 
 \subsection{Per-Criterion Results} \label{apx:tradeoffs}
 
-\begin{table*}[h]
+\begin{table*}[!htbp]
 \centering
+\small
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{ll  cc  cc  cc  cc  cc}
 \toprule
-& & \multicolumn{2}{c}{\textbf{Main Idea}}
-& \multicolumn{2}{c}{\textbf{Details}}
-& \multicolumn{2}{c}{\textbf{Organization}}
-& \multicolumn{2}{c}{\textbf{Wording}}
-& \multicolumn{2}{c}{\textbf{Language}} \\
-\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-12}
-\multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}}
+\textbf{Model} & \textbf{Method}
   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
   & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
 \midrule
-\multirow{5}{*}{Llama}
+\multicolumn{2}{l}{\textit{CLASSE}}
+  & \multicolumn{2}{c}{\textbf{Main Idea}}
+  & \multicolumn{2}{c}{\textbf{Details}}
+  & \multicolumn{2}{c}{\textbf{Organization}}
+  & \multicolumn{2}{c}{\textbf{Wording}}
+  & \multicolumn{2}{c}{\textbf{Language}} \\
+\midrule
+\multirow{3}{*}{Haiku}
+  & ME       & 0.285 & 0.064 & 0.282 & 0.243 & 0.279 & 0.015 & 0.266 & 0.341 & 0.289 & 0.056 \\
+  & ICL      & 0.274 & $\textbf{0.365}$ & 0.268 & 0.454 & 0.279 & 0.158 & 0.292 & $\textbf{0.513}$ & 0.294 & 0.072 \\
+  & I\&R     & $\textbf{0.482}$ & 0.263 & $\textbf{0.402}$ & $\textbf{0.651}$ & $\textbf{0.501}$ & $\textbf{0.177}$ & $\textbf{0.407}$ & 0.486 & $\textbf{0.461}$ & $\textbf{0.365}$ \\
+\cmidrule(l){2-12}
+\multirow{3}{*}{Sonnet}
+  & ME       & 0.450 & 0.139 & 0.344 & 0.599 & 0.348 & 0.114 & 0.362 & 0.651 & 0.377 & 0.216 \\
+  & ICL      & 0.377 & $\textbf{0.577}$ & 0.320 & 0.711 & 0.362 & $\textbf{0.496}$ & 0.380 & $\textbf{0.804}$ & 0.356 & $\textbf{0.432}$ \\
+  & I\&R     & $\textbf{0.646}$ & 0.410 & $\textbf{0.520}$ & $\textbf{0.766}$ & $\textbf{0.562}$ & 0.201 & $\textbf{0.524}$ & 0.419 & $\textbf{0.516}$ & 0.373 \\
+\cmidrule(l){2-12}
+\multirow{4}{*}{Llama}
   & ME       & 0.305 & 0.165 & 0.315 & 0.224 & 0.299 & 0.265 & 0.341 & 0.154 & 0.310 & 0.107 \\
   & ICL      & 0.288 & 0.272 & 0.308 & 0.381 & 0.305 & 0.516 & 0.320 & 0.182 & 0.320 & 0.282 \\
-  & I\&R     & 0.528 & 0.117 & 0.440 & 0.096 & 0.529 & 0.112 & 0.498 & 0.092 & 0.494 & 0.099 \\
+  & I\&R     & $\textbf{0.528}$ & 0.117 & $\textbf{0.440}$ & 0.096 & $\textbf{0.529}$ & 0.112 & $\textbf{0.498}$ & 0.092 & $\textbf{0.494}$ & 0.099 \\
   % & BH       & $\textbf{0.546}$ & 0.171 & $\textbf{0.557}$ & 0.145 & $\textbf{0.554}$ & 0.165 & $\textbf{0.596}$ & 0.152 & $\textbf{0.548}$ & 0.206 \\
   & GM (Ours) & 0.364 & $\textbf{0.820}$ & 0.334 & $\textbf{0.780}$ & 0.387 & $\textbf{0.769}$ & 0.412 & $\textbf{0.666}$ & 0.458 & $\textbf{0.306}$ \\
-\midrule
-\multirow{5}{*}{Qwen}
-  & ME       & 0.648 & 0.163 & 0.667 & 0.247 & 0.579 & 0.239 & 0.558 & 0.281 & 0.432 & 0.230 \\
+\cmidrule(l){2-12}
+\multirow{4}{*}{Qwen}
+  & ME       & $\textbf{0.648}$ & 0.163 & $\textbf{0.667}$ & 0.247 & 0.579 & 0.239 & 0.558 & 0.281 & 0.432 & 0.230 \\
   & ICL      & 0.349 & 0.190 & 0.347 & 0.248 & 0.359 & 0.156 & $\textbf{0.620}$ & 0.217 & 0.326 & 0.137 \\
   & I\&R     & 0.524 & 0.282 & 0.403 & 0.540 & 0.474 & 0.328 & 0.388 & $\textbf{0.385}$ & 0.450 & 0.286 \\
   % & BH       & $\textbf{0.693}$ & 0.140 & $\textbf{0.702}$ & 0.236 & 0.619 & 0.244 & 0.585 & 0.252 & 0.468 & 0.235 \\
   & GM (Ours) & 0.506 & $\textbf{0.729}$ & 0.455 & $\textbf{0.761}$ & $\textbf{0.624}$ & $\textbf{0.483}$ & 0.615 & 0.312 & $\textbf{0.677}$ & $\textbf{0.544}$ \\
-\bottomrule
-\end{tabular}
-\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{CLASSE} dataset.}
-\label{tab:appendix_classe}
-\end{table*}
-
-\begin{table*}[h]
-\centering
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{ll  cc  cc  cc}
-\toprule
-& & \multicolumn{2}{c}{\textbf{Content}}
-& \multicolumn{2}{c}{\textbf{Language}}
-& \multicolumn{2}{c}{\textbf{Organization}} \\
-\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
-\multirow{-2}{*}{\textbf{Model}} & \multirow{-2}{*}{\textbf{Method}}
-  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
-  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$
-  & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
 \midrule
-\multirow{5}{*}{Llama}
-  & ME       & 0.312 & 0.323 & 0.307 & 0.143 & 0.295 & 0.097 \\
-  & ICL      & 0.357 & 0.327 & 0.320 & 0.239 & 0.312 & 0.227 \\
-  & I\&R     & 0.296 & $\textbf{0.489}$ & 0.322 & 0.116 & 0.307 & 0.370 \\
+\multicolumn{2}{l}{\textit{DREsS}}
+  & \multicolumn{2}{c}{\textbf{Content}}
+  & \multicolumn{2}{c}{\textbf{Language}}
+  & \multicolumn{2}{c}{\textbf{Organization}}
+  & \multicolumn{4}{c}{} \\
+\midrule
+\multirow{3}{*}{Haiku}
+  & ME       & 0.308 & 0.105 & 0.337 & 0.123 & 0.292 & 0.052 & & & & \\
+  & ICL      & 0.307 & 0.170 & 0.328 & 0.097 & 0.307 & 0.109 & & & & \\
+  & I\&R     & $\textbf{0.340}$ & $\textbf{0.566}$ & $\textbf{0.460}$ & $\textbf{0.216}$ & $\textbf{0.352}$ & $\textbf{0.541}$ & & & & \\
+\cmidrule(l){2-12}
+\multirow{3}{*}{Sonnet}
+  & ME       & 0.332 & 0.544 & 0.431 & $\textbf{0.411}$ & 0.363 & 0.363 & & & & \\
+  & ICL      & 0.372 & $\textbf{0.556}$ & 0.502 & 0.386 & 0.380 & 0.509 & & & & \\
+  & I\&R     & $\textbf{0.438}$ & 0.435 & $\textbf{0.571}$ & 0.212 & $\textbf{0.426}$ & $\textbf{0.566}$ & & & & \\
+\cmidrule(l){2-12}
+\multirow{4}{*}{Llama}
+  & ME       & 0.312 & 0.323 & 0.307 & 0.143 & 0.295 & 0.097 & & & & \\
+  & ICL      & 0.357 & 0.327 & 0.320 & 0.239 & 0.312 & 0.227 & & & & \\
+  & I\&R     & 0.296 & $\textbf{0.489}$ & 0.322 & 0.116 & 0.307 & 0.370 & & & & \\
   % & BH       & 0.448 & 0.220 & 0.405 & 0.136 & $\textbf{0.353}$ & 0.087 \\
-  & GM (Ours) & $\textbf{0.637}$ & 0.307 & $\textbf{0.498}$ & $\textbf{0.371}$ & 0.344 & $\textbf{0.507}$ \\
-\midrule
-\multirow{5}{*}{Qwen}
-  & ME       & 0.298 & 0.266 & 0.305 & 0.195 & 0.287 & 0.128 \\
-  & ICL      & 0.301 & 0.235 & 0.388 & 0.104 & 0.324 & 0.100 \\
-  & I\&R     & 0.248 & $\textbf{0.718}$ & 0.337 & $\textbf{0.312}$ & 0.351 & $\textbf{0.582}$ \\
+  & GM (Ours) & $\textbf{0.637}$ & 0.307 & $\textbf{0.498}$ & $\textbf{0.371}$ & $\textbf{0.344}$ & $\textbf{0.507}$ & & & & \\
+\cmidrule(l){2-12}
+\multirow{4}{*}{Qwen}
+  & ME       & 0.298 & 0.266 & 0.305 & 0.195 & 0.287 & 0.128 & & & & \\
+  & ICL      & 0.301 & 0.235 & 0.388 & 0.104 & 0.324 & 0.100 & & & & \\
+  & I\&R     & 0.248 & $\textbf{0.718}$ & 0.337 & $\textbf{0.312}$ & 0.351 & $\textbf{0.582}$ & & & & \\
   % & BH       & 0.299 & 0.297 & 0.308 & 0.166 & 0.294 & 0.159 \\
-  & GM (Ours) & $\textbf{0.511}$ & 0.414 & $\textbf{0.604}$ & 0.200 & $\textbf{0.707}$ & 0.248 \\
+  & GM (Ours) & $\textbf{0.511}$ & 0.414 & $\textbf{0.604}$ & 0.200 & $\textbf{0.707}$ & 0.248 & & & & \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion breakdown of Similarity and Validity on the \textbf{DREsS} dataset.}
-\label{tab:appendix_dress}
+\caption{Per-criterion breakdown of Similarity and Validity on the CLASSE (top) and DREsS (bottom) datasets. Bold marks the best value per model within each (criterion, metric) cell.}
+\label{tab:appendix_per_criterion}
 \end{table*}
 We report a per-criterion expansion of the aggregate similarity and validity measurements reported for Llama-3 and Qwen3 in 
-Tables~\ref{tab:appendix_classe} and~\ref{tab:appendix_dress}. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones where GM tends to maximize validity with minimal tradeoff for similarity. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that Qwen has exceptional paraphrase capabilities when provided in-context demonstrations .
+Table~\ref{tab:appendix_per_criterion}. We observe that the within-model similarity-validity ordering is consistent across criteria for both open-weight backbones where GM tends to maximize validity with minimal tradeoff for similarity. The clearest exception is the CLASSE ``Wording'' criterion, where ICL on Qwen achieves the highest similarity, suggesting that Qwen has exceptional paraphrase capabilities when provided in-context demonstrations .
 
 \subsection{Instruction Prompts} \label{apx:prompts}
 
@@ -1019,8 +1026,22 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 
 \begin{figure}
         \centering
-        \includegraphics[width=1\linewidth]{latex/figs/paper_tradeoff_baselines_v1.png}
-        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias approach. Gumbel Machine provides a tunable tradeoff between competing metrics occupying a different region of Pareto frontier.}
+        \begin{subfigure}{\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{latex/figs/paper_tradeoff_baselines_v1.png}
+            \caption{CLASSE}
+            \label{fig:pareto-front-classe}
+        \end{subfigure}
+
+        \vspace{0.6em}
+
+        \begin{subfigure}{\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{latex/figs/dress_tradeoff_dress.png}
+            \caption{DREsS}
+            \label{fig:pareto-front-dress}
+        \end{subfigure}
+        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias approach on CLASSE (top) and DREsS (bottom). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier than the logit-bias baseline.}
         \label{fig:pareto-front}
 \end{figure}
 
@@ -1028,49 +1049,34 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 \centering
 \small
 \setlength{\tabcolsep}{6pt}
-\begin{tabular}{l  c  ccc}
+\begin{tabular}{ll  c  ccc}
 \toprule
-& \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
-\cmidrule(lr){2-2} \cmidrule(lr){3-5}
-\textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
+& & \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
+\cmidrule(lr){3-3} \cmidrule(lr){4-6}
+\textbf{Dataset} & \textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
 \midrule
-Main Idea     & 0.566 & 0.632 & 0.590 & \textbf{0.683} \\
-Details       & 0.616 & 0.473 & 0.476 & \textbf{0.690} \\
-Organization  & 0.607 & 0.495 & 0.393 & \textbf{0.628} \\
-Wording       & 0.542 & 0.463 & 0.366 & \textbf{0.522} \\
-Language      & 0.423 & 0.543 & 0.497 & \textbf{0.598} \\
+\multirow{6}{*}{CLASSE}
+  & Main Idea     & 0.566 & 0.632 & 0.590 & \textbf{0.683} \\
+  & Details       & 0.616 & 0.473 & 0.476 & \textbf{0.690} \\
+  & Organization  & 0.607 & 0.495 & 0.393 & \textbf{0.628} \\
+  & Wording       & 0.542 & 0.463 & 0.366 & \textbf{0.522} \\
+  & Language      & 0.423 & 0.543 & 0.497 & \textbf{0.598} \\
+  & \textbf{Mean} & 0.551 & 0.521 & 0.464 & \textbf{0.624} \\
 \midrule
-\textbf{Mean} & 0.551 & 0.521 & 0.464 & \textbf{0.624} \\
+\multirow{4}{*}{DREsS}
+  & Content      & 0.540 & 0.211 & 0.289 & \textbf{0.652} \\
+  & Organization & 0.490 & 0.278 & 0.213 & \textbf{0.598} \\
+  & Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
+  & \textbf{Mean} & 0.502 & 0.232 & 0.251 & \textbf{0.601} \\
 \bottomrule
 \end{tabular}
-\caption{Per-criterion QWK agreement between scoring models and human raters on the CLASSE validation set.}
-\label{apx:scoring_classe}
-\end{table*}
-
-\begin{table*}[h]
-\centering
-\small
-\setlength{\tabcolsep}{6pt}
-\begin{tabular}{l  c  ccc}
-\toprule
-& \textbf{BERT} & \multicolumn{3}{c}{\textbf{GPT-4.1 family}} \\
-\cmidrule(lr){2-2} \cmidrule(lr){3-5}
-\textbf{Criterion} & \texttt{ModernBERT}-base & \texttt{GPT-4.1} (prompted) & \texttt{GPT-4.1-mini} (prompted) & \texttt{GPT-4.1-mini} (fine-tuned) \\
-\midrule
-Content      & 0.540 & 0.211 & 0.289 & \textbf{0.652} \\
-Organization & 0.490 & 0.278 & 0.213 & \textbf{0.598} \\
-Language     & 0.475 & 0.208 & 0.252 & \textbf{0.553} \\
-\midrule
-\textbf{Mean} & 0.502 & 0.232 & 0.251 & \textbf{0.601} \\
-\bottomrule
-\end{tabular}
-\caption{Per-criterion QWK agreement between scoring models and human raters on the DREsS validation set.}
-\label{apx:scoring_dress}
+\caption{Per-criterion QWK agreement between scoring models and human raters on the CLASSE and DREsS validation sets.}
+\label{apx:scoring_per_criterion}
 \end{table*}
 
 Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model for the ``Language'' criterion. Rubric details are modified relative to each criterion. The model is prompted with top $p=1.0$ and temperature $0$ to reduce randomness, with an instruction to provide justification before scoring to encourage Chain-of-Thought reasoning.
 
-\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Tables~\ref{apx:scoring_classe} and~\ref{apx:scoring_dress} report per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
+\paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Table~\ref{apx:scoring_per_criterion} reports per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
 
 For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
 
