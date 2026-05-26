@@ -104,7 +104,7 @@
 %
 % and set <dim> to something 5cm or larger.
 
-\title{Gumbel Machine: Counterfactual Student Writing Generation via Gumbel Noise Steering}
+\title{Gumbel Machine: Counterfactual Student Writing Generation\\via Gumbel Noise Steering}
 
 % Author information can be set in various styles:
 % For several authors from the same institution:
@@ -122,16 +122,20 @@
 %         Author 2 \\ Address line \\ ... \\ Address line \And
 %         Author 3 \\ Address line \\ ... \\ Address line}
 
-\author{First Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\\And
-  Second Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\}
+\author{
+\bf
+Hunter McNichols$^{1}$,
+Alexander Scarlatos$^{1}$,
+Mihai Dascalu$^{2}$,
+Danielle McNamara$^{3}$,
+Andrew Lan$^{1}$ \\
+$^{1}$University of Massachusetts Amherst $^{2}$ University Politehnica of Bucharest 
+$^{3}$Arizona State University \\
+\texttt{wmcnichols@umass.edu, ajscarlatos@umass.edu} \\
+\texttt{mihai.dascalu@upb.ro,} 
+\texttt{Danielle.McNamara@asu.edu,}
+\texttt{andrewlan@cs.umass.edu}
+}
 
 %\author{
 %  \textbf{First Author\textsuperscript{1}},
@@ -177,7 +181,7 @@
 % 1. Motivate the problem the thing solves and provide required backgorund
 An effective method of teaching across disciplines is to provide examples of high-quality work.
 % This teaching method allows students to strive for an ideal in their work, and let's them take aspects of the exemplary work into their own. 
-However, the example may be significantly different from a student's current work, making it challenging for them to emulate. An ideal learning demonstration is a \textit{counterfactual} version of the student work, an improved version that is still similar to their own.
+However, an example may be significantly different from a student's current work, making it challenging for them to emulate. An ideal learning demonstration is a \textit{counterfactual} version of the student work, an improved version that is still similar to their own.
 % 2. Current approaches to this problem and how they fall short (the gap)
 %While providing counterfactual demonstrations at scale is infeasible, advancements in large language models (LLMs) have shown considerable advances in generating counterfactual text. 
 Existing automated approaches for counterfactual text generation using Large Language Models (LLMs) result in domain-specific systems that are difficult to translate into practical applications.
@@ -373,7 +377,7 @@ Given the recovered noise values, we then replay the noise to generate the count
 
 We now detail our approach to encourage validity in generated counterfactual student work. We frame this validity alignment problem as an instruction-following task, in which we prompt a language model with explicit instructions on how to generate a valid counterfactual. In each prompt, we include a rubric detailing the criterion to change, the qualitative aspects of each possible ordinal score $z$, and the reference student work $\mathbf{y_r}$. We conclude the prompt with instructions for the model to generate a revised version $y'$ that adheres closely to the reference while reflecting a specified score $z'$. We include the prompts in Appendix~\ref{apx:prompts}.
 
-We find that training with preference alignment substantially improves task validity. We first perform supervised fine-tuning (SFT) \cite{ouyang2022training} using examples derived from a dataset of $(\mathbf{y}, z)$ tuples, where $z$ is used in forming the prompt $\textbf{x}$ and $\textbf{y}$ is the target. During training, we use the same prompt format but exclude the reference and related adherence instructions. After conducting SFT, we further align the model to the counterfactual task using direct preference optimization (DPO) \cite{rafailov2023direct}. To construct preference pairs, we treat student examples that achieve the target, ground-truth score as a preferred example, and those that receive an alternative score for the same criterion as a negative example. For each example in the training dataset, we randomly select one negative sample for each alternative score, yielding $k-1$ preference pairs per example. Together, instruction-based prompting, supervised fine-tuning, and preference alignment enable reliable task validity while remaining compatible with $\beta$-Hindsight similarity control.
+We find that training with preference alignment substantially improves task validity. We first perform supervised fine-tuning (SFT) \cite{ouyang2022training} using examples derived from a dataset of $(\mathbf{y}, z)$ tuples, where $z$ is used in forming the prompt $\textbf{x}$ and $\textbf{y}$ is the target. During training, we use the same prompt format but exclude the reference and related adherence instructions. After conducting SFT, we further align the model to the counterfactual task using direct preference optimization (DPO) \cite{rafailov2023direct}. To construct preference pairs, we use student examples that achieve a target, ground-truth score on a given criterion as a preferred example, and those that receive an alternative score for the same criterion as a negative example. For each example in the training dataset, we randomly select one negative sample for each alternative score on the same prompt, yielding $k-1$ preference pairs per example. Together, instruction-based prompting, supervised fine-tuning, and preference alignment enable reliable task validity and are compatible with $\beta$-Hindsight similarity control.
 
 % We now detail how we prompt an LLM for the instruction following  aligning the instruction following capabilities of an LLM to the task of counterfactual generation. We combine 
 % \textbf{Base} The default pre-trained model weights. 
@@ -809,7 +813,7 @@ Moreover, the result indicates that combining our approach with a larger open-we
 
 
 
-We conduct an IRB-approved human evaluation study to evaluate the effectiveness of our approach and the quality of the generated counterfactual student writing. We employ four evaluators via Upwork \cite{upwork}, all of whom have experience teaching English in the United States across elementary, middle school, high school levels. %The task took evaluators roughly 2 hours, and we paid them \$60 each, which is significantly higher than the minimum wage. All evaluators gave consent before participating.
+We conduct an IRB-approved human evaluation study to evaluate the effectiveness of our approach and the quality of the generated counterfactual student writing. We employ four evaluators via Upwork \cite{upwork}, all of whom have experience teaching English in the United States across elementary, middle school, high school levels.
 
 We focus our evaluation on student summaries from the CLASSE dataset, since the shorter, student-written summaries in CLASSE are easier to evaluate at scale than the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of each summary. We then ask them to evaluate each pair of rewritten summaries and compare them across three dimensions: improvement relative to the scoring criterion, similarity to the original summary, and overall pedagogical utility. We select 10 writing samples for each of the 5 criteria and stratify sampling by the original student score on each criterion to ensure that the evaluation includes student writing at different quality levels. We generate rewrites with the targeted score set to the maximum score of 4, sampling from both the GM and the ME baselines. In this setting, both approaches generate rewrites with similar validity, yielding average scores of $3.64/4$ and $3.68/4$, respectively. Therefore, our evaluation setting enables a fair comparison between the two approaches that generate different rewrites but at the same level of validity. To prevent positional bias, we randomize the ordering of rewrites from both approaches.
 
@@ -1037,7 +1041,7 @@ We include the details of the instructions passed to the various open-weight mod
 
 \subsection{Tuning Gumbel Noise Control} \label{apx:tuning}
 
-In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values for GM and compare with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$ for CLASSE and $\beta \in \{0.05, 0.2, 0.4, 0,5, 0.6, 0.7, 0.8, 1.0\}$ for DREsS. Lower values of $\beta$ emphasize similarity to the original student response, while higher values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$ for CLASSE and $\alpha \in \{0.01, 1.0, 5.0\}$ for DREsS. Higher values of $\alpha$ induce stronger similarity to reference tokens. We observe that values outside these ranges result in collapses in model fluency due to excessive logit manipulation.
+In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values for GM and compare with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$ for CLASSE and $\beta \in \{0.05, 0.2, 0.4, 0,5, 0.6, 0.7, 0.8, 1.0\}$ for DREsS. Higher values of $\beta$ emphasize similarity to the original student response, while lower values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$ for CLASSE and $\alpha \in \{0.01, 1.0, 5.0\}$ for DREsS. Higher values of $\alpha$ induce stronger similarity to reference tokens. We observe that values outside these ranges result in collapses in model fluency due to excessive logit manipulation.
 
 Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
 
@@ -1133,15 +1137,17 @@ We report detailed descriptions for each CLASSE criterion in Table~\ref{apx:crit
 
 We train all GM checkpoints using parameter-efficient fine-tuning on \texttt{LLaMA-3.1-8B-Instruct} and \texttt{Qwen3-4B-Instruct-2507}. The pipeline runs supervised fine-tuning (SFT) on counterfactual prompt-target pairs, followed by direct preference optimization (DPO) on score-gap preference pairs constructed from the same training split. For both stages, we train a rank-$32$ LoRA adapter with dropout $0.05$ for all attention and MLP projections using an AdamW optimizer. For SFT, we use a constant learning rate of $5\!\times\!10^{-5}$ with weight decay $0.01$, and in DPO we use a cosine schedule at $2\!\times\!10^{-5}$ against the frozen SFT LoRA as the reference policy.
 
+We estimate our experiments to spend 350 NVIDIA GPU-hours across A100, L40, A40, and RTX 8000 GPUs. In addition to closed-weight API access to Claude Haiku 4.5, Claude Sonnet 4.6, and 8 fine-tuned GPT-4.1-mini judges.
+
 % \paragraph{Preference pair construction.} DPO pairs are bucketed per dataset. For DREsS, we group essays by (writing prompt, target-criterion score) and require the score gap on the target criterion to be at least $2.0$; we additionally constrain the rejected essay's two non-target criteria to stay within $\pm 1.0$ of the chosen essay so the preference signal reflects only the target criterion. We sample one rejected essay per (chosen essay, alternative score) bucket, yielding approximately $800$ training and $133$ validation pairs per criterion. For CLASSE, we group by source passage and accept all non-zero score gaps with no non-target filter, since CLASSE's five interrelated criteria leave few candidates under a strict non-target constraint; this yields approximately $10{,}000$--$11{,}000$ training pairs per criterion.
 
-\subsection{Teacher Evaluation Details} \label{sec:apdx-human-eval}
+\subsection{Human Evaluation Details} \label{sec:apdx-human-eval}
 
 % \paragraph{Recruitment and demographics.} The five evaluators were recruited via Upwork \cite{upwork} with explicit screening for documented K--12 or post-secondary English teaching experience. All evaluators reported at least eight years of English teaching experience, with several reporting twenty-five or more years, spanning middle school, high school, and university settings in the United States. Each evaluator completed an IRB-approved consent process before participating; the task took approximately two hours and evaluators were compensated \$60.
 
-\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating approach was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$. 
+\paragraph{Task structure.} Each evaluator was shown 50 (passage, student summary, rewrite A, rewrite B) tuples on the CLASSE dataset, stratified across the five criteria and across the original student score on the target criterion. The pair of rewrites was sampled one from GM and one from the Minimal-Edit baseline at matched automated validity (target score $4$); ordering was randomized and the generating approach was hidden from the evaluator. For each tuple, evaluators answered three per-rewrite questions independently for A and B on a 1--3 scale (None / Slight / Clear), and then three direct-comparison questions with options $\{A, B, \text{Same}\}$. The task took evaluators roughly 2 hours, and we paid them \$60 each, which is significantly higher than the minimum wage in the country where this study was conducted. All evaluators gave consent before participating via an IRB-approved consent form.
 
-\paragraph{Calibration material.} Evaluators were provided with a reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. We include this instruction material and consent form information in the submission.
+\paragraph{Calibration material.} Evaluators were provided with a reference document, available throughout the task, that contained: (i) a description of the rewrite-comparison task and a worked positive/negative rewrite example; (ii) detailed guidance on each of the six questions with concrete anchors for the 1--3 scale; (iii) a sample passage paired with each rubric criterion; and (iv) for each criterion, the score-level rubric (1--4) together with an example student summary at every rubric score for calibration. Table~\ref{apx:rubric} and Table~\ref{apx:criteria} provide detailed definitions shown to evaluators for each criterion.
 
 \paragraph{Interface.} Figures~\ref{fig:label_interface_1} and~\ref{fig:label_interface_2} show the evaluation interface used in the study. The interface presents the passage and the student summary alongside the two rewrites, with the per-rewrite questions appearing first (Figure~\ref{fig:label_interface_1}) and the direct-comparison questions appearing second (Figure~\ref{fig:label_interface_2}).
 
