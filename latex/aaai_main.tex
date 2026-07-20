@@ -45,6 +45,16 @@
 \usepackage{xcolor}
 \definecolor{AlgGreen}{RGB}{34,139,34}
 
+% ---- Robust asset paths (compile-root-independent) --------------------
+% Figures and \input files are under latex/. These search paths let the
+% document compile whether the working directory is the repo root or latex/
+% (Overleaf vs. local), so nothing silently drops. \includegraphics and
+% \input below are given WITHOUT the "latex/" prefix and resolved here.
+\graphicspath{{latex/figs/}{figs/}}
+\makeatletter
+\def\input@path{{latex/}{./}}
+\makeatother
+
 % ---- Custom macros carried over verbatim from the ACL source ----------
 % Comment macro for algorithm right-margin annotations
 \newcommand{\algcmt}[1]{\hfill \textcolor{AlgGreen}{\ensuremath{\triangleright}\,#1}}
@@ -169,9 +179,9 @@ Providing feedback on student work, especially open-ended work, is an essential 
 
 \begin{figure}[!t]
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/gumbel_task_v3_2.png}
+    \includegraphics[width=1\linewidth]{gumbel_task_v3_2.png}
     \caption{Overview of counterfactual student writing generation. Our approach produces a revised version of student work that improves a specific rubric criterion while remaining similar to the original.}
-    \label{fig:placeholder}
+    \label{fig:task-overview}
     \vspace{-.4cm}
 \end{figure}
 % \ml{good example, but the edit here is kinda substantial (more than half of the words are bolded). it also obviously uses words/language for a higher age group, so one may wonder whether that needs to be controlled as well}
@@ -214,11 +224,11 @@ In our approach to generating counterfactual student work, we leverage the Gumbe
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.95\linewidth]{latex/figs/gumbel_method_v2_6.png}
+    \includegraphics[width=0.95\linewidth]{gumbel_method_v2_6.png}
     \vspace{-.4cm}
     \caption{Overview of the Gumbel Machine. In Stage 1, we recover noise that would have produced the observed tokens. In Stage 2, we intervene on the prompt with a new target score and replay the noise, steering generation toward a modified score while preserving similarity to the reference. In this example, ``exposed'' is selected, while the original token ``in,'' is a close alternative. A tunable $\beta$ scales the influence of noise-based similarity on replay.}
     % i'm not 100\% sure whether this example illustrates the gist of this whole ``use-the-same-noise'' approach. the obvious: the noise didn't change what the logit (without) would likely say, which is also to generate exposed when the score is 4. the deeper: if the control is language fluency/coherence, noise contains stylistic/content things. like where the explanation goes, the logic, etc. those should be preserved. so ideally, a good counterfactual should stick to the factual summary as much as possible in terms of how the student structures things, but introduce modifications mostly in-place, fix grammatical errors, fluency issues, etc.}}
-    \label{fig:placeholder}
+    \label{fig:method-overview}
     \vspace{-.3cm}
 \end{figure*}
 
@@ -321,8 +331,8 @@ $$
 $$ 
 Here, $\tau_{min}$ denotes the lower bound of a truncated standard Gumbel distribution. We then compute $\tau_{min} = \ell_{max} - \ell[{y_t}]$, the difference between the ground truth token logit and the maximum observed logit, so that the augmented logit for the reference token will be greater than the logit for any other token at each timestep.
 
-% \input{latex/algo_v1_short}
-\input{latex/algo_v2_short}
+% \input{algo_v1_short}
+\input{algo_v2_short}
 
 The sampled target noise establishes a ceiling, $T_{t} = \ell[{y_t}] + g[y_t]$, the new logit value for the reference token. Subsequently, for all other tokens $v \neq y_t$, we sample their corresponding noise values from an upper-truncated Gumbel distribution, such that no resulting token logit exceeds the ceiling. 
 $$
@@ -600,7 +610,7 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
 
 % \begin{figure*}[!ht]
 %     \centering
-%     \includegraphics[width=0.99\textwidth]{latex/figs/tradeoff_curve_save_v5.png}
+%     \includegraphics[width=0.99\textwidth]{tradeoff_curve_save_v5.png}
 %     \caption{Similarity–validity trade-offs across models (colors) and decoding strategies (shapes). Gumbel Machine combines model alignment (purple) and $\beta$-Hindsight control (star), which yields counterfactuals with higher validity and reference similarity compared to a larger Llama-4 model. $\beta$-Hindsight control traverses a wider-range of the trade-off curve with higher validity compared to Fixed Boost (circle).}
 %         \label{fig:tradeoff-curves}
 % \end{figure*}
@@ -889,7 +899,7 @@ Third, while our approach is compared across LLMs of both proprietary and open-w
 
 Finally, our primary validity measurements rely on a fine-tuned GPT-4.1-mini judge (Table~\ref{tab:human_eval}) to enable scalable evaluation. While comparisons to ground-truth inter-rater agreement are promising, the automated judge may introduce systematic biases and may not fully capture pedagogical usefulness. Likewise, similarity is measured using normalized character-level Levenshtein distance, which is common in related literature but is sensitive to surface edits and not semantics-aware. Our human evaluation finds that this metric correlates moderately with teacher judgment of similarity, but interpretation should still be made with caution. Furthermore, our approach has not been directly studied with students, so teacher useful ratings are only an approximation for how well this approach would translate to meaningful learning improvements.
 
-\section*{Ethical Considerations}
+\section*{Ethical Statement}
 Counterfactual student writing, even when intended as illustrative feedback, risks being perceived as an “ideal rewrite” rather than a pedagogical example, which could unintentionally discourage student agency or mask the student’s original voice. If deployed without appropriate framing, such systems may encourage over-reliance on AI-generated revisions, shifting learning from skill development toward imitation. These risks underscore the importance of positioning counterfactuals as illustrative demonstrations rather than authoritative corrections in classroom environments.
 
 On fairness, bias, and accountability, both the generation and evaluation components of our system rely on LLMs that may encode biases related to language background, dialect, or writing style, potentially advantaging certain student populations over others. Automated scoring models used to assess validity may further amplify these biases, especially when subtle stylistic features are conflated with quality. Additionally, using student writing as input raises privacy concerns, particularly in classroom deployments involving minors. Any real-world use of this approach should therefore include safeguards such as bias audits, human oversight, transparency about AI involvement, and follow local regulations regarding the use of student data.
@@ -1012,7 +1022,7 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
         \centering
         \begin{subfigure}{\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{latex/figs/paper_tradeoff_v4_larger.png}
+            \includegraphics[width=\linewidth]{paper_tradeoff_v4_larger.png}
             \caption{CLASSE}
             \label{fig:pareto-front-classe}
         \end{subfigure}
@@ -1021,7 +1031,7 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 
         \begin{subfigure}{\linewidth}
             \centering
-            \includegraphics[width=\linewidth]{latex/figs/dress_tradeoff_v1_larger.png}
+            \includegraphics[width=\linewidth]{dress_tradeoff_v1_larger.png}
             \caption{DREsS}
             \label{fig:pareto-front-dress}
         \end{subfigure}
@@ -1133,15 +1143,15 @@ We estimate our experiments to spend 350 NVIDIA GPU-hours across A100, L40, A40,
 \onecolumn
 \subsection{Qualitative Counterfactual Examples} \label{apx:qualitative}
 
-\input{latex/examples/civil_service}
+\input{examples/civil_service}
 
 \clearpage
 
-\input{latex/examples/global_warming}
+\input{examples/global_warming}
 
 \clearpage
 
-\input{latex/examples/ecological_pyramids}
+\input{examples/ecological_pyramids}
 \twocolumn
 
 %% =====================================================================
@@ -1283,7 +1293,7 @@ We estimate our experiments to spend 350 NVIDIA GPU-hours across A100, L40, A40,
 %% ALGORITHM
 %% =====================================================================
 
-\input{latex/algo_v2}
+\input{algo_v2}
 
 %% =====================================================================
 %% ANNOTATION FIGURES
@@ -1291,14 +1301,14 @@ We estimate our experiments to spend 350 NVIDIA GPU-hours across A100, L40, A40,
 
 \begin{figure*}[h]
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/label_interface_1.png}
+    \includegraphics[width=1\linewidth]{label_interface_1.png}
     \caption{Teacher evaluation interface per-rewrite questions (Q1--Q3) for rewrites A and B.}
     \label{fig:label_interface_1}
 \end{figure*}
 
 \begin{figure*}[h]
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/label_interface_2.png}
+    \includegraphics[width=1\linewidth]{label_interface_2.png}
     \caption{Teacher evaluation interface pairwise comparison questions (Q4--Q6).}
     \label{fig:label_interface_2}
 \end{figure*}
@@ -1307,13 +1317,13 @@ We estimate our experiments to spend 350 NVIDIA GPU-hours across A100, L40, A40,
 %% PROMPT BLOCKS
 %% =====================================================================
 
-\input{latex/prompts/language_ref}
+\input{prompts/language_ref}
 
-\input{latex/prompts/details_excl_ref}
+\input{prompts/details_excl_ref}
 
-\input{latex/prompts/ir_dress}
+\input{prompts/ir_dress}
 
-\input{latex/prompts/scoring}
+\input{prompts/scoring}
 
 %% =====================================================================
 %% CRITERION TABLES
@@ -1448,14 +1458,14 @@ This criterion measures the student's control of vocabulary and grammatical stru
 
 \begin{figure*}
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/token_statistics_visualization_3.jpg}
+    \includegraphics[width=1\linewidth]{token_statistics_visualization_3.jpg}
     \caption{Token count statistics for the summaries and passages in the CLASSE dataset. Summaries are approximately 68 words in length and passages are approximately 297 words.}
     \label{fig:token_counts}
 \end{figure*}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=1\linewidth]{latex/figs/dress_token_statistics.png}
+    \includegraphics[width=1\linewidth]{dress_token_statistics.png}
     \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.}
     \label{fig:dress_token_counts}
 \end{figure*}
