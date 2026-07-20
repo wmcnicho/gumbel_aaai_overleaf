@@ -893,7 +893,8 @@ We evaluate our approach on two datasets of student-written summaries and demons
 % Then outline future work, space permitting
 Our work outlines future directions that include: evaluating this approach across other domains and generation tasks, assessing the pedagogical effectiveness of generated counterfactuals relative to conventional writing feedback, and further investigation into the necessary and sufficient conditions for recovering noise that is effective for control.
 
-\newpage
+% \newpage  % removed: with Limitations gone this forced a blank-ish page before
+%           % the Ethical Statement (and AAAI forbids page-break commands anyway).
 % This counts towards page limit in AAAI so removing
 % \section*{Limitations}
 
@@ -918,6 +919,9 @@ On fairness, bias, and accountability, both the generation and evaluation compon
 % Bibliography entries for the entire Anthology, followed by custom entries
 %\bibliography{anthology,custom}
 % Custom bibliography entries only
+% AAAI permits \small (9pt) references when over length; keeps them to 2 pages.
+{\small
 \bibliography{custom}
+}
 
 \end{document}
