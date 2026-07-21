@@ -229,34 +229,8 @@ Table~\ref{tab:appendix_per_criterion}. We observe that the within-model similar
 
 We include the details of the instructions passed to the various open-weight models during counterfactual generation. The base counterfactual prompt is shown both including the reference summary (Figure~\ref{apx:prompt_ref}) and excluding it (Figure~\ref{fig:exc_prompt}) for two distinct criteria. The Identify-and-Replace (I\&R) prompt is shown in Figure~\ref{fig:ir_prompt}, illustrated on the DREsS ``Language'' criterion. Format is identical for other criteria with rubric details replaced.
 
-\subsection{Tuning Gumbel Noise Control} \label{apx:tuning}
-
-In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values for GM and compare with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$ for CLASSE and $\beta \in \{0.05, 0.2, 0.4, 0,5, 0.6, 0.7, 0.8, 1.0\}$ for DREsS. Higher values of $\beta$ emphasize similarity to the original student response, while lower values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$ for CLASSE and $\alpha \in \{0.01, 1.0, 5.0\}$ for DREsS. Higher values of $\alpha$ induce stronger similarity to reference tokens. We observe that values outside these ranges result in collapses in model fluency due to excessive logit manipulation.
-
-Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
-
 \subsection{Scoring Model} \label{apx:scoring}
 
-\begin{figure}
-        \centering
-        \begin{subfigure}{\linewidth}
-            \centering
-            \includegraphics[width=\linewidth]{paper_tradeoff_v4_larger.png}
-            \caption{CLASSE}
-            \label{fig:pareto-front-classe}
-        \end{subfigure}
-
-        \vspace{0.6em}
-
-        \begin{subfigure}{\linewidth}
-            \centering
-            \includegraphics[width=\linewidth]{dress_tradeoff_v1_larger.png}
-            \caption{DREsS}
-            \label{fig:pareto-front-dress}
-        \end{subfigure}
-        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (top) and DREsS (bottom). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier than the logit-bias baseline.}
-        \label{fig:pareto-front}
-\end{figure}
 
 \begin{table*}[h]
 \centering
@@ -688,6 +662,27 @@ This criterion measures the student's control of vocabulary and grammatical stru
     \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.}
     \label{fig:dress_token_counts}
 \end{figure*}
+
+% ---- Limitations and Ethical Considerations (relocated out of the 7-page
+% ---- main paper; neither is required by AAAI). \ref to sec:tuning/tab:human_eval
+% ---- resolve against the main paper via xr (\externaldocument{aaai_main}). ----
+\section{Limitations}
+
+While our results suggest that recovered Gumbel noise can serve as a practical similarity control signal for counterfactual student writing, there are limitations that constrain the interpretation and generalizability of our findings.
+
+First, our recovery-and-replay procedure assumes that the data-generating process for student writing can be approximated by the autoregressive Gumbel-Max structural causal model (SCM) induced by the proxy LLM. As prior work has noted, the Gumbel-Max SCM is one of several parameterizations of categorical sampling and is a modeling choice rather than a discovered structure \citep{chatzi2025counterfactual, benz2025evaluation}. Real student writing also involves planning, revision, and non-local edits, so the strict autoregressive assumption is at best an approximation. Our results should therefore be read as counterfactuals \emph{under a proxy autoregressive SCM}, rather than as causal counterfactuals over the true student-writing process. Our ablation study supports this interpretation where we observe that a pre-trained LLM, optimized for well-written summaries, assigns low likelihood to student-authored ones (which can contain rubric-relevant errors), so the noise it produces is residual-like rather than meaningful. However, upon training the LLM on student data, the noise becomes a much more effective control signal, and thus a better, but still limited, proxy model of student writing.
+
+Second, our approach assumes access to carefully engineered prompts that specify the rubric, request adherence to a reference, and clearly define the target score change. As shown in an ablation study, reference conditioning is a key enabling condition for effective control, suggesting sensitivity to prompt variation that does not preserve this structure. In addition, we train separate alignment adapters per rubric criterion, which improves controllability in our experiments but may not scale cleanly to richer, multi-criterion feedback without more advanced multitask or compositional alignment strategies.
+
+Third, while our approach is compared across LLMs of both proprietary and open-weight types, our comparative baselines are primarily prompting-based. While these baselines are representative of recent research on counterfactual generation approaches, their comparison with the Gumbel Machine is somewhat mismatched, as they do not directly modify output logits. While a body of prior research has explored logit manipulation techniques for counterfactual generation, these techniques do not translate to ordinal task setups as they are designed for nominal tasks and would require significant modification to adapt to our task, challenging direct comparison \cite{krause2021gedi, yang2021fudge, dathathri_plug_2019}. To mitigate this evaluation gap, we provide a comparison to Vocab Bias, a direct logit manipulation technique in Section~\ref{sec:tuning}.
+
+Finally, our primary validity measurements rely on a fine-tuned GPT-4.1-mini judge (Table~\ref{tab:human_eval}) to enable scalable evaluation. While comparisons to ground-truth inter-rater agreement are promising, the automated judge may introduce systematic biases and may not fully capture pedagogical usefulness. Likewise, similarity is measured using normalized character-level Levenshtein distance, which is common in related literature but is sensitive to surface edits and not semantics-aware. Our human evaluation finds that this metric correlates moderately with teacher judgment of similarity, but interpretation should still be made with caution. Furthermore, our approach has not been directly studied with students, so teacher useful ratings are only an approximation for how well this approach would translate to meaningful learning improvements.
+
+\section{Ethical Considerations}
+
+Counterfactual student writing, even when intended as illustrative feedback, risks being perceived as an “ideal rewrite” rather than a pedagogical example, which could unintentionally discourage student agency or mask the student’s original voice. If deployed without appropriate framing, such systems may encourage over-reliance on AI-generated revisions, shifting learning from skill development toward imitation. These risks underscore the importance of positioning counterfactuals as illustrative demonstrations rather than authoritative corrections in classroom environments.
+
+On fairness, bias, and accountability, both the generation and evaluation components of our system rely on LLMs that may encode biases related to language background, dialect, or writing style, potentially advantaging certain student populations over others. Automated scoring models used to assess validity may further amplify these biases, especially when subtle stylistic features are conflated with quality. Additionally, using student writing as input raises privacy concerns, particularly in classroom deployments involving minors. Any real-world use of this approach should therefore include safeguards such as bias audits, human oversight, transparency about AI involvement, and follow local regulations regarding the use of student data.
 
 % References cited within the supplementary (aaai2027.sty sets the .bst).
 \bibliography{custom}
