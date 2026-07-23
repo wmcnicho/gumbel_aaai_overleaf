@@ -116,11 +116,9 @@
 %
 % and set <dim> to something 5cm or larger.
 
-% ---- Cross-reference bridge to the main paper (resolves \ref to main-paper
-% ---- tables/figures/sections). Requires aaai_main.aux to exist: compile the
-% ---- main paper once, then this file. xr does not embed links (hyperref-free).
-\usepackage{xr}
-\externaldocument{aaai_main}
+% Cross-references into the main paper are hardcoded (e.g. "Section~5.2",
+% "Table~3") rather than resolved via xr, so this file compiles standalone on
+% Overleaf without needing aaai_main.aux.
 
 \title{Supplementary Material\\Gumbel Machine: Counterfactual Student Writing Generation via Gumbel Noise Steering}
 \author{
@@ -663,9 +661,20 @@ This criterion measures the student's control of vocabulary and grammatical stru
     \label{fig:dress_token_counts}
 \end{figure*}
 
+\subsection{Similarity–Validity Tradeoff Without Instruction Alignment} \label{apx:base-tradeoff}
+
+Figure~\ref{fig:base-tradeoff} details the similarity–validity tradeoff traced by $\beta$-Hindsight control on the base model, without the instruction alignment used by the full Gumbel Machine, swept over the same range of $\beta$ and compared against the Vocab Bias logit-bias baseline and the ME, ICL, and I\&R baselines on CLASSE and DREsS. Without alignment, validity stays low across the frontier and collapses toward zero (and below, on CLASSE at high $\beta$), even as similarity increases. Contrasted with the trained Gumbel Machine in the main paper, which attains substantially higher validity at comparable similarity, this detailed view reinforces our finding that instruction alignment is what turns the recovered Gumbel noise into an effective control signal rather than a residual source of randomness.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{appendix_tradeoff_curves.png}
+    \caption{Similarity–validity trade-offs for $\beta$-Hindsight control without instruction alignment (base model) and the Vocab Bias logit-bias baseline, against the ME, ICL, and I\&R baselines on CLASSE (left) and DREsS (right). Without alignment, $\beta$-Hindsight control traces a markedly lower-validity frontier than the trained Gumbel Machine in the main paper.}
+    \label{fig:base-tradeoff}
+\end{figure*}
+
 % ---- Limitations and Ethical Considerations (relocated out of the 7-page
-% ---- main paper; neither is required by AAAI). \ref to sec:tuning/tab:human_eval
-% ---- resolve against the main paper via xr (\externaldocument{aaai_main}). ----
+% ---- main paper; neither is required by AAAI). References to the main paper
+% ---- (Section~5.2, Table~3) are hardcoded, not resolved via xr. ----
 \section{Limitations}
 
 While our results suggest that recovered Gumbel noise can serve as a practical similarity control signal for counterfactual student writing, there are limitations that constrain the interpretation and generalizability of our findings.
@@ -674,9 +683,9 @@ First, our recovery-and-replay procedure assumes that the data-generating proces
 
 Second, our approach assumes access to carefully engineered prompts that specify the rubric, request adherence to a reference, and clearly define the target score change. As shown in an ablation study, reference conditioning is a key enabling condition for effective control, suggesting sensitivity to prompt variation that does not preserve this structure. In addition, we train separate alignment adapters per rubric criterion, which improves controllability in our experiments but may not scale cleanly to richer, multi-criterion feedback without more advanced multitask or compositional alignment strategies.
 
-Third, while our approach is compared across LLMs of both proprietary and open-weight types, our comparative baselines are primarily prompting-based. While these baselines are representative of recent research on counterfactual generation approaches, their comparison with the Gumbel Machine is somewhat mismatched, as they do not directly modify output logits. While a body of prior research has explored logit manipulation techniques for counterfactual generation, these techniques do not translate to ordinal task setups as they are designed for nominal tasks and would require significant modification to adapt to our task, challenging direct comparison \cite{krause2021gedi, yang2021fudge, dathathri_plug_2019}. To mitigate this evaluation gap, we provide a comparison to Vocab Bias, a direct logit manipulation technique in Section~\ref{sec:tuning}.
+Third, while our approach is compared across LLMs of both proprietary and open-weight types, our comparative baselines are primarily prompting-based. While these baselines are representative of recent research on counterfactual generation approaches, their comparison with the Gumbel Machine is somewhat mismatched, as they do not directly modify output logits. While a body of prior research has explored logit manipulation techniques for counterfactual generation, these techniques do not translate to ordinal task setups as they are designed for nominal tasks and would require significant modification to adapt to our task, challenging direct comparison \cite{krause2021gedi, yang2021fudge, dathathri_plug_2019}. To mitigate this evaluation gap, we provide a comparison to Vocab Bias, a direct logit manipulation technique in Section~5.2.
 
-Finally, our primary validity measurements rely on a fine-tuned GPT-4.1-mini judge (Table~\ref{tab:human_eval}) to enable scalable evaluation. While comparisons to ground-truth inter-rater agreement are promising, the automated judge may introduce systematic biases and may not fully capture pedagogical usefulness. Likewise, similarity is measured using normalized character-level Levenshtein distance, which is common in related literature but is sensitive to surface edits and not semantics-aware. Our human evaluation finds that this metric correlates moderately with teacher judgment of similarity, but interpretation should still be made with caution. Furthermore, our approach has not been directly studied with students, so teacher useful ratings are only an approximation for how well this approach would translate to meaningful learning improvements.
+Finally, our primary validity measurements rely on a fine-tuned GPT-4.1-mini judge (Table~3) to enable scalable evaluation. While comparisons to ground-truth inter-rater agreement are promising, the automated judge may introduce systematic biases and may not fully capture pedagogical usefulness. Likewise, similarity is measured using normalized character-level Levenshtein distance, which is common in related literature but is sensitive to surface edits and not semantics-aware. Our human evaluation finds that this metric correlates moderately with teacher judgment of similarity, but interpretation should still be made with caution. Furthermore, our approach has not been directly studied with students, so teacher useful ratings are only an approximation for how well this approach would translate to meaningful learning improvements.
 
 \section{Ethical Considerations}
 

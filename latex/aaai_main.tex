@@ -55,12 +55,9 @@
 \def\input@path{{latex/}{./}}
 \makeatother
 
-% ---- Cross-reference bridge to the separate supplementary document -----
-% Lets \ref{apx:...} (appendix labels, now in supplementary.tex) resolve in
-% the main paper. Requires supplementary.aux to exist: compile supplementary.tex
-% once, then the main paper. xr embeds no links (hyperref-free, AAAI-safe).
-\usepackage{xr}
-\externaldocument{supplementary}
+% Cross-references into the supplementary appendix are hardcoded (e.g.
+% "Appendix~A.2") rather than resolved via xr, so the main paper compiles
+% standalone on Overleaf without needing supplementary.aux.
 
 % ---- Custom macros carried over verbatim from the ACL source ----------
 % Comment macro for algorithm right-margin annotations
@@ -353,7 +350,7 @@ Given the recovered noise values, we then replay the noise to generate the count
 
 \subsection{Instruction Alignment for Task Validity} \label{train-setup}
 
-We now detail our approach to encourage validity in generated counterfactual student work. We frame this validity alignment problem as an instruction-following task, in which we prompt a language model with explicit instructions on how to generate a valid counterfactual. In each prompt, we include a rubric detailing the criterion to change, the qualitative aspects of each possible ordinal score $z$, and the reference student work $\mathbf{y_r}$. We conclude the prompt with instructions for the model to generate a revised version $y'$ that adheres closely to the reference while reflecting a specified score $z'$. We include the prompts in Appendix~\ref{apx:prompts}.
+We now detail our approach to encourage validity in generated counterfactual student work. We frame this validity alignment problem as an instruction-following task, in which we prompt a language model with explicit instructions on how to generate a valid counterfactual. In each prompt, we include a rubric detailing the criterion to change, the qualitative aspects of each possible ordinal score $z$, and the reference student work $\mathbf{y_r}$. We conclude the prompt with instructions for the model to generate a revised version $y'$ that adheres closely to the reference while reflecting a specified score $z'$. We include the prompts in Appendix~A.2.
 
 We find that training with preference alignment substantially improves task validity. We first perform supervised fine-tuning (SFT) \cite{ouyang2022training} using examples derived from a dataset of $(\mathbf{y}, z)$ tuples, where $z$ is used in forming the prompt $\textbf{x}$ and $\textbf{y}$ is the target. During training, we use the same prompt format but exclude the reference and related adherence instructions. After conducting SFT, we further align the model to the counterfactual task using direct preference optimization (DPO) \cite{rafailov2023direct}. To construct preference pairs, we use student examples that achieve a target, ground-truth score on a given criterion as a preferred example, and those that receive an alternative score for the same criterion as a negative example. For each example in the training dataset, we randomly select one negative sample for each alternative score on the same prompt, yielding $k-1$ preference pairs per example. Together, instruction-based prompting, supervised fine-tuning, and preference alignment enable reliable task validity and are compatible with $\beta$-Hindsight similarity control.
 
@@ -393,16 +390,16 @@ We evaluate our approach on two datasets of scored student writing samples.
 %, covering both reading passage summarization and open-ended student writing from a variety of proficiency levels. 
 The first dataset is Common Lit Augmented Student Summary Evaluation (\textbf{CLASSE}), a corpus of student-authored summaries of short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries of 101 unique passages authored by students in grades 3-12. 
 %
-The second dataset is Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}), a corpus of student-authored responses to open-ended writing prompts \cite{yoo_dress_2025}. We use $\text{DREsS}_{\text{New}}$, which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an English as a foreign language (EFL) writing course. The student writings in both datasets are graded by experts with ordinal rubrics on multiple criteria for writing quality, 5 for CLASSE and 3 for DREsS. We further detail criterion definitions, token statistics, and scoring rubrics for the datasets in Appendix~\ref{apx:classe}.
+The second dataset is Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}), a corpus of student-authored responses to open-ended writing prompts \cite{yoo_dress_2025}. We use $\text{DREsS}_{\text{New}}$, which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an English as a foreign language (EFL) writing course. The student writings in both datasets are graded by experts with ordinal rubrics on multiple criteria for writing quality, 5 for CLASSE and 3 for DREsS. We further detail criterion definitions, token statistics, and scoring rubrics for the datasets in Appendix~A.5.
 % English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. 
 % Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. 
 
-% The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring in preliminary experiments; see Appendix~\ref{apx:classe}.}. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. 
+% The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring in preliminary experiments; see Appendix~A.5.}. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. 
 
 % Could include here details about filtering/cleaning if needed.
 % \subsection{Scoring Model}
 % We use an LLM-as-a-judge \cite{li_generation_2025} system to automatically score generated counterfactual summaries using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. We find that this approach performs better than a fine-tuned BERT-based scoring model \cite{devlin_bert_2019} and directly prompting \texttt{GPT-4.1}. 
-% The average Quadratic Weighted Kappa (QWK) agreement across scoring criteria between this model and human scores are 0.6242 and 0.6012, respectively, for CLASSE and DREsS. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), which shows that our scoring model is a good proxy of human scoring. See Appendix~\ref{apx:scoring} for details.
+% The average Quadratic Weighted Kappa (QWK) agreement across scoring criteria between this model and human scores are 0.6242 and 0.6012, respectively, for CLASSE and DREsS. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), which shows that our scoring model is a good proxy of human scoring. See Appendix~A.3 for details.
 
 \subsection{Metrics}
 We measure two competing properties of the generated counterfactuals, i) similarity to a factual example and ii) task validity, following existing work on counterfactual generation \cite{wang-etal-2024-survey}. 
@@ -416,7 +413,7 @@ Here, $y_i$ is the reference summary and $y_i'$ the counterfactual summary. This
 \paragraph{Validity}
 A generated counterfactual is valid if its score, given by the scoring model, reflects the intended score for the specified criterion. Existing evaluation metrics for validity, such as flip rate \cite{ross-etal-2021-explaining}, are for nominal tasks (e.g., sentiment or topic classification). Since scores in our task are ordinal, we use average Quadratic Weighted Kappa (QWK) across scoring criteria between the intended score $z'$ and an estimated score from the scoring model $s(\mathbf{y}')=\hat{z}'$. QWK produces a score in $[-1,1]$, with high values indicating higher task validity. 
 
-We use an LLM-as-a-judge \cite{li_generation_2025} system to compute validity using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. We evaluate the average QWK agreement across scoring criteria between this model and human scores for CLASSE and DREsS, which are 0.6242 and 0.6012, respectively. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), indicating that our scoring model is a good proxy of human scoring. We detail experiments on multiple approaches for automated validity scoring in Appendix~\ref{apx:scoring}.
+We use an LLM-as-a-judge \cite{li_generation_2025} system to compute validity using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. We evaluate the average QWK agreement across scoring criteria between this model and human scores for CLASSE and DREsS, which are 0.6242 and 0.6012, respectively. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), indicating that our scoring model is a good proxy of human scoring. We detail experiments on multiple approaches for automated validity scoring in Appendix~A.3.
 
 % \begin{equation*}
 % Validity \;=\; 1 \;-\;
@@ -787,20 +784,8 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 
 \begin{figure*}[t]
         \centering
-        \begin{subfigure}{0.49\textwidth}
-            \centering
-            \includegraphics[width=\linewidth]{paper_tradeoff_v4_larger.png}
-            \caption{CLASSE}
-            \label{fig:pareto-front-classe}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}{0.49\textwidth}
-            \centering
-            \includegraphics[width=\linewidth]{dress_tradeoff_v1_larger.png}
-            \caption{DREsS}
-            \label{fig:pareto-front-dress}
-        \end{subfigure}
-        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (left) and DREsS (right). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier than the logit-bias baseline.}
+        \includegraphics[width=\textwidth]{tradeoff_curves_combined.png}
+        \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias (Vocab Bias) and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (left) and DREsS (right). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier than the logit-bias baseline.}
         \label{fig:pareto-front}
 \end{figure*}
 
@@ -822,7 +807,7 @@ We focus our evaluation on student summaries from the CLASSE dataset, since the 
 
 We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 62\% of contested cases ($p=0.018$), and give a significantly higher aggregate similarity rating ($p=0.033$). Moreover, our automated similarity metric has moderate yet statistically significant correlation with average teacher similarity ratings ($\rho=0.48$, $p<0.001$). We find no significant difference between the approaches in terms of score improvement (as expected) and utility. However, we observe that when the evaluator judges the GM rewrite as more similar, they also prefer GM on utility in 75\% of contested cases ($\chi^2(4)=57.8$, $p<0.001$). 
 % In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. 
-These results highlight reference similarity as an important factor in creating pedagogically useful feedback for students and demonstrate that fine-grained control techniques beyond prompt design are directionally necessary towards creating automated rewriting feedback systems that are faithful to student writing preferences. We report further details and results of our teacher evaluation in Appendix~\ref{sec:apdx-human-eval}.
+These results highlight reference similarity as an important factor in creating pedagogically useful feedback for students and demonstrate that fine-grained control techniques beyond prompt design are directionally necessary towards creating automated rewriting feedback systems that are faithful to student writing preferences. We report further details and results of our teacher evaluation in Appendix~A.7.
 
  % \ml{this last sentence basically repeats what you wrote in this paragraph and adds nothing new. come up with a deeper discussion?} 
 
@@ -869,7 +854,7 @@ $-$ & \checkmark & \checkmark
 
 In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and logit control components of GM, running each configuration on Llama-3. We observe a distinctive trend in the introduction of each component. With $\beta$-Hindsight decoding alone and no training, we observe improved similarity at marginally lower validity. This result suggests that recovered Gumbel noise can steer the sampling trajectory toward the reference but does not induce rubric-adherent counterfactuals. Training the model with SFT on student writing amplifies the noise's control influence, resulting in a large jump in similarity while validity collapses to near zero. This result suggests that SFT is necessary to adapt a model to student writing style, which may not be statistically likely for a pre-trained model. 
 %This collapse suggests an increased model sensitivity to the Gumbel noise control, and could be explained that the model has a strong preference to vocabularly and word sequences that are frequent in the trained student writing samples. 
-Notably, adding DPO after SFT significantly improves the model's capability on this task. This result suggests that by contrasting generations with different scores, DPO helps the LLM with controllable generation, while $\beta$-Hindsight remains key to maintaining similarity to original student writing, which prompting alone cannot achieve. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference. We report the results of an additional ablation study on the prompt configuration in Appendix~\ref{apx:prompt-ablate}. 
+Notably, adding DPO after SFT significantly improves the model's capability on this task. This result suggests that by contrasting generations with different scores, DPO helps the LLM with controllable generation, while $\beta$-Hindsight remains key to maintaining similarity to original student writing, which prompting alone cannot achieve. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference. We report the results of an additional ablation study on the prompt configuration in Appendix~A.4. 
 
 % only encodes the likelihood of a simple instruction-following process with high precision
 
