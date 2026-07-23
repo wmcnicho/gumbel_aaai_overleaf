@@ -782,16 +782,18 @@ In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tu
 
 Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
 
-% Single-column figure with the wide combined image = most compact layout:
-% it displaces only one column of text and saves a full page vs. a two-column
-% figure*. If the panels read too small, switch back to \begin{figure*}[t] with
-% \includegraphics[width=0.8\textwidth]{...} (costs ~1 page).
-\begin{figure}[t]
+% Two-column figure* sized for readability with minimal page overflow. Width
+% trades off readability vs. overflow onto the content page (all are 10 pp):
+%   0.60\textwidth -> least overflow but small panels
+%   0.70\textwidth -> readable, near-minimal overflow  (chosen)
+%   0.80\textwidth -> most readable, slightly more overflow
+% (A single-column \begin{figure} at \linewidth reaches 9 pp but is too small.)
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{tradeoff_curves_combined.png}
+    \includegraphics[width=0.7\textwidth]{tradeoff_curves_combined.png}
     \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias (Vocab Bias) and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (left) and DREsS (right). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier.}
     \label{fig:pareto-front}
-\end{figure}
+\end{figure*}
 
 \subsection{Cross-LLM Comparisons}
 
