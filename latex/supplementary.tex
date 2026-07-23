@@ -138,6 +138,12 @@
 %% =====================================================================
 %% TEXT SECTIONS
 %% =====================================================================
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.8\textwidth]{appendix_tradeoff_curves.png}
+    \caption{Similarity–validity trade-offs for $\beta$-Hindsight control without instruction alignment (base model) and the Vocab Bias logit-bias baseline, against the ME, ICL, and I\&R baselines on CLASSE (left) and DREsS (right). Without alignment, $\beta$-Hindsight control traces a markedly lower-validity frontier than the trained Gumbel Machine in the main paper.}
+    \label{fig:base-tradeoff}
+\end{figure*}
 
 \subsection{Per-Criterion Results} \label{apx:tradeoffs}
 
@@ -265,6 +271,10 @@ Figure~\ref{fig:score_prompt} shows the instructions passed to our scoring model
 \paragraph{Scoring Model Comparison} Our final scoring model is a fine-tuned \texttt{GPT-4.1-mini} model, trained per criterion. We report scoring-model comparisons across four configurations: (i) a fine-tuned BERT encoder following \cite{fernandez_automated_2022}, (ii) prompting the larger \texttt{GPT-4.1} model, (iii) prompting \texttt{GPT-4.1-mini}, and (iv) fine-tuned \texttt{GPT-4.1-mini}. Table~\ref{apx:scoring_per_criterion} reports per-criterion QWK against human ratings on a held-out validation set for CLASSE and DREsS, respectively. Across both datasets the fine-tuned \texttt{GPT-4.1-mini} achieves the highest mean QWK (CLASSE $0.624$, DREsS $0.601$) and outperforms every other scoring configuration on nearly every criterion.
 
 For the BERT scoring model, we fine-tune a \texttt{ModernBERT-base} encoder with a linear regression head over the integer rubric scores using mean-squared-error loss. For both prompted and fine-tuned GPT models we use the template shown in Figure~\ref{fig:score_prompt}, sampled with temperature $0$ and top-$p=1.0$. For fine-tuning, we use OpenAI's hosted fine-tuning API on \texttt{gpt-4.1-mini-2025-04-14}, training one checkpoint per criterion on the criterion-specific train split with the same prompt template used at inference.
+
+\subsection{Similarity–Validity Tradeoff Without Instruction Alignment} \label{apx:base-tradeoff}
+
+Figure~\ref{fig:base-tradeoff} details the similarity–validity tradeoff traced by $\beta$-Hindsight control on the base model, without the instruction alignment used by the full Gumbel Machine, swept over the same range of $\beta$ and compared against the Vocab Bias logit-bias baseline and the ME, ICL, and I\&R baselines on CLASSE and DREsS. Without alignment, validity stays low across the frontier and collapses toward zero (and below, on CLASSE at high $\beta$), even as similarity increases. Contrasted with the trained Gumbel Machine in the main paper, which attains substantially higher validity at comparable similarity, this detailed view reinforces our finding that instruction alignment is what turns the recovered Gumbel noise into an effective control signal rather than a residual source of randomness.
 
 \subsection{Prompt Ablation} \label{apx:prompt-ablate}
 
@@ -659,17 +669,6 @@ This criterion measures the student's control of vocabulary and grammatical stru
     \includegraphics[width=1\linewidth]{dress_token_statistics.png}
     \caption{Token count statistics for the essays and writing prompts in the DREsS dataset. Essays are approximately 310 words in length and writing prompts are approximately 30 words.}
     \label{fig:dress_token_counts}
-\end{figure*}
-
-\subsection{Similarity–Validity Tradeoff Without Instruction Alignment} \label{apx:base-tradeoff}
-
-Figure~\ref{fig:base-tradeoff} details the similarity–validity tradeoff traced by $\beta$-Hindsight control on the base model, without the instruction alignment used by the full Gumbel Machine, swept over the same range of $\beta$ and compared against the Vocab Bias logit-bias baseline and the ME, ICL, and I\&R baselines on CLASSE and DREsS. Without alignment, validity stays low across the frontier and collapses toward zero (and below, on CLASSE at high $\beta$), even as similarity increases. Contrasted with the trained Gumbel Machine in the main paper, which attains substantially higher validity at comparable similarity, this detailed view reinforces our finding that instruction alignment is what turns the recovered Gumbel noise into an effective control signal rather than a residual source of randomness.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=\textwidth]{appendix_tradeoff_curves.png}
-    \caption{Similarity–validity trade-offs for $\beta$-Hindsight control without instruction alignment (base model) and the Vocab Bias logit-bias baseline, against the ME, ICL, and I\&R baselines on CLASSE (left) and DREsS (right). Without alignment, $\beta$-Hindsight control traces a markedly lower-validity frontier than the trained Gumbel Machine in the main paper.}
-    \label{fig:base-tradeoff}
 \end{figure*}
 
 % ---- Limitations and Ethical Considerations (relocated out of the 7-page
