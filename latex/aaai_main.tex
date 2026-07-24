@@ -783,13 +783,20 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 % half-panels; single-column placement displaces only one column, giving the
 % least content overflow of the readable layouts (10 pp). Tune 0.75\linewidth
 % to taste (larger -> more readable but eventually fills the whole column).
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.75\linewidth]{tradeoff_classe_curve.png}\\[2pt]
+%     \includegraphics[width=0.75\linewidth]{tradeoff_dress_curve.png}
+%     \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias (Vocab Bias) and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (top) and DREsS (bottom). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier.}
+%     \label{fig:pareto-front}
+% \end{figure}
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.75\linewidth]{tradeoff_classe_curve.png}\\[2pt]
-    \includegraphics[width=0.75\linewidth]{tradeoff_dress_curve.png}
+    \includegraphics[width=0.85\linewidth]{latex/figs/stacked_test.png}\\[2pt]
     \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias (Vocab Bias) and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (top) and DREsS (bottom). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier.}
     \label{fig:pareto-front}
 \end{figure}
+
 
 \subsection{Cross-LLM Comparisons}
 
