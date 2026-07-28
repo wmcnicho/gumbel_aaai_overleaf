@@ -186,7 +186,7 @@ Providing feedback on student work, especially open-ended work, is an essential 
     \includegraphics[width=1\linewidth]{gumbel_task_v3_2.png}
     \caption{Overview of counterfactual student writing generation. Our approach produces a improved version of student work that remains similar to the original.}
     \label{fig:task-overview}
-    \vspace{-.4cm}
+    \vspace{0cm}
 \end{figure}
 % \ml{good example, but the edit here is kinda substantial (more than half of the words are bolded). it also obviously uses words/language for a higher age group, so one may wonder whether that needs to be controlled as well}
 
@@ -229,11 +229,11 @@ In our approach to generating counterfactual student work, we leverage the Gumbe
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.95\linewidth]{gumbel_method_v2_6.png}
-    \vspace{-.4cm}
+    \vspace{0cm}
     \caption{Overview of the Gumbel Machine. In Stage 1, we recover noise that would have produced the observed tokens. In Stage 2, we intervene on the prompt with a new target score and replay the noise, steering generation toward a modified score while preserving similarity to the reference. In this example, ``exposed'' is selected, while the original token ``in,'' is a close alternative. A tunable $\beta$ scales the influence of noise-based similarity on replay.}
     % i'm not 100\% sure whether this example illustrates the gist of this whole ``use-the-same-noise'' approach. the obvious: the noise didn't change what the logit (without) would likely say, which is also to generate exposed when the score is 4. the deeper: if the control is language fluency/coherence, noise contains stylistic/content things. like where the explanation goes, the logic, etc. those should be preserved. so ideally, a good counterfactual should stick to the factual summary as much as possible in terms of how the student structures things, but introduce modifications mostly in-place, fix grammatical errors, fluency issues, etc.}}
     \label{fig:method-overview}
-    \vspace{-.3cm}
+    \vspace{0cm}
 \end{figure*}
 
 %We formally introduce this trick by first stating the output of an LLM, the probability of the next token, expressed in terms of the logits the model produces.
@@ -390,11 +390,11 @@ We evaluate our approach on two datasets of scored student writing samples.
 %, covering both reading passage summarization and open-ended student writing from a variety of proficiency levels. 
 The first dataset is Common Lit Augmented Student Summary Evaluation (\textbf{CLASSE}), a corpus of student-authored summaries of short reading passages \cite{crossley-etal-2024-world}. The dataset contains 4,689 summaries of 101 unique passages authored by students in grades 3-12. 
 %
-The second dataset is Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}), a corpus of student-authored responses to open-ended writing prompts \cite{yoo_dress_2025}. We use $\text{DREsS}_{\text{New}}$, which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an English as a foreign language (EFL) writing course. The student writings in both datasets are graded by experts with ordinal rubrics on multiple criteria for writing quality, 5 for CLASSE and 3 for DREsS. We further detail criterion definitions, token statistics, and scoring rubrics for the datasets in Appendix~A.5.
+The second dataset is Dataset for Rubric-based Essay Scoring on EFL Writing (\textbf{DREsS}), a corpus of student-authored responses to open-ended writing prompts \cite{yoo_dress_2025}. We use $\text{DREsS}_{\text{New}}$, which contains 2,279 essays from 65 essay writing prompts authored by university undergraduate students enrolled in an English as a foreign language (EFL) writing course. The student writings in both datasets are graded by experts with ordinal rubrics on multiple criteria for writing quality, 5 for CLASSE and 3 for DREsS. We further detail criterion definitions, token statistics, and scoring rubrics for the datasets in Appendix~A.6.
 % English education experts evaluate each essays on 3 grading criteria on an increasing scale from 1 to 5. 
 % Human raters evaluate each summary on 5 grading criteria related to writing quality on an increasing scale from 1 to 4. 
 
-% The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring in preliminary experiments; see Appendix~A.5.}. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. 
+% The grading criteria are \textbf{Main Idea}, \textbf{Details}, \textbf{Organization}, \textbf{Wording}, and \textbf{Language} \footnote{We exclude the ``Voice'' criterion due to unreliable automated scoring in preliminary experiments; see Appendix~A.6.}. The grading criteria are \textbf{Content}, \textbf{Organization}, and \textbf{Language}. 
 
 % Could include here details about filtering/cleaning if needed.
 % \subsection{Scoring Model}
@@ -460,7 +460,7 @@ GM (Ours)
 \end{tabular}
 \caption{Comparing GM to other counterfactual methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
 \label{tab:llama_results}
-\vspace{-.3cm}
+\vspace{0cm}
 \end{table}
 
 % \begin{table}[t]
@@ -490,8 +490,8 @@ GM (Ours)
 % \end{tabular}
 % \caption{\mh{FT}Comparing GM to other counterfactual generation methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
 % \label{tab:llama_results}
-% \vspace{-.3cm}
-\end{table}
+% \vspace{0cm}
+% \end{table}
 
 
 \subsection{Experimental Settings and Details}
@@ -606,7 +606,7 @@ We compare our approach, \textbf{Gumbel Machine (GM)}, to three other LLM-based 
 \end{tabular}
 \caption{Comparing counterfactual LLM approaches across proprietary and open-weight models (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine). GM translates across open-weight models and has comparable performance to larger proprietary models.}
 \label{tab:gm_vs_closed}
-% \vspace{-.4cm}
+% \vspace{0cm}
 \end{table}
 
 
@@ -824,7 +824,7 @@ We focus our evaluation on student summaries from the CLASSE dataset, since the 
 
 We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 62\% of contested cases ($p=0.018$), and give a significantly higher aggregate similarity rating ($p=0.033$). Moreover, our automated similarity metric has moderate yet statistically significant correlation with average teacher similarity ratings ($\rho=0.48$, $p<0.001$). We find no significant difference between the approaches in terms of score improvement (as expected) and utility. However, we observe that when the evaluator judges the GM rewrite as more similar, they also prefer GM on utility in 75\% of contested cases ($\chi^2(4)=57.8$, $p<0.001$). 
 % In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. 
-These results highlight reference similarity as an important factor in creating pedagogically useful feedback for students and demonstrate that fine-grained control techniques beyond prompt design are directionally necessary towards creating automated rewriting feedback systems that are faithful to student writing preferences. We report further details and results of our teacher evaluation in Appendix~A.7.
+These results highlight reference similarity as an important factor in creating pedagogically useful feedback for students and demonstrate that fine-grained control techniques beyond prompt design are directionally necessary towards creating automated rewriting feedback systems that are faithful to student writing preferences. We report further details and results of our teacher evaluation in Appendix~A.8.
 
  % \ml{this last sentence basically repeats what you wrote in this paragraph and adds nothing new. come up with a deeper discussion?} 
 
@@ -849,10 +849,10 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 % \end{figure}
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.85\linewidth]{latex/figs/stacked_curve_v2.png}\\[2pt]
+    \includegraphics[width=0.85\linewidth]{stacked_curve_v2.png}
     \caption{Similarity–validity trade-offs comparing Gumbel Machine with logit bias (Vocab Bias) and prompting baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace). Gumbel Machine provides a tunable tradeoff between competing metrics, on a different region of the Pareto frontier.}
     \label{fig:pareto-front}
-    \vspace{-.3cm}
+    \vspace{0cm}
 \end{figure}
 
 
@@ -890,7 +890,7 @@ $-$ & \checkmark & \checkmark
 \end{tabular}}
 \caption{Ablation study on the components of GM. We observe that SFT alone drastically improves similarity at the cost of validity and that DPO is necessary to realize counterfactual results that balance both axes.}
 \label{tab:ablation_alignment}
-\vspace{-.3cm}
+\vspace{0cm}
 \end{table}
 
 \subsection{Ablation Studies}\label{sec:foresight}
@@ -898,7 +898,7 @@ $-$ & \checkmark & \checkmark
 
 In Table~\ref{tab:ablation_alignment}, we report the results of an ablation on the training and logit control components of GM, running each configuration on Llama-3. We observe a distinctive trend in the introduction of each component. With $\beta$-Hindsight decoding alone and no training, we observe improved similarity at marginally lower validity. This result suggests that recovered Gumbel noise can steer the sampling trajectory toward the reference but does not induce rubric-adherent counterfactuals. Training the model with SFT on student writing amplifies the noise's control influence, resulting in a large jump in similarity while validity collapses to near zero. This result suggests that SFT is necessary to adapt a model to student writing style, which may not be statistically likely for a pre-trained model. 
 %This collapse suggests an increased model sensitivity to the Gumbel noise control, and could be explained that the model has a strong preference to vocabularly and word sequences that are frequent in the trained student writing samples. 
-Notably, adding DPO after SFT significantly improves the model's capability on this task. This result suggests that by contrasting generations with different scores, DPO helps the LLM with controllable generation, while $\beta$-Hindsight remains key to maintaining similarity to original student writing, which prompting alone cannot achieve. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference. We report the results of an additional ablation study on the prompt configuration in Appendix~A.4. 
+Notably, adding DPO after SFT significantly improves the model's capability on this task. This result suggests that by contrasting generations with different scores, DPO helps the LLM with controllable generation, while $\beta$-Hindsight remains key to maintaining similarity to original student writing, which prompting alone cannot achieve. All three components are therefore necessary to produce valid counterfactuals that are similar to the reference. We report the results of an additional ablation study on the prompt configuration in Appendix~A.5. 
 
 % only encodes the likelihood of a simple instruction-following process with high precision
 
