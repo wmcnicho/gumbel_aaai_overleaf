@@ -186,7 +186,7 @@ Providing feedback on student work, especially open-ended work, is an essential 
     \includegraphics[width=1\linewidth]{gumbel_task_v3_2.png}
     \caption{Overview of counterfactual student writing generation. Our approach produces a improved version of student work that remains similar to the original.}
     \label{fig:task-overview}
-    \vspace{0cm}
+    \vspace{-.4cm}
 \end{figure}
 % \ml{good example, but the edit here is kinda substantial (more than half of the words are bolded). it also obviously uses words/language for a higher age group, so one may wonder whether that needs to be controlled as well}
 
@@ -229,11 +229,11 @@ In our approach to generating counterfactual student work, we leverage the Gumbe
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.95\linewidth]{gumbel_method_v2_6.png}
-    \vspace{0cm}
+    \vspace{-.4cm}
     \caption{Overview of the Gumbel Machine. In Stage 1, we recover noise that would have produced the observed tokens. In Stage 2, we intervene on the prompt with a new target score and replay the noise, steering generation toward a modified score while preserving similarity to the reference. In this example, ``exposed'' is selected, while the original token ``in,'' is a close alternative. A tunable $\beta$ scales the influence of noise-based similarity on replay.}
     % i'm not 100\% sure whether this example illustrates the gist of this whole ``use-the-same-noise'' approach. the obvious: the noise didn't change what the logit (without) would likely say, which is also to generate exposed when the score is 4. the deeper: if the control is language fluency/coherence, noise contains stylistic/content things. like where the explanation goes, the logic, etc. those should be preserved. so ideally, a good counterfactual should stick to the factual summary as much as possible in terms of how the student structures things, but introduce modifications mostly in-place, fix grammatical errors, fluency issues, etc.}}
     \label{fig:method-overview}
-    \vspace{0cm}
+    \vspace{-.3cm}
 \end{figure*}
 
 %We formally introduce this trick by first stating the output of an LLM, the probability of the next token, expressed in terms of the logits the model produces.
@@ -460,7 +460,7 @@ GM (Ours)
 \end{tabular}
 \caption{Comparing GM to other counterfactual methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
 \label{tab:llama_results}
-\vspace{0cm}
+\vspace{-.3cm}
 \end{table}
 
 % \begin{table}[t]
@@ -490,7 +490,7 @@ GM (Ours)
 % \end{tabular}
 % \caption{\mh{FT}Comparing GM to other counterfactual generation methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
 % \label{tab:llama_results}
-% \vspace{0cm}
+% \vspace{-.3cm}
 % \end{table}
 
 
@@ -606,7 +606,7 @@ We compare our approach, \textbf{Gumbel Machine (GM)}, to three other LLM-based 
 \end{tabular}
 \caption{Comparing counterfactual LLM approaches across proprietary and open-weight models (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine). GM translates across open-weight models and has comparable performance to larger proprietary models.}
 \label{tab:gm_vs_closed}
-% \vspace{0cm}
+% \vspace{-.4cm}
 \end{table}
 
 
@@ -852,7 +852,7 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
     \includegraphics[width=0.85\linewidth]{stacked_curve_v2.png}
     \caption{Similarity–validity trade-offs comparing Gumbel Machine with logit bias (Vocab Bias) and prompting baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace). Gumbel Machine provides a tunable tradeoff between competing metrics, on a different region of the Pareto frontier.}
     \label{fig:pareto-front}
-    \vspace{0cm}
+    \vspace{-.3cm}
 \end{figure}
 
 
@@ -890,7 +890,7 @@ $-$ & \checkmark & \checkmark
 \end{tabular}}
 \caption{Ablation study on the components of GM. We observe that SFT alone drastically improves similarity at the cost of validity and that DPO is necessary to realize counterfactual results that balance both axes.}
 \label{tab:ablation_alignment}
-\vspace{0cm}
+\vspace{-.3cm}
 \end{table}
 
 \subsection{Ablation Studies}\label{sec:foresight}
