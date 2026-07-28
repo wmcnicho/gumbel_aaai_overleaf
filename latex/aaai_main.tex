@@ -164,7 +164,7 @@ Existing automated approaches for counterfactual text generation using Large Lan
 % 3. Present the thing (the gap fill)
 We present the Gumbel Machine, a flexible, modular approach to generating counterfactuals that leverages LLM instruction-following capabilities while encouraging similarity to a reference factual text.  
 % 4. Explain the thing in a sentence or two
-Central to our approach is a novel, controlled decoding algorithm, $\beta$-Hindsight control, which uses latent randomness as a tunable similarity control mechanism during counterfactual generation.
+Central to our approach is a controlled decoding algorithm, $\beta$-Hindsight control, which uses latent randomness as a tunable similarity control mechanism during counterfactual generation.
 % This approach can induce reference similarity and can operate in cold start settings or take advantage of task-specific training data.
 % 5. Explain evidence in results
 Experiments on datasets of student writing, scored on various criteria, demonstrate the effectiveness of our approach at generating counterfactuals both rubric-consistent and similar to a reference.
@@ -184,7 +184,7 @@ Providing feedback on student work, especially open-ended work, is an essential 
 \begin{figure}[!t]
     \centering
     \includegraphics[width=1\linewidth]{gumbel_task_v3_2.png}
-    \caption{Overview of counterfactual student writing generation. Our approach produces a revised version of student work that improves a specific rubric criterion while remaining similar to the original.}
+    \caption{Overview of counterfactual student writing generation. Our approach produces a improved version of student work that remains similar to the original.}
     \label{fig:task-overview}
 \end{figure}
 % \ml{good example, but the edit here is kinda substantial (more than half of the words are bolded). it also obviously uses words/language for a higher age group, so one may wonder whether that needs to be controlled as well}
@@ -196,10 +196,10 @@ While personalized counterfactual student work can be pedagogically helpful, man
 
 
 % 3. Sketch existing approaches, and gaps in existing work which motivates our contributions
-Existing LLM-based approaches to automated counterfactual generation must address a central design challenge: balancing the tradeoff of task performance and similarity to the original factual text. Since these two objectives are often in opposition, a variety of approaches exist to address this tradeoff. Some approaches optimize a language model for this joint objective \cite{jung_counterfactual_2022,hu_causal_2021,dathathri_plug_2019}, thereby encoding the trade-off in its weights. Another common pattern across approaches is to decompose the problem into identification and replacement steps, where one model identifies words of the factual text that should be revised and a second replaces them for the counterfactual task. The models used in each step are either LLMs trained for the specific step on a given task \cite{ross-etal-2021-explaining,treviso_crest_2023} or a large pretrained LLMs \cite{chen_disco_2023, dixit_core_2022, sachdeva_catfood_2024, wang_fitcf_2025}. This decomposition-based approach implicitly enforces similarity by the assumption that changing only the words with maximum influence will minimize the total number of words changed, thereby enforcing similarity by construction. 
+Existing LLM-based approaches to automated counterfactual generation must address a central design challenge: balancing the tradeoff of task performance and similarity to the original factual text. Since these two objectives are often in opposition, a variety of approaches exist to address this tradeoff. Some approaches optimize a language model for this joint objective \cite{jung_counterfactual_2022,hu_causal_2021,dathathri_plug_2019}, thereby encoding the trade-off in its weights. Another common pattern across approaches is to decompose the problem into identification and replacement steps, where one model identifies words of the factual text that should be revised and a second replaces them for the counterfactual task. The models used in each step are either LLMs trained for the specific step on a given task \cite{ross-etal-2021-explaining,treviso_crest_2023} or a large pretrained LLMs \cite{chen_disco_2023, dixit_core_2022, sachdeva_catfood_2024, wang_fitcf_2025}. This decomposition-based approach enforces similarity by assuming that only changing the words with maximum influence will minimize the overall number of words changed, creating similarity by construction. 
 
 While existing approaches provide promising directions towards generating counterfactual student work, significant work remains to make them adoptable in real classrooms \cite{filighera_towards_2022}. One limitation is the tight coupling between task alignment and similarity control: many approaches rely on training task-specific classifiers or control codes, which jointly define what constitutes a valid counterfactual and how to generate them. As a result, adapting to a new task often requires retraining or system redesign, which limits generalizability. A second limitation is that most existing works frame counterfactual generation in terms of nominal labels, such as sentiment, topic, or toxicity. In these settings, success is defined by crossing a decision boundary since counterfactuals are evaluated by the resulting change in label. %This formulation obscures the notion of degree or direction of change, favoring minimal boundary-crossing edits over structured, incremental change. 
-In education, however, student work is often scored in an ordinal way. Therefore, counterfactual work needs to reflect nuanced adjustments in student work that lead to continuously improved quality.
+In education, however, student work is often scored in an ordinal way. Therefore, counterfactual work must reflect nuanced adjustments in student work on a quality spectrum.
 %When counterfactual generation is only designed for coarse-grained levels of correctness, the resulting feedback may be technically valid but pedagogically limited.
 
 
@@ -253,13 +253,13 @@ In our approach, we use the recovered Gumbel noise for counterfactual generation
 
 \subsection{Hindsight Gumbel Sampling}
 
-The Gumbel-Max trick provides a mechanism for preserving and replaying the random noise used in discrete random processes. However, in practice, we often do not have access to the random process and can only observe samples. For example, the random process that generates student writing is controlled by the students themselves, not a computational system that produces logits. Therefore, we need to approximate the random process and recover the noise implied by the observations. \citet{ravfogel2025gumbel} refers to the task of recovering noise from a proxy as ``Hindsight Gumbel Sampling.'' In their work, the authors use an LLM as a proxy for the textual data generation process and outline an algorithmic procedure to recover Gumbel noise implied by data. We build on this foundation and demonstrate that recovered noise can serve as a tunable similarity-control mechanism. 
+The Gumbel-Max trick provides a mechanism for preserving and replaying the random noise used in discrete random processes. However, in practice, we often do not have access to the random process and can only observe samples. For example, the random process that generates student writing is controlled by the students themselves, not a computational system that produces logits. Therefore, we need to approximate the random process and recover the noise implied by the observations. \citet{ravfogel2025gumbel} refers to the task of recovering noise from a proxy as ``Hindsight Gumbel Sampling.'' In their work, the authors use an LLM as a proxy for the textual data generation process and outline an algorithmic procedure to recover Gumbel noise implied by data. We build on this foundation and demonstrate that recovered noise can also serve as a tunable similarity-control mechanism. 
 
 \subsection{Related Work}
 
 \paragraph{Counterfactual Generation.} Counterfactual text generation has been widely studied, within NLP, for applications for a variety of tasks including sentiment analysis~\cite{kaushik_learning_2020, madaan_generate_2021}, story rewriting~\cite{chen_unsupervised_2022}, question answering~\cite{sachdeva_catfood_2024, paranjape_retrieval-guided_2022}, relation extraction~\cite{miao_episodic_2024}, and domain adaptation~\cite{calderon_docogen_2022, wu_polyjuice_2021}. Recent work has also explored applications of LLMs for counterfactual generation, particularly for data augmentation and model explainability \cite{goethals_what_2025, zhang_dually_2025,wang_fitcf_2025,gat_faithful_2023, wen_autocad_2022}.
 
-\paragraph{Counterfactuals in Education.} Extensive work has been done in education to provide feedback for short answer writing~\cite{filighera_your_2022, mcnichols_can_2024, scarlatos_improving_2024}. Closely related to counterfactual generation is the task of paraphrase generation ~\cite{ouahrani_paraphrase_2024}, but existing work on counterfactual generation remains limited, highlighting the need for further development in this domain.  
+\paragraph{Counterfactuals in Education.} Extensive work has been done in education to provide feedback for short answer writing~\cite{filighera_your_2022, mcnichols_can_2024, scarlatos_improving_2024}. Closely related to counterfactual generation is the task of paraphrase generation ~\cite{ouahrani_paraphrase_2024}, but existing work on counterfactual generation remains limited, highlighting the need for further work in this domain.  
 
 % Existing work evaluates the counterfactual reasoning capabilities of LLMs in education~\cite{sonkar_malalgoqa_2024}, but 
 
@@ -269,7 +269,7 @@ The Gumbel-Max trick provides a mechanism for preserving and replaying the rando
 
 \paragraph{Gumbel Noise for LLM Generation.} Recent work has explored the use of Gumbel noise for consistency during LLM generation \cite{de_mijolla_waste_2025}. Subsequent work explores the application of Gumbel noise to counterfactual generation for analyzing language model bias \cite{chatzi2025counterfactual}. \citet{ravfogel2025gumbel} introduces a procedure for reference-based recovery and replay of Gumbel noise for counterfactual generation. 
 
-Our approach builds on this line of work and introduces several key innovations. First, this work demonstrates that the recovered Gumbel Noise can serve as a tunable reference-similarity control signal during generation time. Second, our work is the first to extensively evaluate the quality of the Gumbel noise-generated counterfactuals for an applied downstream task. Finally, we introduce a practical variant of hindsight Gumbel sampling that does not require computing the normalization constant. 
+Our approach builds on this line of work and introduces several key innovations. First, this work demonstrates that the recovered Gumbel Noise can serve as a tunable reference-similarity control signal during generation time. Second, our work is the first to extensively evaluate the quality of the Gumbel noise-generated counterfactuals for an applied downstream task. Finally, we introduce a practical variant of hindsight Gumbel sampling that does not require computing the normalization constant and is easily parallelizable. 
 
 % Our empirical findings suggest that recovered noise can only be used effectively under specific conditions, namely those where the model is provided specific instructions that hint at the required output. 
 % \mh{This last bit might belong in intro/related work instead}
@@ -399,7 +399,7 @@ The second dataset is Dataset for Rubric-based Essay Scoring on EFL Writing (\te
 % The average Quadratic Weighted Kappa (QWK) agreement across scoring criteria between this model and human scores are 0.6242 and 0.6012, respectively, for CLASSE and DREsS. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), which shows that our scoring model is a good proxy of human scoring. See Appendix~A.3 for details.
 
 \subsection{Metrics}
-We measure two competing properties of the generated counterfactuals, i) similarity to a factual example and ii) task validity, following existing work on counterfactual generation \cite{wang-etal-2024-survey}. 
+We measure two competing properties of the generated counterfactuals, i) similarity to a factual example and ii) task validity, following existing work~\cite{wang-etal-2024-survey}. 
 
 \paragraph{Similarity}
 In our experiments, we measure the similarity between the reference student summary and the counterfactual student summary. We report the complement of the normalized character-level Levenshtein distance, i.e., one minus the normalized distance, averaged across all $N$ counterfactual summaries for a given setting:
@@ -410,7 +410,7 @@ Here, $y_i$ is the reference summary and $y_i'$ the counterfactual summary. This
 \paragraph{Validity}
 A generated counterfactual is valid if its score, given by the scoring model, reflects the intended score for the specified criterion. Existing evaluation metrics for validity, such as flip rate \cite{ross-etal-2021-explaining}, are for nominal tasks (e.g., sentiment or topic classification). Since scores in our task are ordinal, we use average Quadratic Weighted Kappa (QWK) across scoring criteria between the intended score $z'$ and an estimated score from the scoring model $s(\mathbf{y}')=\hat{z}'$. QWK produces a score in $[-1,1]$, with high values indicating higher task validity. 
 
-We use an LLM-as-a-judge \cite{li_generation_2025} system to compute validity using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion across both datasets. We evaluate the average QWK agreement across scoring criteria between this model and human scores for CLASSE and DREsS, which are 0.6242 and 0.6012, respectively. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), indicating that our scoring model is a good proxy of human scoring. We detail experiments on multiple approaches for automated validity scoring in Appendix~A.3.
+We use an LLM-as-a-judge \cite{li_generation_2025} system to compute validity using a scoring rubric. Specifically, we fine-tune \texttt{GPT-4.1-mini} for each criterion. We evaluate the average QWK agreement across scoring criteria between this model and human scores for CLASSE and DREsS, which are 0.6242 and 0.6012, respectively. This agreement is very close to the 0.642 inter-rater agreement for CLASSE (DREsS is single-scored), indicating that our scoring model is a good proxy of human scoring. We detail experiments on explored validity scoring approaches in Appendix~A.3.
 
 % \begin{equation*}
 % Validity \;=\; 1 \;-\;
@@ -455,9 +455,40 @@ GM (Ours)
     & $\textbf{0.477}^{*}$ & $\textbf{0.404}^{*}$ \\
 \bottomrule
 \end{tabular}
-\caption{Comparing GM to other counterfactual generation methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
+\caption{Comparing GM to other counterfactual methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
 \label{tab:llama_results}
 \end{table}
+
+% \begin{table}[t]
+% \centering
+% % \small
+% \setlength{\tabcolsep}{3pt}
+% \setlength{\tabcolsep}{3pt}
+% \begin{tabular}{l  cc  cc}
+% \toprule
+% & \multicolumn{2}{c}{\textbf{CLASSE}} & \multicolumn{2}{c}{\textbf{DREsS}} \\
+% \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+% \multirow{-2}{*}{\textbf{Approach}} & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ & $\text{Sim}^\uparrow$ & $\text{Val}^\uparrow$ \\
+% \midrule
+% ME (FT) %Minimal-Edit, fine-tuned
+%     & $0.324$ & $\textbf{0.690}$
+%     & $0.224$ & $\textbf{0.607}$ \\
+% ICL (FT)
+%     & $0.282$ & $0.316$
+%     & $0.268$ & $\underline{0.426}$ \\
+% I\&R (FT) %Identify-and-Replace, fine-tuned
+%     & $\textbf{0.461}$ & $0.392$
+%     & $\underline{0.359}$ & $0.175$ \\
+% GM (Ours)
+%     & $\underline{0.391}$ & $\underline{0.668}$
+%     & $\textbf{0.477}$ & $0.404$ \\
+% \bottomrule
+% \end{tabular}
+% \caption{\mh{FT}Comparing GM to other counterfactual generation methods on both datasets (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace, GM - Gumbel Machine).}
+% \label{tab:llama_results}
+% \vspace{-.3cm}
+\end{table}
+
 
 \subsection{Experimental Settings and Details}
 
@@ -469,8 +500,8 @@ In this section, we detail the settings and baseline approaches we use to evalua
 We compare our approach, \textbf{Gumbel Machine (GM)}, to three other LLM-based counterfactual text generation strategies.
 %
 %\noindent, our proposed approach, which leverages recovered Gumbel noise and preference alignment to create similar, rubric-aligned counterfactuals.
-\textbf{Minimal-Edit (ME)}: Following \citet{gat_faithful_2023}, we include in the prompt instructions for the LLM to minimally edit the reference as a zero-shot prompting approach.
-\textbf{In-Context Learning (ICL)}: Following \citet{li_prompting_2024}, we further include in-context demonstrations of each score level in the prompt.
+\textbf{Minimal-Edit (ME)}: Following \citet{gat_faithful_2023}, we include in the prompt instructions for the LLM to minimally edit the reference, which is also done in GM, as a zero-shot prompting approach.
+\textbf{In-Context Learning (ICL)}: Following \citet{li_prompting_2024}, we further include in-context demonstrations atop ME for each score level in the prompt.
 \textbf{Identify-and-Replace (I\&R)}: Following \citet{nguyen_llms_2024}, we instruct the LLM to perform a series of steps to (i) identify word spans leading to the original score, (ii) change the identified spans to reflect the desired score, and (iii) construct a new summary with the modified spans. These instructions resemble a ``Chain-of-Thought (CoT)'' for our task \cite{wei2022chain}.
 
 % \begin{itemize}
@@ -618,7 +649,7 @@ We generate counterfactuals for a stratified subset of score changes sampled fro
 
 \section{Results, Analysis, Discussion}
 
-We now detail experimental results and perform both human evaluation and ablation studies to verify the effectiveness of our approach. 
+We now detail experimental results and perform both human evaluation and ablation studies to verify our approach. 
 
 % Across all experimental settings, we report our $\beta$-Hindsight sampling approach (Ours) to standard categorical random sampling (Baseline).  In all cases, we instruct the LLM to adhere to the factual student summary while generating a counterfactual response. To induce a counterfactual from the LLM, we instruct the model to form an output for a different expected score by simply changing a single character of the prompt corresponding to the desired score value $z'$. We provide further details on exact model prompts and training details in the Appendix TODO.
 
@@ -767,16 +798,38 @@ We now detail experimental results and perform both human evaluation and ablatio
 
 \subsection{Counterfactual Approach Comparisons}
 
-In Table~\ref{tab:llama_results}, we report the results of our experiments comparing GM to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively, based on tuning experiments reported in Section~\ref{sec:tuning}. On CLASSE, we observe that our approach noticeably improves validity across both datasets and yields higher similarity scores. While the I\&R approach shows a higher similarity score than GM, its validity is the lowest among the approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference but not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and similar. On DresS, we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This observation suggests that GM can produce more rubric-aligned counterfactuals when the writing samples are more homogeneous, e.g., for summarization, compared to open-ended writing. 
+In Table~\ref{tab:llama_results}, we report the results of our experiments comparing GM to baseline LLM-based counterfactual approaches. In this experiment, we run all settings on Llama-3 and set $\beta=0.1$ and $\beta=0.05$ for CLASSE and DREsS, respectively, based on tuning experiments reported in Section~\ref{sec:tuning}. On CLASSE, we observe that our approach noticeably improves validity across both datasets and yields higher similarity scores. While the I\&R approach shows a higher similarity score than GM, its validity is the lowest among the approaches. This result suggests that I\&R produces counterfactuals that are more similar to the reference but not accurate with respect to the rubric, while the counterfactuals produced by GM are more accurate and similar. On DREsS, we observe that GM outperforms all baselines on both metrics, but do not see as large of an improvement on validity. This observation suggests that GM can produce more rubric-aligned counterfactuals when the writing samples are more homogeneous, e.g., for summarization, compared to open-ended writing. 
 %This result suggests the GM is an effective counterfactual approach for both shorter summarization tasks and longer open-ended writing, but produces more .
 
 
+\subsection{Cross-LLM Comparisons}
 
-\subsection{Tuning Gumbel Noise Control} \label{sec:tuning}
+In Table~\ref{tab:gm_vs_closed}, we report results comparing our approach to other models, Qwen-3 and Claude (prompting-only). 
+%For both open-weight models we run our method with the same $\beta$ values of $0.1$ and $0.05$ for CLASSE and DREsS respectively. 
+On CLASSE, Llama-3-based GM outperforms the strongest Sonnet-based validity baseline (ICL) on both metrics; Qwen-3-based GM outperforms Sonnet's strongest similarity baseline (Identify-and-Replace) across both metrics. On DREsS, GM improves on similarity compared to proprietary models, but does not reach the same levels of validity in some settings. This result suggests that for longer open-ended writing tasks, the capacity of a larger, more capable base LLM helps. 
+%is required to maintain validity over longer time horizons beyond what is possible with training for smaller models. 
+Moreover, the result indicates that combining our approach with a larger open-weight model may yield further improvements, but at the expense of higher computational costs. Overall, these results suggest that our GM approach is generalizable across open-weight model families; more importantly, we obtain counterfactuals that are either better than or comparable to those generated by a much larger proprietary model.
 
-In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values for GM and compare with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, we sweep the control parameter $\beta$ across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$ for CLASSE and $\beta \in \{0.05, 0.2, 0.4, 0,5, 0.6, 0.7, 0.8, 1.0\}$ for DREsS. Higher values of $\beta$ emphasize similarity to the original student response, while lower values prioritize satisfying the desired target score. For Vocab Bias, we sweep the control parameter $\alpha$ across the values $\alpha \in \{0.01, 5.0, 10.0\}$ for CLASSE and $\alpha \in \{0.01, 1.0, 5.0\}$ for DREsS. Higher values of $\alpha$ induce stronger similarity to reference tokens. We observe that values outside these ranges result in collapses in model fluency due to excessive logit manipulation.
+\subsection{Human Evaluation}
 
-Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics for similarity control. This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
+
+
+We conduct an IRB-approved human evaluation study to explore the effectiveness of our approach and the quality of the generated counterfactual student writing. We employ four evaluators via Upwork \cite{upwork}, all of whom have experience teaching English in the United States across elementary, middle school, high school levels.
+
+We focus our evaluation on student summaries from the CLASSE dataset, since the shorter, student-written summaries in CLASSE are easier to evaluate at scale than the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of each summary. We then ask them to evaluate each pair of rewritten summaries and compare them across three dimensions: improvement relative to the scoring criterion, similarity to the original summary, and overall pedagogical utility. We select 10 writing samples for each of the 5 criteria and stratify sampling by the original student score on each criterion to ensure that the evaluation includes student writing at different quality levels. We generate rewrites with the targeted score set to the maximum score of 4, sampling from both the GM and the ME baselines using Llama-3. This setting minimizes differences between comparisons: ME and GM prompts are identical, so only the only variable changed is our added similarity controls. Both approaches generate rewrites with similar validity, yielding average scores of $3.64/4$ and $3.68/4$, respectively. Therefore, our evaluation setting enables a fair comparison between the two approaches that generate different rewrites but at the same level of validity. To prevent positional bias, we randomize the ordering of rewrites from both approaches.
+
+We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 62\% of contested cases ($p=0.018$), and give a significantly higher aggregate similarity rating ($p=0.033$). Moreover, our automated similarity metric has moderate yet statistically significant correlation with average teacher similarity ratings ($\rho=0.48$, $p<0.001$). We find no significant difference between the approaches in terms of score improvement (as expected) and utility. However, we observe that when the evaluator judges the GM rewrite as more similar, they also prefer GM on utility in 75\% of contested cases ($\chi^2(4)=57.8$, $p<0.001$). 
+% In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. 
+These results highlight reference similarity as an important factor in creating pedagogically useful feedback for students and demonstrate that fine-grained control techniques beyond prompt design are directionally necessary towards creating automated rewriting feedback systems that are faithful to student writing preferences. We report further details and results of our teacher evaluation in Appendix~A.7.
+
+ % \ml{this last sentence basically repeats what you wrote in this paragraph and adds nothing new. come up with a deeper discussion?} 
+
+\subsection{Gumbel Noise: A Flexible Control Signal} \label{sec:tuning}
+
+In Figure~\ref{fig:pareto-front}, we report the results of our experiments to tune the controllable $\beta$ parameter in the GM. In these experiments, we vary the control signal across a range of values for GM and compare with Vocab Bias, a simple decoding strategy that adds a tunable $\alpha$ constant to all logits for all tokens in the reference summary \cite{yang_fudge_2021}. For GM, higher values of $\beta$ emphasize similarity to the original student response, while lower values prioritize satisfying the desired target score. For Vocab Bias, higher values of $\alpha$ induce stronger similarity to reference tokens. We sweep the control parameters across the values $\beta \in \{0.001, 0.1, 0.2, 0.3, 0.4, 1.0\}$, $\alpha \in \{0.01, 5.0, 10.0\}$ for CLASSE and $\beta \in \{0.05, 0.2, 0.4, 0,5, 0.6, 0.7, 0.8, 1.0\}$, $\alpha \in \{0.01, 1.0, 5.0\}$ for DREsS. We observe that values outside these ranges result in collapses in model fluency. % due to excessive logit manipulation.
+
+Comparing the two approaches, we observe that for GM, increasing values of $\beta$ enable a trade-off between similarity that can explore a much wider range of the Pareto front compared to Vocab Bias. Further, we observe that GM tends to maintain higher validity with increasing similarity values. These observations suggest that recovered Gumbel noise provides a more effective control signal for generating similar counterfactual randomness than using token-level heuristics or prompting techniques for similarity control. 
+% This finding suggests that similarity control in LLMs is more robust when the entire sampling trajectory and random states are considered rather than solely token-level alignment.
 
 % Individual curve plots stacked in a SINGLE column. Each panel gets the full
 % (shrunk) column width, so it reads larger than the combined image's cramped
@@ -792,34 +845,11 @@ Comparing the two approaches, we observe that for GM, increasing values of $\bet
 % \end{figure}
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.85\linewidth]{stacked_test.png}
-    \caption{Similarity–validity trade-offs comparing Gumbel Machine with a logit bias (Vocab Bias) and baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace) on CLASSE (top) and DREsS (bottom). Gumbel Machine provides a tunable tradeoff between competing metrics, occupying a different region of the Pareto frontier.}
+    \includegraphics[width=0.85\linewidth]{latex/figs/stacked_curve_v2.png}\\[2pt]
+    \caption{Similarity–validity trade-offs comparing Gumbel Machine with logit bias (Vocab Bias) and prompting baseline approaches (ME - Minimal-Edit, ICL - In-Context Learning, I\&R - Identify-and-Replace). Gumbel Machine provides a tunable tradeoff between competing metrics, on a different region of the Pareto frontier.}
     \label{fig:pareto-front}
+    \vspace{-.3cm}
 \end{figure}
-
-
-\subsection{Cross-LLM Comparisons}
-
-In Table~\ref{tab:gm_vs_closed}, we report results comparing our approach to other models, Qwen-3 and Claude (prompting-only). 
-%For both open-weight models we run our method with the same $\beta$ values of $0.1$ and $0.05$ for CLASSE and DREsS respectively. 
-On CLASSE, Llama-3-based GM outperforms the strongest Sonnet-based validity baseline (ICL) on both metrics; Qwen-3-based GM outperforms Sonnet's strongest similarity baseline (Identify-and-Replace) across both metrics. On DREsS, GM improves on similarity compared to proprietary models, but does not reach the same levels of validity in some settings. This result suggests that for longer open-ended writing tasks, the capacity of a larger, more capable base LLM helps. 
-%is required to maintain validity over longer time horizons beyond what is possible with training for smaller models. 
-Moreover, the result indicates that combining our approach with a larger open-weight model may yield further improvements, but at the expense of higher computational costs. Overall, these results suggest that our GM approach is generalizable across open-weight model families; more importantly, we obtain counterfactuals that are either better than or comparable to those generated by a much larger proprietary model.
-
-\subsection{Human Evaluation}
-
-
-
-We conduct an IRB-approved human evaluation study to evaluate the effectiveness of our approach and the quality of the generated counterfactual student writing. We employ four evaluators via Upwork \cite{upwork}, all of whom have experience teaching English in the United States across elementary, middle school, high school levels.
-
-We focus our evaluation on student summaries from the CLASSE dataset, since the shorter, student-written summaries in CLASSE are easier to evaluate at scale than the DREsS essays. We show each evaluator 50 student writing summaries and two counterfactual rewrites of each summary. We then ask them to evaluate each pair of rewritten summaries and compare them across three dimensions: improvement relative to the scoring criterion, similarity to the original summary, and overall pedagogical utility. We select 10 writing samples for each of the 5 criteria and stratify sampling by the original student score on each criterion to ensure that the evaluation includes student writing at different quality levels. We generate rewrites with the targeted score set to the maximum score of 4, sampling from both the GM and the ME baselines. In this setting, both approaches generate rewrites with similar validity, yielding average scores of $3.64/4$ and $3.68/4$, respectively. Therefore, our evaluation setting enables a fair comparison between the two approaches that generate different rewrites but at the same level of validity. To prevent positional bias, we randomize the ordering of rewrites from both approaches.
-
-We report the results of this evaluation in Table~\ref{tab:human_eval}. We observe that evaluators rate GM outputs as more similar to the reference student writing in 62\% of contested cases ($p=0.018$), and give a significantly higher aggregate similarity rating ($p=0.033$). Moreover, our automated similarity metric has moderate yet statistically significant correlation with average teacher similarity ratings ($\rho=0.48$, $p<0.001$). We find no significant difference between the approaches in terms of score improvement (as expected) and utility. However, we observe that when the evaluator judges the GM rewrite as more similar, they also prefer GM on utility in 75\% of contested cases ($\chi^2(4)=57.8$, $p<0.001$). 
-% In a per-rating breakdown analysis, we find that GM rewrites are preferred to ME in 92\% of contested cases when the original student work is rated a 3, suggesting that GM performs noticeably better in cases where student rewriting is close to meeting a given criterion but marginally different. 
-These results highlight reference similarity as an important factor in creating pedagogically useful feedback for students and demonstrate that fine-grained control techniques beyond prompt design are directionally necessary towards creating automated rewriting feedback systems that are faithful to student writing preferences. We report further details and results of our teacher evaluation in Appendix~A.7.
-
- % \ml{this last sentence basically repeats what you wrote in this paragraph and adds nothing new. come up with a deeper discussion?} 
-
 
 
 \begin{table}[t]
@@ -856,6 +886,7 @@ $-$ & \checkmark & \checkmark
 \end{tabular}}
 \caption{Ablation study on the components of GM. We observe that SFT alone drastically improves similarity at the cost of validity and that DPO is necessary to realize counterfactual results that balance both axes.}
 \label{tab:ablation_alignment}
+\vspace{-.3cm}
 \end{table}
 
 \subsection{Ablation Studies}\label{sec:foresight}
